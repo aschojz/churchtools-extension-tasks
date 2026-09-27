@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Input } from '@churchtools/styleguide';
-import { getFirstOrSelf } from '@churchtools/utils';
+import { CtColor, getFirstOrSelf } from '@churchtools/utils';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
@@ -20,9 +20,6 @@ const onFullscreen = () => {
     fullscreen.value = !fullscreen.value;
 };
 
-const openBoardSettings = () => {
-    alert('TODO: Board settings einstellen');
-};
 const store = taskStore();
 const listIsOpen = ref(false);
 
@@ -46,14 +43,14 @@ const taskIsOpen = computed(() => !!getFirstOrSelf(route.params.taskId));
                 />
                 <slot name="actions">
                     <Button
-                        v-if="$route.name === 'project-board'"
+                        :color="CtColor.BASIC"
                         icon="fas fa-plus"
+                        label="Liste"
                         outlined
                         @click="listIsOpen = true"
                     />
-                    <Button color="basic" icon="fas fa-cog" outlined @click="openBoardSettings" />
                     <Button
-                        color="basic"
+                        :color="CtColor.BASIC"
                         :icon="fullscreen ? 'fas fa-compress' : 'fas fa-expand'"
                         outlined
                         @click="onFullscreen"
@@ -81,7 +78,7 @@ const taskIsOpen = computed(() => !!getFirstOrSelf(route.params.taskId));
     </div>
 </template>
 <style scoped>
-@reference '@churchtools/styleguide/tailwind';
+@reference '../../tailwind.css';
 .tabs a {
     padding: 8px 12px;
     @apply rounded-t bg-gray-200;

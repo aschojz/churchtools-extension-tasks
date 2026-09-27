@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { Button, DomainObject, Textarea } from '@churchtools/styleguide';
-import {
-    dateToStringLocale,
-    notNullish,
-    transformPersonToDomainObject,
-    useCurrentUser,
-    usePersonsQueryAllPages,
-} from '@churchtools/utils';
+import { dateToStringLocale, notNullish, transformPersonToDomainObject, useCurrentUser } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
+import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { txx } from '../../utils/utils';
 
 const props = withDefaults(
@@ -51,6 +46,17 @@ const onComment = () => {
     newComment.value = '';
 };
 const onCancelComment = () => (newComment.value = '');
+const formatActivity = (value: unknown) => {
+    if (!value || typeof value !== 'object') return String(value ?? '');
+    return Object.entries(value)
+        .map(([key, change]) => {
+            if (change && typeof change === 'object' && 'from' in change && 'to' in change) {
+                return `${key}: ${String(change.from ?? '')} → ${String(change.to ?? '')}`;
+            }
+            return `${key}: ${String(change)}`;
+        })
+        .join(', ');
+};
 </script>
 <template>
     <div class="flex flex-col gap-4">
@@ -84,7 +90,7 @@ const onCancelComment = () => (newComment.value = '');
                             <div>{{ entry.dateDisplay }}</div>
                         </div>
                         <div v-else class="text-basic-tertiary flex items-center gap-2">
-                            <DomainObject :domain-object="{ domainType: 'person', icon: 'fas fa-user' }" size="XS" />
+                            <DomainObject :domain-object="{ icon: 'fas fa-user' }" size="XS" />
                             <span class="text-basic-secondary font-bold">
                                 {{ txx('Unbekannter Benutzer') }}
                             </span>
@@ -120,18 +126,7 @@ const onCancelComment = () => (newComment.value = '');
                     <span class="font-bold">
                         {{ entry.person?.title ?? txx('Unbekannter Benutzer') }}
                     </span>
-                    <span
-                        >{{ entry.type }}:
-                        {{
-                            Object.entries(entry.value)
-                                .map(([key, value]) =>
-                                    typeof value === 'string'
-                                        ? `${key}: ${value}`
-                                        : `${key}: ${value.from || '""'} → ${value.to || '""'}`,
-                                )
-                                .join(', ')
-                        }}</span
-                    >
+                    <span>{{ entry.type }}: {{ formatActivity(entry.value) }}</span>
                     <span class="text-basic-tertiary">
                         {{ entry.dateDisplay }}
                     </span>

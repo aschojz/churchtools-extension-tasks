@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, DropdownMenu, LoadingMessage, PageHeader, Subgrid } from '@churchtools/styleguide';
-import { ADD_ICON, DELETE_ICON, EDIT_ICON } from '@churchtools/utils';
+import { CtColor, CtIcon } from '@churchtools/utils';
 import { computed, toRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ICONS } from '../utils/utils';
@@ -13,22 +13,23 @@ defineEmits<{ (event: 'edit-project', project: Project): void }>();
 const route = useRoute();
 const router = useRouter();
 
-const { project, deleteProject } = useProject(toRef(() => parseInt(props.projectId)));
+const { project, deleteProject, isLoading, isError, refetch } = useProject(toRef(() => parseInt(props.projectId)));
 const projectContextMenu = computed(() => {
     return [
         {
             items: [
                 {
-                    icon: EDIT_ICON,
+                    id: 'edit',
+                    icon: CtIcon.EDIT,
                     nameTranslated: 'Bearbeiten',
                     callback: () => createOrEditProject(project.value ?? undefined),
                 },
                 {
-                    icon: { icon: DELETE_ICON, class: 'text-error-bright' },
+                    id: 'delete',
+                    icon: { icon: CtIcon.DELETE, class: 'text-error-bright' },
                     nameTranslated: 'Löschen',
                     callback: async () => {
-                        await deleteProject();
-                        router.push({ name: 'overview' });
+                        if (await deleteProject()) router.push({ name: 'overview' });
                     },
                 },
             ],
@@ -38,15 +39,19 @@ const projectContextMenu = computed(() => {
 </script>
 <template>
     <Subgrid class="grow">
-        <LoadingMessage v-if="!project" />
+        <LoadingMessage v-if="isLoading" />
+        <p v-else-if="isError" role="alert">
+            Projekt konnte nicht geladen werden. <button @click="refetch()">Erneut versuchen</button>
+        </p>
+        <p v-else-if="!project" role="alert">Projekt nicht gefunden oder keine Berechtigung.</p>
         <div v-else class="flex grow flex-col">
             <PageHeader
                 :actions="[
                     {
-                        icon: ADD_ICON,
+                        icon: CtIcon.ADD,
                         label: 'Aufgabe erstellen',
-                        color: 'green',
-                        to: { ...route, params: { ...route.params, taskId: 'new' } },
+                        color: CtColor.GREEN,
+                        to: { name: route.name!, params: { ...route.params, taskId: 'new' } },
                     },
                 ]"
                 :breadcrumbs="[
@@ -54,14 +59,14 @@ const projectContextMenu = computed(() => {
                     { title: project.name ?? '...', to: { name: 'project', params: { projectId: project.id } } },
                 ]"
                 class="pt-page-header-full-width mb-page-header-full-width mx-4 lg:mx-6"
-                :color="project.color ?? 'basic'"
+                :color="project.color ?? CtColor.BASIC"
                 :description="project.description"
                 :icon="project.icon ?? ICONS.DEFAULT_PROJECT"
                 :title="project.name"
             >
                 <template #title-after>
                     <DropdownMenu :menu-items="projectContextMenu">
-                        <Button color="basic" icon="fas fa-ellipsis" size="S" text />
+                        <Button :color="CtColor.BASIC" icon="fas fa-ellipsis" size="S" text />
                     </DropdownMenu>
                 </template>
             </PageHeader>

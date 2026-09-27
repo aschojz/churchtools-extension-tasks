@@ -13,7 +13,8 @@ export default defineConfig([
     pluginVue.configs['flat/essential'],
     ...vueConfigTypescript(),
     vueConfigPrettier,
-    globalIgnores(['dist/', 'tailwind.config.js', 'vite.config.js']),
+    globalIgnores(['dist/', 'releases/', 'src/assets/', 'src/utils/ct-types.d.ts']),
+    { files: ['scripts/**', '*.config.*'], languageOptions: { globals: globals.node } },
     {
         rules: {
             'vue/multi-word-component-names': 'off',

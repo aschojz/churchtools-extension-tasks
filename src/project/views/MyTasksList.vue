@@ -16,12 +16,10 @@ const currentUser = useCurrentUser();
 const store = taskStore();
 
 const filteredTasks = computed(() => {
-    const filtered = tasks.value.filter(
-        task => showTask(task) && task.assignedTo?.map(a => parseInt(a)).includes(currentUser.id),
-    );
+    const filtered = tasks.value.filter(task => showTask(task) && task.assignedTo?.includes(currentUser.id));
     return sortBy(
-        filtered.map(t => ({ ...t, dueDate: calculateDueDate(t) })),
-        store.sortBy,
+        filtered.map(t => ({ ...t, calculatedDueDate: calculateDueDate(t) })),
+        store.sortBy === 'dueDate' ? 'calculatedDueDate' : store.sortBy,
     );
 });
 </script>

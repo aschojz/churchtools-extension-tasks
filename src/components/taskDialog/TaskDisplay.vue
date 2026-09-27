@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { DomainObject, Tag } from '@churchtools/styleguide';
-import { computed } from 'vue';
+import { Button, DomainObject, Input, Tag } from '@churchtools/styleguide';
+import { computed, ref } from 'vue';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
 import TaskItem from '../TaskItem.vue';
@@ -13,7 +13,7 @@ const pId = computed(() => props.projectId);
 const { task, sortedTags, assignees } = useTask(pId, tId);
 const subTasks = computed(() => (task.value?.subTasks ?? []).map(st => tasksMap.value[st]).filter(st => st));
 
-const { updateTask, tasksMap } = useTasks(pId);
+const { updateTask, createTask, tasksMap } = useTasks(pId);
 
 const onComment = (activities: ActivityEntry[]) => {
     if (!task.value) {
@@ -21,13 +21,37 @@ const onComment = (activities: ActivityEntry[]) => {
     }
     updateTask({ ...task.value, activity: activities });
 };
+const childName = ref('');
+const childSaving = ref(false);
+const childError = ref('');
+const createChild = async () => {
+    if (!childName.value.trim() || !task.value || childSaving.value) return;
+    childSaving.value = true;
+    childError.value = '';
+    const parent = task.value;
+    try {
+        const child = await createTask({
+            type: 'task',
+            name: childName.value.trim(),
+            fullfilled: false,
+            sortKey: Date.now(),
+            list: parent.list,
+        });
+        await updateTask({ ...parent, subTasks: [...(parent.subTasks ?? []), child.id] });
+        childName.value = '';
+    } catch {
+        childError.value = 'Unteraufgabe konnte nicht vollständig gespeichert werden. Bitte die Aufgabenliste prüfen.';
+    } finally {
+        childSaving.value = false;
+    }
+};
 </script>
 <template>
     <div class="grid grid-cols-4 gap-3">
         <div class="col-span-3 flex flex-col gap-8">
             <div class="whitespace-pre-line">{{ task?.description }}</div>
             <div class="border-basic-divider border-b"></div>
-            <div v-if="subTasks.length" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-4">
                 <div>
                     <div class="text-lg font-bold">Unteraufgaben</div>
                 </div>
@@ -35,6 +59,11 @@ const onComment = (activities: ActivityEntry[]) => {
                     <TaskItem v-for="subtask in subTasks" :key="subtask.id" :item="subtask" :project-id="projectId" />
                 </div>
             </div>
+            <div class="flex gap-2">
+                <Input v-model="childName" label="Neue Unteraufgabe" @enter="createChild" />
+                <Button :disabled="childSaving || !childName.trim()" @click="createChild">Anlegen</Button>
+            </div>
+            <p v-if="childError" role="alert">{{ childError }}</p>
             <Activities v-if="task?.activity" :activities="task?.activity" @comment="onComment" />
         </div>
         <div class="flex flex-col gap-4">

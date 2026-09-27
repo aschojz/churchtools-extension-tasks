@@ -5,6 +5,9 @@
         "module": "ESNext",
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
+        "paths": {
+            "@churchtools/styleguide": ["./node_modules/@churchtools/styleguide/dist/types/styleguide/src/lib.d.ts"]
+        },
 
         /* Bundler mode */
         "moduleResolution": "bundler",
@@ -17,7 +20,6 @@
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "erasableSyntaxOnly": true,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true
     },

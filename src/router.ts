@@ -52,7 +52,7 @@ const routes: RouteRecordRaw[] = [
 
 export const router = createRouter({
     routes,
-    history: createWebHistory(`/ccm/tasks/`),
+    history: createWebHistory(import.meta.env.BASE_URL),
     scrollBehavior(to, from, savedPosition) {
         if (to.hash) {
             return { el: to.hash, left: 0, top: 70 };

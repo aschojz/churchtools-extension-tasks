@@ -11,7 +11,7 @@ const props = defineProps<{
 }>();
 const projectId = computed(() => parseInt(props.projectId));
 
-const { tasks, tasksMap, getPercentFullfilled } = useTasks(projectId.value);
+const { tasks, tasksMap, getPercentFullfilled } = useTasks(projectId);
 const store = taskStore();
 
 const tasksByParent = computed(() => {
@@ -27,16 +27,27 @@ const tasksByParent = computed(() => {
 });
 
 const boardlists = computed(() => {
-    const li: TransformedList[] = tasks.value
+    const li = tasks.value
         .filter(task => task.subTasks?.filter(st => tasksMap.value[st]).length)
-        .map(task => ({ id: task.id, name: task.name, percentage: getPercentFullfilled(task) }));
+        .map(task => ({
+            id: task.id,
+            name: task.name,
+            percentage: getPercentFullfilled(task),
+            type: 'parent' as const,
+        }));
     return li;
 });
 </script>
 <template>
     <ViewWrapper :project-id="projectId" :sub-task-toggle="false">
         <template v-for="list in boardlists" :key="list.id">
-            <List :items="tasksByParent[list.id]" :list="list" :project-id="projectId" :show-task="true">
+            <List
+                :is-draggable="false"
+                :items="tasksByParent[list.id] ?? []"
+                :list="list"
+                :project-id="projectId"
+                :show-task="true"
+            >
                 <template #header>
                     <ProgressRing class="progress-icon relative text-[20px] text-gray-500" :percent="list.percentage" />
                     <span>{{ list.name }}</span>

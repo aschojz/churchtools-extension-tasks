@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Button, DomainObject, DropdownMenu, Tag } from '@churchtools/styleguide';
-import { DELETE_ICON, EDIT_ICON } from '@churchtools/utils';
-import { computed } from 'vue';
+import { Button, deleteConfirm, DomainObject, DropdownMenu, Tag, type DropdownSection } from '@churchtools/styleguide';
+import { CtColor, CtIcon } from '@churchtools/utils';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTask } from '../composables/useTask.ts';
 import { useTasks } from '../composables/useTasks.ts';
+import { descendantIds } from '../domain/tasks';
 import ProgressRing from './ProgressRing.vue';
 
 const props = defineProps<{
@@ -35,9 +36,9 @@ const openTask = () => {
     router.push({ ...router.currentRoute, params: { taskId: props.item.id } });
 };
 
-const showLastRow = computed(() => dueDate.value || props.item.comments?.length || props.item.tags?.length);
+const showLastRow = computed(() => dueDate.value || comments.value.length || props.item.tags?.length || props.item.url);
 
-const { tasksMap, createTask, deleteTask } = useTasks(pId);
+const { tasksMap, createTask, deleteTask, updateTask } = useTasks(pId);
 
 const createTaskOrSubtask = async ({ id, ...data }: TransformedTask) => {
     void id; // ensure we don't pass an id when creating a new task
@@ -50,13 +51,16 @@ async function duplicateTask() {
     const newTask = await createTaskOrSubtask({ ...originalTask, subTasks: newSubtaskIds });
     return newTask;
 }
-async function duplicateSubtasks(subtaskIds?: number[]) {
+async function duplicateSubtasks(subtaskIds?: number[], visited = new Set<number>()) {
     const newSubtaskIds = [];
 
     if (subtaskIds?.length) {
         for (const subtaskId of subtaskIds) {
             const originalSubtask = tasksMap.value[subtaskId];
-            const nestedSubtaskIds = await duplicateSubtasks(originalSubtask.subTasks);
+            if (!originalSubtask) continue;
+            if (visited.has(subtaskId)) throw new Error('Zyklische Unteraufgaben können nicht dupliziert werden.');
+            visited.add(subtaskId);
+            const nestedSubtaskIds = await duplicateSubtasks(originalSubtask.subTasks, visited);
             const newSubtask = await createTaskOrSubtask({ ...originalSubtask, subTasks: nestedSubtaskIds });
             if (newSubtask) {
                 newSubtaskIds.push(newSubtask.id);
@@ -67,45 +71,57 @@ async function duplicateSubtasks(subtaskIds?: number[]) {
     return newSubtaskIds;
 }
 
-const deleteRecursive = (task: TransformedTask) => {
-    if (task.subTasks?.length) {
-        for (const subtaskId of task.subTasks) {
-            const subtask = tasksMap.value[subtaskId];
-            deleteRecursive(subtask);
+const actionError = ref('');
+const runAction = async (action: () => Promise<unknown>) => {
+    actionError.value = '';
+    try {
+        await action();
+    } catch {
+        actionError.value = 'Aktion fehlgeschlagen. Bitte den aktuellen Aufgabenstand prüfen.';
+    }
+};
+const deleteRecursive = async (task: TransformedTask) => {
+    if (
+        (await deleteConfirm('Die Aufgabe und ihre Unteraufgaben werden gelöscht.', { rejectOnCancel: false })) !== 'ok'
+    )
+        return;
+    const ids = descendantIds(task, tasksMap.value);
+    const removed = new Set(ids);
+    // Detach only the subtree root. On a partial failure, remaining children stay accessible in their lists.
+    for (const parent of Object.values(tasksMap.value)) {
+        if (!removed.has(parent.id) && parent.subTasks?.some(id => removed.has(id))) {
+            await updateTask({ ...parent, subTasks: parent.subTasks.filter(id => !removed.has(id)) });
         }
     }
-    deleteTask(task.id);
+    for (const id of ids) await deleteTask(id, task.dataCategoryId);
 };
 
-const contextMenu = computed(() => [
+const contextMenu = computed<DropdownSection[]>(() => [
     {
         title: `Aufgabe "${props.item.name}"`,
         items: [
             {
                 id: 'fullfilled',
-                label: props.item.fullfilled ? 'Als nicht-erfüllt markieren' : 'Abhaken',
+                nameTranslated: props.item.fullfilled ? 'Als nicht-erfüllt markieren' : 'Abhaken',
                 icon: props.item.fullfilled ? 'far fa-square' : 'fas fa-check-square',
-                callback: () => toggleTask(),
-            },
-            {
-                id: 'move',
-                label: 'In anderes Projekt verschieben',
-                icon: 'fas fa-arrow-left-long',
-                callback: () => {
-                    alert('TODO: change project');
-                },
+                callback: () => runAction(toggleTask),
             },
         ],
     },
     {
         items: [
-            { id: 'edit', label: 'Bearbeiten', icon: EDIT_ICON, callback: () => openTask() },
-            { id: 'duplicate', label: 'Duplizieren', icon: 'fas fa-copy', callback: () => duplicateTask() },
+            { id: 'edit', nameTranslated: 'Bearbeiten', icon: CtIcon.EDIT, callback: () => openTask() },
+            {
+                id: 'duplicate',
+                nameTranslated: 'Duplizieren',
+                icon: 'fas fa-copy',
+                callback: () => runAction(duplicateTask),
+            },
             {
                 id: 'delete',
-                label: 'Löschen',
-                icon: { icon: DELETE_ICON, class: 'text-red-500' },
-                callback: () => deleteRecursive(props.item),
+                nameTranslated: 'Löschen',
+                icon: { icon: CtIcon.DELETE, class: 'text-red-500' },
+                callback: () => runAction(() => deleteRecursive(props.item)),
             },
         ],
     },
@@ -145,9 +161,9 @@ const breadcrumbs = computed(() => {
                     <i
                         v-if="item.fullfilled"
                         class="far fa-check-square text-[20px] text-green-500"
-                        @click.stop="toggleTask"
+                        @click.stop="runAction(toggleTask)"
                     ></i>
-                    <i v-else class="far fa-square text-[20px] text-gray-500" @click.stop="toggleTask"></i>
+                    <i v-else class="far fa-square text-[20px] text-gray-500" @click.stop="runAction(toggleTask)"></i>
                 </template>
                 <span class="font-bold"> {{ item.name }} </span>
             </div>
@@ -163,9 +179,10 @@ const breadcrumbs = computed(() => {
                 :button-bind="{ class: 'absolute hidden right-1 top-1 group-hover:inline-flex' }"
                 :menu-items="contextMenu"
             >
-                <Button color="basic" icon="fas fa-ellipsis" outlined size="S" />
+                <Button :color="CtColor.BASIC" icon="fas fa-ellipsis" outlined size="S" />
             </DropdownMenu>
         </div>
+        <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <div v-if="item.description" class="l line-clamp-1">
             {{ item.description }}
         </div>
@@ -173,17 +190,19 @@ const breadcrumbs = computed(() => {
             <div class="flex flex-grow items-center gap-3 text-gray-400">
                 <Tag
                     v-if="dueDate"
-                    :color="dueColor ?? 'basic'"
+                    :color="dueColor ?? CtColor.BASIC"
                     icon="far fa-clock"
                     :label="
-                        task.dueDateRelative ? `${toDayMonth(dueDate)} (${task.dueDateRelative})` : toDayMonth(dueDate)
+                        task?.dueDateRelative
+                            ? `${toDayMonth(dueDate)} (${task?.dueDateRelative})`
+                            : toDayMonth(dueDate)
                     "
                     size="S"
                 />
                 <Tag v-if="comments?.length" icon="far fa-comments" :label="String(comments.length)" size="0" />
                 <Button
                     v-if="item.url"
-                    color="gray"
+                    :color="CtColor.BASIC"
                     :href="item.url"
                     icon="fas fa-link"
                     size="S"

@@ -1,7 +1,8 @@
-import { useCurrentUser, useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '@churchtools/utils';
+import { useCurrentUser } from '@churchtools/utils';
 import Fuse from 'fuse.js';
-import { isEqual } from 'lodash-es';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
+import { taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
 import { taskStore } from './storeTasks';
 import { useLists } from './useLists';
 import { usePlugin } from './usePlugin';
@@ -16,32 +17,38 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         useCustomModuleDataValuesMutations<Task>(moduleId, pId);
 
     const createTask = async (newTask: Task) => {
+        if (!newTask.name?.trim()) throw new Error('Bitte einen Titel eingeben.');
         return await createCustomDataValue({
-            ...newTask,
+            ...taskDraft(newTask),
+            name: newTask.name.trim(),
             activity: [{ personId: currentUser.id, date: new Date().toISOString(), type: 'create' }],
             dataCategoryId: pId.value,
             type: 'task',
         });
     };
-    const updateTask = async (task: TransformedTask, diff?: any) => {
-        const activity = task.activity;
-        if (diff) {
-            activity?.push({ personId: currentUser.id, date: new Date().toISOString(), type: 'update', value: diff });
+    const updateTask = async (task: TransformedTask, diff?: ReturnType<typeof taskDiff>) => {
+        if (!task.name?.trim()) throw new Error('Bitte einen Titel eingeben.');
+        const activity = [...(task.activity ?? [])];
+        if (diff && Object.keys(diff).length) {
+            activity.push({ personId: currentUser.id, date: new Date().toISOString(), type: 'update', value: diff });
         }
-        const payload = { ...task, type: 'task' as const, dataCategoryId: pId.value };
+        const payload = {
+            ...taskDraft(task),
+            id: task.id,
+            activity,
+            name: task.name.trim(),
+            type: 'task' as const,
+            dataCategoryId: task.dataCategoryId,
+        };
         await updateCustomDataValue(payload);
     };
-    const deleteTask = async (taskId: number) => {
-        return await deleteCustomDataValue({ id: taskId, dataCategoryId: pId.value });
+    const deleteTask = async (taskId: number, categoryId = pId.value) => {
+        return await deleteCustomDataValue({ id: taskId, dataCategoryId: categoryId });
     };
 
     const store = taskStore();
 
-    const getPercentFullfilled = (task: TransformedTask) => {
-        const all = task.subTasks?.length ?? 0;
-        const fullfilled = (task.subTasks ?? [])?.map(st => tasksMap.value[st]).filter(st => st?.fullfilled);
-        return Math.floor((fullfilled.length / all) * 100);
-    };
+    const getPercentFullfilled = (task: TransformedTask | undefined) => taskProgress(task, tasksMap.value);
 
     const tasks = computed<TransformedTask[]>(() => {
         const tasks: TransformedTask[] = (data.value ?? []).filter(
@@ -58,21 +65,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     });
     const tasksMap = computed(() => Object.fromEntries(tasks.value.map(t => [t.id, t])));
 
-    const getObjectDiff = (obj1: Partial<Task>, obj2: Partial<Task>) => {
-        return (Object.keys(obj1) as (keyof Task)[]).reduce<Partial<Record<keyof Task, { from: any; to: any }>>>(
-            (result, key) => {
-                if (!Object.prototype.hasOwnProperty.call(obj1, key)) {
-                    result[key] = { from: obj2[key], to: undefined };
-                } else if (!Object.prototype.hasOwnProperty.call(obj2, key)) {
-                    result[key] = { from: undefined, to: obj1[key] };
-                } else if (!isEqual(obj1[key], obj2[key])) {
-                    result[key] = { from: obj2[key], to: obj1[key] };
-                }
-                return result;
-            },
-            {},
-        );
-    };
+    const getObjectDiff = taskDiff;
 
     const tasksInSearch = computed(() => {
         if (store.search) {
@@ -95,37 +88,26 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         const listId = task.list && getListById(task.list) ? task.list : defaultListId;
         const showCompleted = getListById(listId)?.showCompleted ?? false;
         const showSubTasks = getListById(listId)?.showSubTasks ?? false;
+        const parent = findParent(task);
         return (
             tasksInSearch.value[task.id] &&
             ((!showCompleted && !task.fullfilled) || showCompleted) &&
-            ((!showSubTasks && !task.parent) || showSubTasks)
+            ((!showSubTasks && !parent) || showSubTasks)
         );
     };
 
-    const findParent = (t: TransformedTask) => tasks.value.find(task => task.subTasks?.includes(t?.id));
-
-    const calculateDueDate = (t: TransformedTask): Date | undefined => {
-        let dueDate = t.dueDate ? new Date(t.dueDate) : undefined;
-
-        if (t.dueDateRelative) {
-            const parentTask = findParent(t);
-
-            if (parentTask) {
-                const parentDueDate = calculateDueDate(parentTask);
-                if (parentDueDate) {
-                    dueDate = new Date(parentDueDate.getTime() - t.dueDateRelative * 24 * 60 * 60 * 1000);
-                }
-            }
+    const findParent = (t: TransformedTask | undefined) =>
+        t ? tasks.value.find(task => task.subTasks?.includes(t.id)) : undefined;
+    const calculateDueDate = (t: TransformedTask | undefined) => taskDueDate(t, findParent);
+    const getSuperParent = (t: TransformedTask | undefined): TransformedTask | undefined => {
+        const visited = new Set<number>();
+        while (t && !visited.has(t.id)) {
+            visited.add(t.id);
+            const parent = findParent(t);
+            if (!parent) return t;
+            t = parent;
         }
-        return dueDate;
-    };
-
-    const getSuperParent = (t: TransformedTask): TransformedTask => {
-        const parent = findParent(t);
-        if (parent) {
-            return getSuperParent(parent);
-        }
-        return t;
+        return undefined;
     };
     return {
         projectId,

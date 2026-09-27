@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,7 +18,10 @@ const version = packageJson.version;
 let gitHash = '';
 try {
     gitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-} catch (error) {
+    if (execSync('git status --porcelain', { encoding: 'utf8' }).trim()) {
+        gitHash += '-dirty';
+    }
+} catch {
     console.warn('Warning: Could not get git hash, using timestamp');
     gitHash = Date.now().toString(36);
 }
@@ -47,10 +50,12 @@ if (!fs.existsSync(distDir)) {
 }
 
 try {
+    // Always start a fresh archive so removed assets cannot survive a rebuild.
+    if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath);
     // Create ZIP archive using system zip command
     const zipCommand = `cd "${rootDir}" && zip -r "${archivePath}" dist/ -x "*.map" "*.DS_Store"`;
     execSync(zipCommand, { stdio: 'inherit' });
-    
+
     console.log('✅ Package created successfully!');
     console.log(`📁 Location: ${archivePath}`);
     console.log('');
@@ -59,13 +64,12 @@ try {
     console.log('   2. Go to Admin → Extensions → Upload Extension');
     console.log('   3. Select the ZIP file and install');
     console.log('');
-    
+
     // Show file size
     const stats = fs.statSync(archivePath);
     const fileSizeInBytes = stats.size;
     const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
     console.log(`📊 Package size: ${fileSizeInMB} MB`);
-    
 } catch (error) {
     console.error('❌ Error creating package:', error.message);
     process.exit(1);

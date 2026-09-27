@@ -1,25 +1,29 @@
 <script setup lang="ts">
 import { Card, EmptyState, LoadingMessage, PageHeader } from '@churchtools/styleguide';
-import { useCustomModuleDataCategoriesQuery } from '@churchtools/utils';
+import { CtColor } from '@churchtools/utils';
 import { computed } from 'vue';
 import { usePlugin } from '../composables/usePlugin';
+import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
 import { createOrEditProject } from '../project/projectHelper';
 import { ICONS, txx } from '../utils/utils';
 
 defineEmits<{ (event: 'edit-project', project: Project): void }>();
-const { moduleId, isLoading } = usePlugin();
-const { data } = useCustomModuleDataCategoriesQuery(moduleId);
+const { moduleId } = usePlugin();
+const { data, isLoading, isError, refetch } = useCustomModuleDataCategoriesQuery<Project>(moduleId);
 const projects = computed(() => (data.value ?? []).filter(cat => cat.shorty.startsWith('project')) as Project[]);
 </script>
 <template>
     <LoadingMessage v-if="isLoading" />
+    <p v-else-if="isError" role="alert">
+        Projekte konnten nicht geladen werden. <button @click="refetch()">Erneut versuchen</button>
+    </p>
     <EmptyState
         v-else-if="projects.length === 0"
         :action="{
             label: txx('Neues Projekt'),
-            color: 'green',
+            color: CtColor.GREEN,
             icon: 'fas fa-plus',
-            onClick: createOrEditProject,
+            onClick: () => createOrEditProject(),
         }"
         :icon="ICONS.MAIN"
         :title="txx('Noch keine Projekte')"

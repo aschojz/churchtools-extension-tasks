@@ -1,7 +1,7 @@
 interface Project {
     name: string;
     description?: string;
-    color?: CtColor;
+    color?: import('@churchtools/utils').CtColor;
     icon?: FAIcon;
     id: number;
     shorty: string;
@@ -37,7 +37,7 @@ interface Task {
 interface Tag {
     type: 'tag';
     name: string;
-    color: string;
+    color: import('@churchtools/utils').CtColor;
     sortKey: number;
 }
 interface ActivityEntry {
@@ -54,3 +54,5 @@ type TransformedList = TaskList & {
     dataCategoryId: number;
     items?: TransformedTask[];
 };
+
+type BoardColumn = TransformedList | { type: 'tag' | 'parent'; id: number; name: string; isCollapsed?: false };

@@ -1,94 +1,103 @@
 <script setup lang="ts">
 import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { Button, Input, InputDate, SelectDropdown, Textarea } from '@churchtools/styleguide';
-import {
-    type DomainObjectPerson,
-    getFirstOrSelf,
-    transformPersonToDomainObject,
-    usePersonsQueryAllPages,
-    useToasts,
-} from '@churchtools/utils';
-import { computed, onMounted, ref, watch } from 'vue';
-import { onBeforeRouteUpdate } from 'vue-router';
+import { type DomainObjectPerson, transformPersonToDomainObject } from '@churchtools/utils';
+import { computed, ref, watch } from 'vue';
+import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
+import { taskDraft } from '../../domain/tasks';
+import DialogTag from '../DialogTag.vue';
 
-const props = defineProps<{
-    taskId?: number;
-    projectId: number;
-}>();
-const emit = defineEmits<{
-    (event: 'change', payload: TransformedTask): void;
-}>();
-
+const props = defineProps<{ taskId?: number; projectId: number }>();
+const emit = defineEmits<{ (event: 'change', payload: Task): void }>();
 const projectId = computed(() => props.projectId);
-const taskId = computed(() => props.taskId);
-
-const { tasksMap, isLoading } = useTasks(projectId);
+const { tasksMap, isLoading, findParent } = useTasks(projectId);
 const { tagsArray } = useTags(projectId);
-
-const internTask = ref<TransformedTask>({} as TransformedTask);
-watch(internTask, () => emit('change', internTask.value), { deep: true });
-onMounted(() => initTask());
-watch(isLoading, () => initTask());
-onBeforeRouteUpdate(to => initTask(getFirstOrSelf(to.params.taskId)));
-const initTask = (id?: string) => {
-    const tId = id ? parseInt(id) : taskId.value;
-    internTask.value = tId ? tasksMap.value[tId] : ({} as TransformedTask);
-    name.value = internTask.value.name;
-};
-
-const filter = computed(() => ({ ids: internTask.value?.assignedTo ?? [] }));
-const { data } = usePersonsQueryAllPages(filter, { enabled: () => !!filter.value.ids.length });
-const personMap = computed(() =>
-    Object.fromEntries(
-        (data.value ?? []).map(p => {
-            const domainObject = transformPersonToDomainObject(p);
-            return [p.id, { ...p, domainObject }];
-        }),
-    ),
+const tagOptions = computed(() =>
+    tagsArray.value.map(tag => ({
+        id: tag.id,
+        nameTranslated: tag.name,
+        color: tag.color.key,
+        icon: 'fas fa-circle' as const,
+    })),
 );
-const name = ref('');
-
-const { successToast } = useToasts();
-const onCreateTag = () => successToast('TODO: Tag erstellen implementieren');
-
+const internTask = ref<Task>(taskDraft());
+const createTagIsOpen = ref(false);
+const missing = ref(false);
+watch(
+    [() => props.taskId, () => props.projectId, isLoading],
+    () => {
+        if (isLoading.value) return;
+        const task = props.taskId ? tasksMap.value[props.taskId] : undefined;
+        missing.value = !!props.taskId && !task;
+        internTask.value = taskDraft(task);
+    },
+    { immediate: true },
+);
+watch(internTask, () => emit('change', internTask.value), {
+    deep: true,
+    immediate: true,
+    // The footer button lives in the parent dialog. Keep its draft synchronous
+    // so a quick input followed by Save cannot submit the previous value.
+    flush: 'sync',
+});
+const parent = computed(() => (props.taskId ? findParent(tasksMap.value[props.taskId]) : undefined));
+const filter = computed(() => ({ ids: internTask.value.assignedTo ?? [] }));
+const { data } = usePersonsQueryAllPages(filter);
+const assignees = computed(() =>
+    (data.value ?? []).map(p => ({
+        domainObject: transformPersonToDomainObject(p),
+        id: p.id,
+        nameTranslated: `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim(),
+    })),
+);
 const onSearchForPerson = async (query: string) => {
-    const result = await churchtoolsClient.get<DomainObjectPerson[]>(`/search?query=${query}&domainTypes[]=person`);
-    return result
-        .filter(r => !internTask.value.assignedTo?.includes(parseInt(r.domainIdentifier)))
-        .map(r => ({ ...r, id: r.domainIdentifier, label: r.title }));
+    const result = await churchtoolsClient.get<DomainObjectPerson[]>(
+        `/search?query=${encodeURIComponent(query)}&domainTypes[]=person`,
+    );
+    return result.map(r => ({ ...r, id: Number(r.domainIdentifier), nameTranslated: r.title }));
 };
-const assignees = computed(() => (internTask.value.assignedTo ?? []).map(id => personMap.value[id]));
-const onSelectAssignee = (ids: string[]) => (internTask.value.assignedTo = ids.map(id => parseInt(id)));
 </script>
 <template>
-    <div class="flex flex-col gap-2">
-        <Input v-model="internTask.name" :horizontal="true" label="Titel" required />
-        <Textarea v-model="internTask.description" :horizontal="true" label="Beschreibung" :rows="10" />
+    <p v-if="isLoading">Aufgabe wird geladen …</p>
+    <p v-else-if="missing" role="alert">Diese Aufgabe wurde nicht gefunden.</p>
+    <div v-else class="flex flex-col gap-2">
+        <Input v-model="internTask.name" :horizontal="true" label="Titel" required @input="internTask.name = $event" />
+        <Textarea
+            v-model="internTask.description"
+            :horizontal="true"
+            label="Beschreibung"
+            :rows="10"
+            @input="internTask.description = $event"
+        />
         <InputDate v-model="internTask.dueDate" class="max-w-[520px]" :horizontal="true" label="Fällig am" />
+        <label v-if="parent" class="flex items-center gap-2">
+            Tage vor der übergeordneten Aufgabe
+            <input v-model.number="internTask.dueDateRelative" class="rounded border p-2" min="0" type="number" />
+        </label>
         <Input v-model="internTask.url" :horizontal="true" label="Link" />
         <div class="flex items-end gap-2">
             <SelectDropdown
                 v-model="internTask.tags"
                 class="flex-grow"
-                :emit-id="true"
+                emit-id
                 :horizontal="true"
                 label="Tags"
-                :multiple="true"
-                :options="tagsArray"
+                multiple
+                :options="tagOptions"
             />
-            <Button icon="fas fa-plus" outlined @click="onCreateTag" />
+            <Button icon="fas fa-plus" label="Tag erstellen" outlined @click="createTagIsOpen = true" />
         </div>
         <SelectDropdown
-            :emit-id="true"
+            v-model="internTask.assignedTo"
+            emit-id
             :horizontal="true"
-            label="Assignee"
-            :model-value="assignees"
-            :multiple="true"
+            label="Verantwortliche"
+            multiple
             :options="assignees"
             :search-function="onSearchForPerson"
-            @update:model-value="onSelectAssignee"
         />
+        <DialogTag v-if="createTagIsOpen" :project-id="projectId" @close="createTagIsOpen = false" />
     </div>
 </template>

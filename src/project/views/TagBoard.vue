@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Tag } from '@churchtools/styleguide';
+import { CtColor } from '@churchtools/utils';
 import { computed } from 'vue';
 import List from '../../components/List.vue';
 import { useTags } from '../../composables/useTags';
@@ -30,8 +31,17 @@ const tasksByTag = computed(() => {
 });
 
 const boardlists = computed(() => {
-    const li: TransformedList[] = tagsArray.value.map(tag => ({ ...tag }));
-    li.unshift({ id: 0, name: 'Kein Tag', dataCategoryId: projectId.value, sortKey: 0, type: 'list' });
+    const li = tagsArray.value.map(tag => ({ ...tag, type: 'tag' as const }));
+    li.unshift({
+        id: 0,
+        name: 'Kein Tag',
+        nameTranslated: 'Kein Tag',
+        color: { key: CtColor.BASIC },
+        icon: 'fas fa-circle',
+        dataCategoryId: projectId.value,
+        sortKey: 0,
+        type: 'tag',
+    });
     return li;
 });
 </script>
@@ -46,7 +56,7 @@ const boardlists = computed(() => {
                 :project-id="projectId"
             >
                 <template #header>
-                    <Tag :color="list.color?.key ?? 'basic'" :label="list.name" />
+                    <Tag :color="list.color?.key ?? CtColor.BASIC" :label="list.name" />
                 </template>
             </List>
         </template>

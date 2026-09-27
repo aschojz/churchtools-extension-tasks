@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { Button, DropdownMenu, Tag } from '@churchtools/styleguide';
-import { DELETE_ICON, EDIT_ICON } from '@churchtools/utils';
+import { type DropdownSection, Button, DropdownMenu, Tag } from '@churchtools/styleguide';
+import { CtColor, CtIcon } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { taskStore } from '../composables/storeTasks';
 import { useLists } from '../composables/useLists';
 import { useTasks } from '../composables/useTasks.ts';
+import { reorderTasks } from '../domain/tasks';
 import DialogList from './DialogList.vue';
 import NewTask from './NewTask.vue';
 import Task from './TaskItem.vue';
@@ -15,7 +16,7 @@ const store = taskStore();
 
 const props = withDefaults(
     defineProps<{
-        list: TransformedList;
+        list: BoardColumn;
         items: TransformedTask[];
         showTask?: boolean;
         isDraggable?: boolean;
@@ -27,13 +28,13 @@ const props = withDefaults(
 const pId = computed(() => props.projectId);
 const { updateList, deleteList } = useLists(pId);
 const onUpdateList = (list: Partial<TaskList>) => {
-    updateList({ ...props.list, ...list });
+    if (props.list.type === 'list') return updateList({ ...props.list, ...list });
 };
 
 const newTaskIsOpen = ref(false);
 
 const initItems = (items: TransformedTask[]) => {
-    internItems.value = sortBy(items, store.search ? 'score' : store.sortBy, 'sortKey');
+    internItems.value = sortBy(items, store.search ? 'score' : 'sortKey');
 };
 onMounted(() => initItems(props.items));
 watch(
@@ -43,76 +44,48 @@ watch(
     },
 );
 const internItems = ref<TransformedTask[]>([]);
-watch(internItems, (newValue, oldValue) => {
-    if (newValue.length >= oldValue.length) {
-        updateSortKeys(newValue);
-    }
-});
 const { updateTask } = useTasks(pId);
-const updateSortKeys = (newAr: TransformedTask[]) => {
-    const half = 2,
-        distance = 10000;
-
-    const newArray = sortBy(
-        newAr.map(task => ({
-            ...task,
-            list: props.list.id,
-            sortKey: props.list.id === task.list ? task.sortKey : 0,
-            added: props.list.id !== task.list,
-        })),
-        'dueDate',
-    );
-
-    const itemsToUpdate: TransformedTask[] = [];
-
-    newArray.forEach((item, index) => {
-        const prevSortKey = index > 0 ? (newArray[index - 1].sortKey ?? index - 1) : 0;
-        const nextSortKey =
-            index < newArray.length - 1 ? (newArray[index + 1].sortKey ?? index + 1) : prevSortKey + distance;
-        let distanceToAdd = Math.round((nextSortKey - prevSortKey) / half);
-        distanceToAdd = distanceToAdd > 0 ? distanceToAdd : distance;
-
-        if (item.dueDate && item.added) {
-            itemsToUpdate.push(item);
-        } else if (
-            ((item.sortKey < prevSortKey || (item.sortKey > nextSortKey && distanceToAdd < 1)) && !item.dueDate) ||
-            item.added
-        ) {
-            const newSortKey = prevSortKey + (distanceToAdd > 1 ? distanceToAdd : distance);
-            const updatedItem = { ...newArray[index], sortKey: newSortKey };
-            delete updatedItem.added;
-            itemsToUpdate.push(updatedItem);
-            newArray[index].sortKey = newSortKey;
-        }
-    });
-    if (itemsToUpdate.length > 0) {
-        itemsToUpdate.forEach(item => updateTask(item));
+const saveError = ref('');
+const isSaving = ref(false);
+const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
+    if (!props.isDraggable || props.list.type !== 'list' || isSaving.value || (!event.added && !event.moved)) return;
+    isSaving.value = true;
+    saveError.value = '';
+    try {
+        for (const task of reorderTasks(internItems.value, props.list.id)) await updateTask(task);
+    } catch {
+        saveError.value = 'Verschieben fehlgeschlagen. Bitte erneut versuchen.';
+        initItems(props.items);
+    } finally {
+        isSaving.value = false;
     }
 };
 
-const listContextMenu = computed(() => {
-    const menu = [
+const listContextMenu = computed<DropdownSection[]>(() => {
+    if (props.list.type !== 'list') return [];
+    const list = props.list;
+    const menu: DropdownSection[] = [
         {
             title: `Liste "${props.list.name}"`,
             items: [
                 {
                     id: 'showSubTasks',
-                    label: 'Unteraufgaben anzeigen',
-                    icon: props.list.showSubTasks
+                    nameTranslated: 'Unteraufgaben anzeigen',
+                    icon: list.showSubTasks
                         ? { icon: 'fas fa-toggle-on', class: 'text-green-500' }
                         : 'fas fa-toggle-off',
                     callback: () => {
-                        onUpdateList({ showSubTasks: !props.list.showSubTasks });
+                        onUpdateList({ showSubTasks: !list.showSubTasks });
                     },
                 },
                 {
                     id: 'showCompleted',
-                    label: 'Erledigte Aufgaben anzeigen',
-                    icon: props.list.showCompleted
+                    nameTranslated: 'Erledigte Aufgaben anzeigen',
+                    icon: list.showCompleted
                         ? { icon: 'fas fa-toggle-on', class: 'text-green-500' }
                         : 'fas fa-toggle-off',
                     callback: () => {
-                        onUpdateList({ showCompleted: !props.list.showCompleted });
+                        onUpdateList({ showCompleted: !list.showCompleted });
                     },
                 },
             ],
@@ -121,23 +94,27 @@ const listContextMenu = computed(() => {
             items: [
                 {
                     id: 'edit',
-                    label: 'Bearbeiten',
-                    icon: EDIT_ICON,
-                    callback: () => (listIsOpen.value = props.list),
+                    nameTranslated: 'Bearbeiten',
+                    icon: CtIcon.EDIT,
+                    callback: () => {
+                        if (props.list.type === 'list') listIsOpen.value = props.list;
+                    },
                 },
                 {
                     id: 'delete',
-                    label: 'Löschen',
-                    disabled: props.list.isDefault,
-                    icon: { icon: DELETE_ICON, class: 'text-red-500' },
-                    callback: () => deleteList(props.list.id),
+                    nameTranslated: 'Löschen',
+                    disabled: list.isDefault,
+                    icon: { icon: CtIcon.DELETE, class: 'text-red-500' },
+                    callback: async () => {
+                        await deleteList(props.list.id);
+                    },
                 },
             ],
         },
     ];
     return menu;
 });
-const listIsOpen = ref();
+const listIsOpen = ref<TransformedList>();
 </script>
 <template>
     <div
@@ -183,30 +160,44 @@ const listIsOpen = ref();
                         size="0"
                     />
                     <Button
-                        v-if="!list.isCollapsed"
-                        color="green"
+                        v-if="!list.isCollapsed && list.type === 'list'"
+                        :color="CtColor.GREEN"
                         icon="fas fa-plus"
                         size="S"
                         text
                         @click="newTaskIsOpen = !newTaskIsOpen"
                     />
                     <DropdownMenu v-if="$route.name === 'project-board'" :menu-items="listContextMenu">
-                        <Button v-if="!list.isCollapsed" color="basic" icon="fas fa-ellipsis-h" size="S" text />
+                        <Button
+                            v-if="!list.isCollapsed"
+                            :color="CtColor.BASIC"
+                            icon="fas fa-ellipsis-h"
+                            size="S"
+                            text
+                        />
                     </DropdownMenu>
                 </span>
             </div>
         </div>
+        <p v-if="saveError" class="px-2 text-red-600" role="alert">{{ saveError }}</p>
         <div v-if="!list.isCollapsed" class="flex flex-grow flex-col gap-2 overflow-y-auto px-2 pb-2">
             <draggable
-                v-if="isDraggable"
+                v-if="isDraggable && list.type === 'list'"
                 v-model="internItems"
                 animation="200"
                 class="flex min-h-full flex-col gap-2"
+                :disabled="isSaving || !!store.search"
                 group="tasks"
                 item-key="id"
+                @change="onDragChange"
             >
                 <template #header>
-                    <NewTask v-if="newTaskIsOpen" :list="list" :project-id="projectId" @close="newTaskIsOpen = false" />
+                    <NewTask
+                        v-if="newTaskIsOpen"
+                        :list="list as TransformedList"
+                        :project-id="projectId"
+                        @close="newTaskIsOpen = false"
+                    />
                 </template>
                 <template #item="{ element }">
                     <Task :item="element" :project-id="projectId" :show-task="showTask" />
@@ -214,7 +205,12 @@ const listIsOpen = ref();
                 <template #footer><div class="pt-px"></div></template>
             </draggable>
             <template v-else>
-                <NewTask v-if="newTaskIsOpen" :list="list" :project-id="projectId" @close="newTaskIsOpen = false" />
+                <NewTask
+                    v-if="newTaskIsOpen"
+                    :list="list as TransformedList"
+                    :project-id="projectId"
+                    @close="newTaskIsOpen = false"
+                />
                 <Task
                     v-for="item in internItems"
                     :key="item.id"

@@ -1,93 +1,68 @@
-# ChurchTools Extension Boilerplate
+# ChurchTools Extension Tasks
 
-This project provides a boilerplate for building your own extension for [ChurchTools](https://www.church.tools).
+Projektbezogene Aufgabenverwaltung für ChurchTools: Listen und Boards, Tags,
+Verantwortliche, Unteraufgaben, Fälligkeiten und Aktivitäten.
 
-## Getting Started
+## Lokal entwickeln
 
-### Prerequisites
+Voraussetzungen: Node.js 22.12+ oder 24 und npm. Der Lockfile verwendet versionierte
+Pakete; ein benachbartes ChurchTools-Repository ist nicht erforderlich.
 
--   Node.js (version compatible with the project)
--   npm or yarn
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies:
-    ```bash
-    npm install
-    ```
-
-## Configuration
-
-Copy `.env-example` to `.env` and fill in your data.
-
-In the `.env` file, configure the necessary constants for your project. This file is included in `.gitignore` to prevent sensitive data from being committed to version control.
-
-## Development and Deployment
-
-### Development Server
-
-Start a development server with hot-reload:
-
-```bash
+```sh
+npm ci
+cp .env-example .env
 npm run dev
 ```
 
-> **Note:** For local development, make sure to configure CORS in your ChurchTools
-> instance to allow requests from your local development server
-> (typically `http://localhost:5173`).
-> This can be done in the ChurchTools admin settings under
-> "API Settings" > "Integration" > "Cross-Origin Resource Sharing"
+In `.env` die Testinstanz und den Extension-Key setzen. Der Key bestimmt sowohl
+Asset- als auch Router-Basis (`/ccm/<key>/`). Für Entwicklung muss die Instanz CORS
+für den lokalen Vite-Ursprung erlauben. Optionale Zugangsdaten werden nur beim
+Entwicklungsstart für `/login` verwendet. `.env` bleibt lokal.
 
-### Building for Production
+## Prüfen und paketieren
 
-To create a production build:
-
-```bash
-npm run build
-```
-
-### Preview Production Build
-
-To preview the production build locally:
-
-```bash
-npm run preview
-```
-
-### Deployment
-
-To build and package your plugin for deployment:
-
-```bash
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run check
 npm run deploy
 ```
 
-This command will:
+`check` führt Typecheck, Lint, Regressionstests und Production-Build aus. `build`
+bricht bei Typfehlern ab. `deploy` erstellt lediglich ein lokales ZIP in `releases/`;
+es lädt nichts hoch. Das ZIP enthält `dist/`. Installation, Update und Berechtigungen
+müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 
-1. Build the project
-2. Package it using the `scripts/package.js` script
+## Daten und Architektur
 
-You can find the package in the `releases` directory.
+- Projekte sind CCM-Datenkategorien; Aufgaben, Listen und Tags sind JSON-Datenwerte.
+- `src/data/ccm.ts` kapselt REST-Verträge, Serialisierung und Invalidierung.
+- `src/data/queryClient.ts` ist der gemeinsame Client für Extension-Abfragen.
+- `src/domain/tasks.ts` enthält reine Funktionen für Entwürfe, Hierarchie, Termine
+  und Sortierung; die Regressionstests liegen unter `tests/`.
+- Ansichten schreiben keine Daten beim Mounten oder Refetch. Drag-and-drop speichert
+  ausschließlich nach einem tatsächlichen Verschiebeereignis in einer echten Liste.
+- Standardlisten werden beim expliziten Anlegen eines Projekts erzeugt. Für ältere
+  Projekte ohne Liste kann über „Liste“ eine angelegt werden.
 
-## API
+## Bewusste Kompatibilitätsgrenzen
 
-Following endpoints are available. Permissions are possible per route. Types are documented in `ct-types.d.ts` (CustomModuleCreate, CustomModuleDataCategoryCreate, CustomModuleDataValueCreate)
+`@churchtools/styleguide` ist auf 0.66.0 und `@churchtools/utils` auf 0.10.0 fixiert.
+Utils 0.10.1 entfernt APIs, die dieser veröffentlichte Styleguide noch verwendet.
+Ein Override hält transitive Utils-Verwendungen auf demselben Stand. Die lokale
+ChurchTools-Entwicklung hat sich bereits weiterentwickelt; ein späterer Wechsel
+auf lokale/neue Pakete muss gemeinsam erfolgen.
 
-GET `/custommodules` get all extensions  
-GET `/custommodules/{pluginkey}` get an extensions by its key  
-GET `/custommodules/{moduleId}` get an extension by its ID
+Das Utils-Bundle enthält eine ältere TanStack-Runtime. Deren interner QueryClient
+wird **nicht** an die aktuelle Extension-Runtime übergeben. ChurchTools-interne
+Abfragen bleiben in der Bibliothek, CCM- und Personenabfragen der Extension nutzen
+ihren eigenen Client.
 
-GET `/custommodules/{moduleId}/customdatacategories`  
-POST `/custommodules/{moduleId}/customdatacategories`  
-PUT `/custommodules/{moduleId}/customdatacategories/{dataCategoryId}`  
-DELETE `/custommodules/{moduleId}/customdatacategories/{dataCategoryId}`
+Styleguide 0.66.0 veröffentlicht einen falschen Typ-Einstieg und verweist aus dem
+CSS auf eine nicht mitgelieferte Tailwind-Quelldatei. `tsconfig.json` verweist auf die
+tatsächlich vorhandenen Deklarationen; Vite löst die CSS-Referenz auf das lokale
+Theme auf. Nach einem korrigierten Paketrelease können diese Anpassungen entfallen.
 
-GET `/custommodules/{moduleId}/customdatacategories/{dataCategoryId}/customdatavalues`  
-POST `/custommodules/{moduleId}/customdatacategories/{dataCategoryId}/customdatavalues`  
-PUT `/custommodules/{moduleId}/customdatacategories/{dataCategoryId}/customdatavalues/{valueId}`  
-DELETE `/custommodules/{moduleId}/customdatacategories/{dataCategoryId}/customdatavalues/{valueId}`
-
-## Support
-
-For questions about the ChurchTools API, visit the [Forum](https://forum.church.tools).
+Offene Themen, Audit-Einordnung und Entwicklungsplan:
+[Projektanalyse](docs/PROJEKTANALYSE.md) und [Umsetzungsstand](docs/UMSETZUNGSSTAND.md).

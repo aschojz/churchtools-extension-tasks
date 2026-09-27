@@ -1,5 +1,5 @@
-import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '@churchtools/utils';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
 import { usePlugin } from './usePlugin';
 
 export function useTags(projectId: MaybeRefOrGetter<number>) {
@@ -16,7 +16,8 @@ export function useTags(projectId: MaybeRefOrGetter<number>) {
     const tagsArray = computed(() =>
         Object.values(tags.value).map(tag => ({
             ...tag,
-            icon: 'fas fa-circle',
+            nameTranslated: tag.name,
+            icon: 'fas fa-circle' as const,
             color: { key: tag.color },
         })),
     );

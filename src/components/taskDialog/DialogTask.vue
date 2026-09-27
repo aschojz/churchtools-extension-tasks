@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { DialogLarge } from '@churchtools/styleguide';
-import { EDIT_ICON } from '@churchtools/utils';
+import { CtColor, CtIcon } from '@churchtools/utils';
 import { computed, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTask } from '../../composables/useTask';
@@ -22,10 +22,10 @@ const { project } = useProject(toRef(() => props.projectId));
 
 const router = useRouter();
 const resetRoute = () => {
-    router.push({ ...router.currentRoute.value, params: undefined });
+    router.push({ name: router.currentRoute.value.name!, params: { projectId: props.projectId } });
 };
 
-const { task } = useTask(projectId, taskId);
+const { task, toggleTask } = useTask(projectId, taskId);
 const { updateTask, getObjectDiff, createTask } = useTasks(projectId);
 
 const actions = computed(() => {
@@ -34,7 +34,7 @@ const actions = computed(() => {
     }
     return [
         {
-            icon: EDIT_ICON,
+            icon: CtIcon.EDIT,
             label: txx('Bearbeiten'),
             outlined: true,
             onClick: () => (isEdit.value = true),
@@ -48,33 +48,51 @@ const primaryButton = computed(() =>
         : isEdit.value
           ? txx('Speichern')
           : task.value?.fullfilled
-            ? { label: txx('Als unerledigt markieren'), color: 'red', icon: 'fas fa-undo', outlined: true }
-            : { label: txx('Als erledigt markieren'), color: 'green', icon: 'fas fa-check' },
+            ? {
+                  label: txx('Als unerledigt markieren'),
+                  color: CtColor.RED,
+                  icon: 'fas fa-undo' as const,
+                  outlined: true,
+              }
+            : { label: txx('Als erledigt markieren'), color: CtColor.GREEN, icon: 'fas fa-check' as const },
 );
 
-const internTask = ref({} as TransformedTask);
-const onTaskChange = (updatedTask: TransformedTask) => {
+const internTask = ref<Task>();
+const isSaving = ref(false);
+const saveError = ref('');
+const onTaskChange = (updatedTask: Task) => {
     internTask.value = updatedTask;
 };
 const onSave = async () => {
-    if (isCreate.value) {
-        await createTask(internTask.value);
-        resetRoute();
-    } else if (isEdit.value) {
-        const diff = getObjectDiff(internTask.value, task.value ?? {});
-        await updateTask(internTask.value, diff);
-        isEdit.value = false;
+    if (isSaving.value) return;
+    isSaving.value = true;
+    saveError.value = '';
+    try {
+        if (isCreate.value && internTask.value) {
+            await createTask(internTask.value);
+            resetRoute();
+        } else if (isEdit.value && internTask.value && task.value) {
+            const diff = getObjectDiff(internTask.value, task.value);
+            await updateTask({ ...internTask.value, id: task.value.id, dataCategoryId: props.projectId }, diff);
+            isEdit.value = false;
+        } else if (!showEditor.value) {
+            await toggleTask();
+        }
+    } catch (error) {
+        saveError.value = error instanceof Error ? error.message : 'Speichern fehlgeschlagen. Bitte erneut versuchen.';
+    } finally {
+        isSaving.value = false;
     }
 };
 </script>
 <template>
     <DialogLarge
-        :button="primaryButton"
+        :button="isSaving ? false : primaryButton"
         :cancel-button="cancelButton"
         :context="project?.name"
         :header="{
             icon: task?.fullfilled ? 'fas fa-square-check' : 'far fa-square',
-            color: task?.fullfilled ? 'green' : 'basic',
+            color: task?.fullfilled ? CtColor.GREEN : CtColor.BASIC,
             title: isCreate
                 ? txx('Aufgabe erstellen')
                 : isEdit
@@ -85,6 +103,7 @@ const onSave = async () => {
         @close="resetRoute"
         @save="onSave"
     >
+        <p v-if="saveError" class="mb-3 text-red-600" role="alert">{{ saveError }}</p>
         <TaskEditor v-if="showEditor" :project-id="projectId" :task-id="taskId" @change="onTaskChange" />
         <TaskDisplay v-else-if="taskId" :projectId="projectId" :taskId="taskId" />
     </DialogLarge>

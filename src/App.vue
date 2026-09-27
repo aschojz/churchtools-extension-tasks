@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Grid, GridHeader, InfoMessageContainer, LoadingMessage } from '@churchtools/styleguide';
-import { useBodyScrollbarWidth, useToasts } from '@churchtools/utils';
+import { CtColor, useBodyScrollbarWidth, useToasts } from '@churchtools/utils';
 import { computed } from 'vue';
 import type { ComponentProps } from 'vue-component-type-helpers';
 import { useRoute } from 'vue-router';
@@ -10,16 +10,16 @@ import { ICONS, txx } from './utils/utils';
 
 useBodyScrollbarWidth();
 
-const { isLoading } = usePlugin();
+const { isLoading, isError, refetch } = usePlugin();
 
 const isSmallScreen = computed(() => window.innerWidth < 768);
 const route = useRoute();
 
 const actions = computed(() => {
-    const actions: ComponentProps<typeof GridHeader>['actions'] = [
+    const actions: NonNullable<ComponentProps<typeof GridHeader>['actions']> = [
         [
             {
-                color: 'violet',
+                color: CtColor.VIOLET,
                 icon: 'fas fa-bug',
                 href: 'https://github.com/aschojz/churchtools-extension-tasks/issues',
                 label: isSmallScreen.value ? '' : txx('Fehler melden'),
@@ -33,7 +33,7 @@ const actions = computed(() => {
     if (route.name === 'overview') {
         actions.push([
             {
-                color: 'green',
+                color: CtColor.GREEN,
                 icon: 'fas fa-plus',
                 label: isSmallScreen.value ? '' : txx('Neues Projekt'),
                 size: 'S',
@@ -44,13 +44,15 @@ const actions = computed(() => {
     return actions;
 });
 
-const isDev = computed(() => import.meta.env.MODE === 'development');
 const { toasts, removeToast } = useToasts();
 const removeInfoMessage = (infoMessage: (typeof toasts.value)[0]) => removeToast(infoMessage.id);
 </script>
 <template>
     <div id="tasks" class="flex grow flex-col" style="--menu-height: 0px">
         <LoadingMessage v-if="isLoading" />
+        <div v-else-if="isError" class="p-6" role="alert">
+            Das Aufgabenmodul konnte nicht geladen werden. <button @click="refetch()">Erneut versuchen</button>
+        </div>
         <Grid v-else min-height="56px" storage-key="ext-tasks" style="--sidebar-left: 0px">
             <template #header>
                 <GridHeader :actions="actions" :icon="ICONS.MAIN" :title="txx('Aufgabenverwaltung')" />
@@ -61,9 +63,7 @@ const removeInfoMessage = (infoMessage: (typeof toasts.value)[0]) => removeToast
         </Grid>
     </div>
     <div id="modal-container"></div>
-    <div v-if="isDev">
-        <InfoMessageContainer :messages="toasts" @close-info-message="removeInfoMessage" />
-    </div>
+    <InfoMessageContainer :messages="toasts" @close-info-message="removeInfoMessage" />
 </template>
 <style>
 @layer oldcss {

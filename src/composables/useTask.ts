@@ -1,12 +1,8 @@
-import {
-    notNullish,
-    transformPersonToDomainObject,
-    useCurrentUser,
-    useCustomModuleDataValuesMutations,
-    usePersonsQueryAllPages,
-} from '@churchtools/utils';
+import { CtColor, notNullish, transformPersonToDomainObject, useCurrentUser } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { useCustomModuleDataValuesMutations } from '../data/ccm';
+import { usePersonsQueryAllPages } from './usePersons';
 import { usePlugin } from './usePlugin';
 import { useTags } from './useTags';
 import { useTasks } from './useTasks';
@@ -18,19 +14,13 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
     const { updateCustomDataValue, deleteCustomDataValue } = useCustomModuleDataValuesMutations<Task>(moduleId, pId);
     const { tasksMap, findParent, calculateDueDate, getSuperParent, getPercentFullfilled } = useTasks(pId);
 
-    const task = computed(() => (tId.value ? (tasksMap.value[tId.value] ?? {}) : undefined));
+    const task = computed(() => (tId.value ? tasksMap.value[tId.value] : undefined));
 
     const percentFullfilled = computed(() => {
         return getPercentFullfilled(task.value);
     });
 
-    const parent = computed(() => {
-        const parent = findParent(task.value);
-        if (parent) {
-            parent.dueDate = calculateDueDate(parent);
-        }
-        return parent;
-    });
+    const parent = computed(() => findParent(task.value));
 
     const superParent = computed(() => findParent(task.value) && getSuperParent(task.value));
 
@@ -53,8 +43,9 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
     });
 
     const currentUser = useCurrentUser();
-    const toggleTask = () => {
-        const activity = task.value?.activity ?? [];
+    const toggleTask = async () => {
+        if (!task.value) return;
+        const activity = [...(task.value.activity ?? [])];
         activity.push({
             personId: currentUser.id,
             date: new Date().toISOString(),
@@ -62,9 +53,10 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
             value: !task.value.fullfilled,
         });
         const payload = { ...task.value, fullfilled: !task.value.fullfilled, activity };
-        updateCustomDataValue(payload);
+        await updateCustomDataValue(payload);
     };
-    const deleteTask = () => deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value });
+    const deleteTask = () =>
+        tId.value ? deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value }) : undefined;
 
     const comments = computed(() => (task.value?.activity ?? [])?.filter(a => a.type === 'comment'));
 
@@ -77,19 +69,19 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
         const now = new Date();
         now.setHours(0, 0, 0, 0);
         if (dd < now) {
-            return 'red';
+            return CtColor.RED;
         }
         const millisecondsPerDay = 1000 * 60 * 60 * 24;
         const diff = dd.getTime() - now.getTime();
 
         const nextDay = 1;
         if (diff < millisecondsPerDay * nextDay) {
-            return 'green';
+            return CtColor.GREEN;
         }
-        return 'basic';
+        return CtColor.BASIC;
     });
 
-    const toDayMonth = (date: string) => {
+    const toDayMonth = (date: string | Date) => {
         return new Date(date).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
     };
 

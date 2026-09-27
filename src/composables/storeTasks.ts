@@ -7,13 +7,10 @@ export const taskStore = defineStore('tasks', () => {
         sortBy = ref('dueDate'),
         search = ref('');
 
-    const isCreatingDefaultList = ref(false);
-
     return {
         showSubTasks,
         showFullfilled,
         sortBy,
-        isCreatingDefaultList,
         search,
     };
 });

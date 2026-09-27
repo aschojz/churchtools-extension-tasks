@@ -1,18 +1,22 @@
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
-import { fileURLToPath, URL } from 'url';
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
-import eslintPlugin from 'vite-plugin-eslint';
 
-// https://vitejs.dev/config/
-export default ({ mode }) => {
-    process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
-    return defineConfig({
-        base: `/ccm/${process.env.VITE_KEY}/`,
-        plugins: [vue(), eslintPlugin(), tailwindcss()],
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd());
+    const key = env.VITE_KEY || 'tasks';
+    if (!/^[a-zA-Z0-9_-]+$/.test(key)) throw new Error('VITE_KEY must be an extension key');
+    return {
+        base: `/ccm/${key}/`,
+        plugins: [vue(), tailwindcss()],
         resolve: {
-            dedupe: ['vue'],
-            alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+            dedupe: ['vue', 'pinia', '@tanstack/vue-query', '@churchtools/utils'],
+            alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
+                // Styleguide 0.66.0 references this source file but does not publish it.
+                '@churchtools/styleguide/tailwind': fileURLToPath(new URL('./src/tailwind.css', import.meta.url)),
+            },
         },
-    });
-};
+    };
+});

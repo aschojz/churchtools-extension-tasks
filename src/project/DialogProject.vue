@@ -13,12 +13,25 @@ const emit = defineEmits<{ (event: 'close'): void }>();
 const proj = ref({ ...(props.project ?? ({} as Project)) });
 
 const { ctColors } = useColors();
-const colors = computed(() => ctColors.map(c => ({ id: c.key, label: c.key, color: c, icon: 'fas fa-circle' })));
+const colors = computed(() =>
+    ctColors.map(c => ({ id: c.key, nameTranslated: c.key, color: c.key, icon: 'fas fa-circle' as const })),
+);
 
 const { createProject, updateProject } = useProjects();
-const onSave = (close: () => void) => {
-    (props.project?.id ? updateProject : createProject)(proj.value);
-    close();
+const saveError = ref('');
+const saving = ref(false);
+const onSave = async (close: () => void) => {
+    if (saving.value) return;
+    saving.value = true;
+    saveError.value = '';
+    try {
+        await (props.project?.id ? updateProject : createProject)(proj.value);
+        close();
+    } catch (error) {
+        saveError.value = error instanceof Error ? error.message : 'Projekt konnte nicht gespeichert werden.';
+    } finally {
+        saving.value = false;
+    }
 };
 
 const CHARACTERS_QUERY = gql`
@@ -46,7 +59,7 @@ const { load, variables, result } = useLazyQuery<{
 const onSearchForIcon = (query: string) => {
     variables.value = { query };
     load();
-    return Promise.resolve();
+    return Promise.resolve([]);
 };
 </script>
 <template>
@@ -56,9 +69,15 @@ const onSearchForIcon = (query: string) => {
         @close="emit('close')"
         @save="onSave"
     >
+        <p v-if="saveError" role="alert">{{ saveError }}</p>
         <div class="flex flex-col gap-4">
-            <Input v-model="proj.name" label="Name" :max-length="100" />
-            <Textarea v-model="proj.description" label="Beschreibung" :max-length="300" />
+            <Input v-model="proj.name" label="Name" :max-length="100" @input="proj.name = $event" />
+            <Textarea
+                v-model="proj.description"
+                label="Beschreibung"
+                :max-length="300"
+                @input="proj.description = $event"
+            />
             <SelectDropdown
                 v-model="proj.icon"
                 emit-id
@@ -67,7 +86,11 @@ const onSearchForIcon = (query: string) => {
                 :options="
                     (result?.search ?? [])
                         .filter(s => s.familyStylesByLicense.free.filter(i => i.style === 'solid').length)
-                        .map(s => ({ id: `fas fa-${s.id}`, label: s.label, icon: `fas fa-${s.id}` }))
+                        .map(s => ({
+                            id: `fas fa-${s.id}` as const,
+                            nameTranslated: s.label,
+                            icon: `fas fa-${s.id}` as const,
+                        }))
                 "
                 :search-function="onSearchForIcon"
             />
