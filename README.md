@@ -1,7 +1,8 @@
 # ChurchTools Extension Tasks
 
 Aufgabenverwaltung für ChurchTools: projektübergreifende persönliche Übersicht,
-Listen und Boards, Tags, Verantwortliche, Unteraufgaben, Fälligkeiten und Aktivitäten.
+Listen und Boards, verwaltbare Tags, Verantwortliche, Unteraufgaben, Fälligkeiten
+und Aktivitäten.
 
 ## Lokal entwickeln
 

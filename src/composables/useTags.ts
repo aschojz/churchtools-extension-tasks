@@ -7,7 +7,8 @@ export function useTags(projectId: MaybeRefOrGetter<number>) {
     const pId = computed(() => toValue(projectId));
 
     const { data } = useCustomModuleDataValuesQuery<Tag>(moduleId, pId);
-    const { createCustomDataValue, updateCustomDataValue } = useCustomModuleDataValuesMutations<Tag>(moduleId, pId);
+    const { createCustomDataValue, updateCustomDataValue, deleteCustomDataValue } =
+        useCustomModuleDataValuesMutations<Tag>(moduleId, pId);
 
     const tags = computed(() => {
         const tags = (data.value ?? []).filter(v => v.type === 'tag' && v.dataCategoryId === pId.value);
@@ -26,6 +27,7 @@ export function useTags(projectId: MaybeRefOrGetter<number>) {
 
     const updateTag = (tag: TransformedTag) =>
         updateCustomDataValue({ ...tag, dataCategoryId: pId.value, type: 'tag' });
+    const deleteTag = (id: number) => deleteCustomDataValue({ id, dataCategoryId: pId.value });
 
-    return { tags, tagsArray, createTag, updateTag };
+    return { tags, tagsArray, createTag, updateTag, deleteTag };
 }

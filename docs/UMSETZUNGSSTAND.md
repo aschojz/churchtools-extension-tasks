@@ -34,6 +34,8 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Die Startseite zeigt offene, persönlich zugewiesene Aufgaben projektübergreifend
   als „Überfällig“, „Heute“, „Demnächst“ oder „Ohne Termin“ und öffnet direkt den
   passenden Projektdialog.
+- Tags lassen sich direkt in der Tag-Ansicht anlegen, bearbeiten und nach Bestätigung
+  löschen. Beim Löschen werden Referenzen aus den betroffenen Aufgaben entfernt.
 
 ## Verifikation
 

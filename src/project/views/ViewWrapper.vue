@@ -41,6 +41,7 @@ const taskIsOpen = computed(() => !!getFirstOrSelf(route.params.taskId));
                     placeholder="Suchen"
                     :show-label="false"
                 />
+                <slot name="extra-actions"></slot>
                 <slot name="actions">
                     <Button
                         :color="CtColor.BASIC"
