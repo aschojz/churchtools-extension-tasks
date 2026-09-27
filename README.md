@@ -20,6 +20,21 @@ Asset- als auch Router-Basis (`/ccm/<key>/`). Für Entwicklung muss die Instanz 
 für den lokalen Vite-Ursprung erlauben. Optionale Zugangsdaten werden nur beim
 Entwicklungsstart für `/login` verwendet. `.env` bleibt lokal.
 
+### In eine lokale ChurchTools-Installation einbinden
+
+Wenn ChurchTools im Nachbarverzeichnis `../churchtools` liegt und das Custom Module
+mit dem Key `tasks` bereits registriert ist, kann der Build direkt verknüpft werden:
+
+```sh
+npm run build
+ln -s "$(pwd)/dist" ../churchtools/sites/default/custommodules/tasks
+```
+
+Danach ist die Extension unter `/ccm/tasks/` erreichbar. Der Symlink muss nur einmal
+angelegt werden; spätere Builds ersetzen den Inhalt von `dist`. Existiert am Ziel
+bereits ein Verzeichnis oder Symlink, muss dessen Herkunft vor dem Ersetzen geprüft
+werden.
+
 ## Prüfen und paketieren
 
 ```sh

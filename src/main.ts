@@ -1,6 +1,6 @@
 import { createApp, h } from 'vue';
 
-import { ApolloClient, InMemoryCache } from '@apollo/client/core';
+import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client/core';
 import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { ctStyleguide } from '@churchtools/styleguide';
 import '@churchtools/styleguide/style';
@@ -41,7 +41,7 @@ export { KEY };
 
 const pinia = createPinia();
 const cache = new InMemoryCache();
-const apolloClient = new ApolloClient({ cache, uri: 'https://api.fontawesome.com' });
+const apolloClient = new ApolloClient({ cache, link: new HttpLink({ uri: 'https://api.fontawesome.com' }) });
 const app = createApp({
     setup() {
         provideApolloClient(apolloClient);

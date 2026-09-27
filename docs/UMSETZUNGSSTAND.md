@@ -1,6 +1,6 @@
 # Umsetzungsstand
 
-Stand: 27.09.2026
+Stand: 28.09.2026
 
 Die erste Stabilisierung aus der Projektanalyse ist umgesetzt. Der Stand baut,
 wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
@@ -47,6 +47,11 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
   erzeugen jeweils genau einen PUT.
 - Ein separater Browser-Test mit zwei simulierten Projekten bestätigt die globale
   Aufgabenübersicht, schreibfreie Navigation und den richtigen Projekt-/Aufgabenlink.
+- Die gebaute Extension ist in ChurchTools `3.137.0-RC17` lokal als `tasks`
+  verknüpft. Ein isolierter End-to-End-Test gegen die echte CCM-API bestätigt
+  Projekt und Standardliste, Aufgabenanlage, Bearbeitung, Statuswechsel,
+  Aktivitätsverlauf sowie alle fünf Projektansichten. Das Testprojekt wurde danach
+  vollständig gelöscht.
 - `npm audit`: keine kritischen oder hohen Befunde mehr. Sechs mittlere Befunde
   bleiben in der veröffentlichten ChurchTools-Markdown-Kette (`showdown` /
   `vue-showdown`). Der von npm vorgeschlagene Fix wäre ein inkompatibles Downgrade
@@ -54,9 +59,9 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 
 ## Noch offen
 
-- Installation und Upgrade mit realem Bestandsdatenbestand in einer ChurchTools-
-  Testinstanz. Die lokale Simulation beweist keine Serverkompatibilität der
-  konkreten Zielversion.
+- Der lokale Neuinstallations- und CRUD-Test ist abgeschlossen. Noch ausstehend ist
+  ein Upgrade-Test mit einem repräsentativen Bestandsdatenbestand und einem
+  vorher/nachher dokumentierten Rollback.
 - Berechtigungsmodell für Projekte und CCM-Kategorien mit der Zielinstanz prüfen.
 - Konfliktschutz für gleichzeitige Bearbeitung hängt von ETag-/Versionsfunktionen
   der ChurchTools-API ab und ist noch nicht umgesetzt.
