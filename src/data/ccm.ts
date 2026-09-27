@@ -68,13 +68,15 @@ export function useCustomModuleDataValuesQuery<T extends object>(moduleId: Id, c
             throwOnError: false,
             queryKey: computed(() => ccmKeys.values(toValue(moduleId), toValue(categoryId))),
             enabled: () => validId(toValue(moduleId)) && validId(toValue(categoryId)),
-            queryFn: async () => {
-                const rows = await churchtoolsClient.get<Value[]>(valuePath(moduleId, categoryId));
-                return rows.map(({ value, ...metadata }) => decodeData<T & Omit<Value, 'value'>>(value, metadata));
-            },
+            queryFn: () => fetchCustomModuleDataValues<T>(requireId(moduleId), requireId(categoryId)),
         },
         queryClient,
     );
+}
+
+export async function fetchCustomModuleDataValues<T extends object>(moduleId: number, categoryId: number) {
+    const rows = await churchtoolsClient.get<Value[]>(valuePath(moduleId, categoryId));
+    return rows.map(({ value, ...metadata }) => decodeData<T & Omit<Value, 'value'>>(value, metadata));
 }
 
 export function useCustomModuleDataValuesMutations<T extends object>(moduleId: Id, categoryId: Id) {

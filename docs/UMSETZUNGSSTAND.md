@@ -31,15 +31,20 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Typecheck, Lint, Tests und Build in `npm run check` zusammengeführt; CI ergänzt.
 - Release-Skript erzeugt ein frisches ZIP, sodass gelöschte Assets nicht aus
   einem älteren Archiv übernommen werden.
+- Die Startseite zeigt offene, persönlich zugewiesene Aufgaben projektübergreifend
+  als „Überfällig“, „Heute“, „Demnächst“ oder „Ohne Termin“ und öffnet direkt den
+  passenden Projektdialog.
 
 ## Verifikation
 
-- `npm run check`: Typecheck, ESLint, 14 Vitest-Tests und Production-Build grün.
+- `npm run check`: Typecheck, ESLint, 15 Vitest-Tests und Production-Build grün.
 - Browser-Smoke-Test mit vollständig simulierten CCM-Daten: Übersicht, Board,
   Tags, Detail und Projekt-Dialog laden ohne Browserfehler.
 - Der Smoke-Test bestätigt: reine Navigation erzeugt keine Schreibanfrage,
   Abbrechen speichert nicht, Bearbeiten speichert den neuen Titel und Statuswechsel
   erzeugen jeweils genau einen PUT.
+- Ein separater Browser-Test mit zwei simulierten Projekten bestätigt die globale
+  Aufgabenübersicht, schreibfreie Navigation und den richtigen Projekt-/Aufgabenlink.
 - `npm audit`: keine kritischen oder hohen Befunde mehr. Sechs mittlere Befunde
   bleiben in der veröffentlichten ChurchTools-Markdown-Kette (`showdown` /
   `vue-showdown`). Der von npm vorgeschlagene Fix wäre ein inkompatibles Downgrade
@@ -60,6 +65,5 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
   Tailwind-Referenz mit. Die Extension enthält einen dokumentierten Build-Workaround.
 - Einige Styleguide-Inputs verbinden sichtbare Labels nicht mit dem nativen Input;
   das sollte upstream für bessere Accessibility korrigiert werden.
-- Produktfeatures aus der Analyse wie globale Aufgabenübersicht, Vorlagen,
-  Wiederholungen, Erinnerungen, Archiv und Mehrfachaktionen folgen nach der
-  Testinstanz-Abnahme.
+- Produktfeatures aus der Analyse wie Vorlagen, Wiederholungen, Erinnerungen,
+  Archiv und Mehrfachaktionen folgen nach der Testinstanz-Abnahme.

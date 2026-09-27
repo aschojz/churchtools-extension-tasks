@@ -33,7 +33,9 @@ const {
 
 const router = useRouter();
 const openTask = () => {
-    router.push({ ...router.currentRoute, params: { taskId: props.item.id } });
+    const currentRoute = router.currentRoute.value;
+    const name = currentRoute.params.projectId ? currentRoute.name! : 'my-tasks';
+    router.push({ name, params: { projectId: props.projectId, taskId: props.item.id } });
 };
 
 const showLastRow = computed(() => dueDate.value || comments.value.length || props.item.tags?.length || props.item.url);

@@ -1,7 +1,7 @@
 # ChurchTools Extension Tasks
 
-Projektbezogene Aufgabenverwaltung für ChurchTools: Listen und Boards, Tags,
-Verantwortliche, Unteraufgaben, Fälligkeiten und Aktivitäten.
+Aufgabenverwaltung für ChurchTools: projektübergreifende persönliche Übersicht,
+Listen und Boards, Tags, Verantwortliche, Unteraufgaben, Fälligkeiten und Aktivitäten.
 
 ## Lokal entwickeln
 
@@ -41,6 +41,8 @@ müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 - `src/data/queryClient.ts` ist der gemeinsame Client für Extension-Abfragen.
 - `src/domain/tasks.ts` enthält reine Funktionen für Entwürfe, Hierarchie, Termine
   und Sortierung; die Regressionstests liegen unter `tests/`.
+- Die Startseite bündelt offene, persönlich zugewiesene Aufgaben aus allen Projekten
+  nach „Überfällig“, „Heute“, „Demnächst“ und „Ohne Termin“.
 - Ansichten schreiben keine Daten beim Mounten oder Refetch. Drag-and-drop speichert
   ausschließlich nach einem tatsächlichen Verschiebeereignis in einer echten Liste.
 - Standardlisten werden beim expliziten Anlegen eines Projekts erzeugt. Für ältere

@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { Card, EmptyState, LoadingMessage, PageHeader } from '@churchtools/styleguide';
-import { CtColor } from '@churchtools/utils';
+import { Card, EmptyState, LoadingMessage, PageHeader, Tag } from '@churchtools/styleguide';
+import { CtColor, useCurrentUser } from '@churchtools/utils';
+import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
+import TaskItem from '../components/TaskItem.vue';
+import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProjectTasks';
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
+import { dueDateBucket, type DueDateBucket } from '../domain/tasks';
 import { createOrEditProject } from '../project/projectHelper';
 import { ICONS, txx } from '../utils/utils';
 
@@ -11,6 +15,29 @@ defineEmits<{ (event: 'edit-project', project: Project): void }>();
 const { moduleId } = usePlugin();
 const { data, isLoading, isError, refetch } = useCustomModuleDataCategoriesQuery<Project>(moduleId);
 const projects = computed(() => (data.value ?? []).filter(cat => cat.shorty.startsWith('project')) as Project[]);
+const currentUser = useCurrentUser();
+const { tasks: allTasks, isLoading: tasksLoading, isError: tasksError, refetch: refetchTasks } = useAllProjectTasks();
+const myTasks = computed(() =>
+    sortBy(
+        allTasks.value.filter(({ task }) => !task.fullfilled && task.assignedTo?.includes(currentUser.id)),
+        item => item.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER,
+    ),
+);
+const sections: Array<{ id: DueDateBucket; title: string; color: CtColor }> = [
+    { id: 'overdue', title: 'Überfällig', color: CtColor.RED },
+    { id: 'today', title: 'Heute', color: CtColor.YELLOW },
+    { id: 'upcoming', title: 'Demnächst', color: CtColor.BLUE },
+    { id: 'none', title: 'Ohne Termin', color: CtColor.BASIC },
+];
+const tasksBySection = computed(
+    () =>
+        Object.fromEntries(
+            sections.map(section => [
+                section.id,
+                myTasks.value.filter(item => dueDateBucket(item.dueDate) === section.id),
+            ]),
+        ) as Record<DueDateBucket, ProjectTask[]>,
+);
 </script>
 <template>
     <LoadingMessage v-if="isLoading" />
@@ -28,7 +55,37 @@ const projects = computed(() => (data.value ?? []).filter(cat => cat.shorty.star
         :icon="ICONS.MAIN"
         :title="txx('Noch keine Projekte')"
     />
-    <div>
+    <div v-else class="w-full">
+        <PageHeader
+            class="pt-page-header-full-width mb-page-header-full-width mx-4 lg:mx-6"
+            icon="fas fa-user-check"
+            :title="txx('Meine Aufgaben')"
+        />
+        <LoadingMessage v-if="tasksLoading" />
+        <p v-else-if="tasksError" class="mx-4 mb-6 lg:mx-6" role="alert">
+            Aufgaben konnten nicht geladen werden. <button @click="refetchTasks()">Erneut versuchen</button>
+        </p>
+        <div v-else-if="myTasks.length" class="task-sections gap-4 px-4 lg:px-6">
+            <section v-for="section in sections" :key="section.id" :aria-labelledby="section.id" class="min-w-0">
+                <div class="mb-2 flex items-center gap-2">
+                    <h2 :id="section.id" class="text-lg font-bold">{{ section.title }}</h2>
+                    <Tag :color="section.color" :label="String(tasksBySection[section.id].length)" size="0" />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <div v-for="item in tasksBySection[section.id]" :key="`${item.project.id}-${item.task.id}`">
+                        <RouterLink
+                            class="text-sec mb-1 block text-xs"
+                            :to="{ name: 'my-tasks', params: { projectId: item.project.id } }"
+                        >
+                            <i class="mr-1" :class="item.project.icon"></i>{{ item.project.name }}
+                        </RouterLink>
+                        <TaskItem :item="item.task" :project-id="item.project.id" />
+                    </div>
+                </div>
+            </section>
+        </div>
+        <EmptyState v-else icon="fas fa-check-circle" :title="txx('Keine offenen Aufgaben für dich')" />
+
         <PageHeader
             class="pt-page-header-full-width mb-page-header-full-width mx-4 lg:mx-6"
             :icon="ICONS.MAIN"
@@ -67,5 +124,9 @@ const projects = computed(() => (data.value ?? []).filter(cat => cat.shorty.star
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     grid-template-rows: auto;
+}
+.task-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 </style>

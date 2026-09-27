@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { descendantIds, reorderTasks, taskDiff, taskDraft, taskDueDate, taskProgress } from '../src/domain/tasks';
+import {
+    descendantIds,
+    dueDateBucket,
+    reorderTasks,
+    taskDiff,
+    taskDraft,
+    taskDueDate,
+    taskProgress,
+} from '../src/domain/tasks';
 
 const task = (id: number, overrides: Partial<TransformedTask> = {}): TransformedTask => ({
     id,
@@ -69,5 +77,12 @@ describe('task integrity', () => {
         ]);
         expect(a.list).toBe(10);
         expect(b.sortKey).toBe(20000);
+    });
+    it('groups due dates by local calendar day', () => {
+        const now = new Date(2026, 8, 27, 18, 30);
+        expect(dueDateBucket(new Date(2026, 8, 26, 23, 59), now)).toBe('overdue');
+        expect(dueDateBucket(new Date(2026, 8, 27, 0, 0), now)).toBe('today');
+        expect(dueDateBucket(new Date(2026, 8, 28, 0, 0), now)).toBe('upcoming');
+        expect(dueDateBucket(undefined, now)).toBe('none');
     });
 });

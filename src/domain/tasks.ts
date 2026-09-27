@@ -73,3 +73,14 @@ export function descendantIds(
         task.id,
     ];
 }
+
+export type DueDateBucket = 'overdue' | 'today' | 'upcoming' | 'none';
+
+export function dueDateBucket(dueDate: Date | undefined, now = new Date()): DueDateBucket {
+    if (!dueDate || !Number.isFinite(dueDate.getTime())) return 'none';
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const due = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()).getTime();
+    if (due < today) return 'overdue';
+    if (due === today) return 'today';
+    return 'upcoming';
+}
