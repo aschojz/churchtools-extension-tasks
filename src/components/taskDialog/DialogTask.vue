@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { DialogLarge } from '@churchtools/styleguide';
-import { CtColor, CtIcon } from '@churchtools/utils';
 import { computed, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
+import { CtColor, CtIcon } from '../../platform';
 import { useProject } from '../../project/useProject';
+import { DialogLarge } from '../../ui';
 import { txx } from '../../utils/utils';
 import TaskDisplay from './TaskDisplay.vue';
 import TaskEditor from './TaskEditor.vue';

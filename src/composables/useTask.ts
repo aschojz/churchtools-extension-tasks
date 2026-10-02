@@ -1,7 +1,7 @@
-import { CtColor, notNullish, transformPersonToDomainObject, useCurrentUser } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations } from '../data/ccm';
+import { CtColor, notNullish, personDisplay, useCurrentUser } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
 import { usePlugin } from './usePlugin';
 import { useTags } from './useTags';
@@ -30,9 +30,7 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
 
     const filter = computed(() => ({ ids: task.value?.assignedTo ?? [] }));
     const { data } = usePersonsQueryAllPages(filter, { enabled: () => !!filter.value.ids.length });
-    const personMap = computed(() =>
-        Object.fromEntries((data.value ?? []).map(p => [p.id, transformPersonToDomainObject(p)])),
-    );
+    const personMap = computed(() => Object.fromEntries((data.value ?? []).map(p => [p.id, personDisplay(p)])));
 
     const assignees = computed(() => (task.value?.assignedTo ?? [])?.map(id => personMap.value[id]).filter(notNullish));
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Button, DomainObject, Input, Tag } from '@churchtools/styleguide';
 import { computed, ref } from 'vue';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
+import { Button, DomainObject, Input, Tag } from '../../ui';
 import TaskItem from '../TaskItem.vue';
 import Activities from './Activities.vue';
 

@@ -1,7 +1,7 @@
 interface Project {
     name: string;
     description?: string;
-    color?: import('@churchtools/utils').CtColor;
+    color?: import('../src/platform').CtColor;
     icon?: FAIcon;
     id: number;
     shorty: string;
@@ -37,7 +37,7 @@ interface Task {
 interface Tag {
     type: 'tag';
     name: string;
-    color: import('@churchtools/utils').CtColor;
+    color: import('../src/platform').CtColor;
     sortKey: number;
 }
 interface ActivityEntry {

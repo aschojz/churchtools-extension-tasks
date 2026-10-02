@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Card, EmptyState, LoadingMessage, PageHeader, Tag } from '@churchtools/styleguide';
-import { CtColor, useCurrentUser } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import TaskItem from '../components/TaskItem.vue';
@@ -8,7 +6,9 @@ import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProje
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
 import { dueDateBucket, type DueDateBucket } from '../domain/tasks';
+import { colorKey, CtColor, useCurrentUser } from '../platform';
 import { createOrEditProject } from '../project/projectHelper';
+import { Card, EmptyState, LoadingMessage, Tag } from '../ui';
 import { ICONS, txx } from '../utils/utils';
 
 defineEmits<{ (event: 'edit-project', project: Project): void }>();
@@ -56,11 +56,15 @@ const tasksBySection = computed(
         :title="txx('Noch keine Projekte')"
     />
     <div v-else class="w-full">
-        <PageHeader
-            class="pt-page-header-full-width mb-page-header-full-width mx-4 lg:mx-6"
-            icon="fas fa-user-check"
-            :title="txx('Meine Aufgaben')"
-        />
+        <section class="overview-section">
+            <div class="section-heading">
+                <span><i class="fas fa-user-check"></i></span>
+                <div>
+                    <h1>{{ txx('Meine Aufgaben') }}</h1>
+                    <p>Alles, was als Nächstes deine Aufmerksamkeit braucht.</p>
+                </div>
+            </div>
+        </section>
         <LoadingMessage v-if="tasksLoading" />
         <p v-else-if="tasksError" class="mx-4 mb-6 lg:mx-6" role="alert">
             Aufgaben konnten nicht geladen werden. <button @click="refetchTasks()">Erneut versuchen</button>
@@ -86,11 +90,18 @@ const tasksBySection = computed(
         </div>
         <EmptyState v-else icon="fas fa-check-circle" :title="txx('Keine offenen Aufgaben für dich')" />
 
-        <PageHeader
-            class="pt-page-header-full-width mb-page-header-full-width mx-4 lg:mx-6"
-            :icon="ICONS.MAIN"
-            :title="txx('Projekte')"
-        />
+        <section class="overview-section projects-heading">
+            <div class="section-heading">
+                <span><i :class="ICONS.MAIN"></i></span>
+                <div>
+                    <h1>{{ txx('Projekte') }}</h1>
+                    <p>Organisiere Aufgaben in klaren Arbeitsbereichen.</p>
+                </div>
+            </div>
+            <button class="text-action" @click="createOrEditProject()">
+                <i class="fas fa-plus"></i> Projekt erstellen
+            </button>
+        </section>
         <div class="project-grid w-full gap-4 px-4 lg:px-6">
             <RouterLink
                 v-for="project in projects"
@@ -101,8 +112,8 @@ const tasksBySection = computed(
                 <Card class="hover:border-basic-300 h-full">
                     <div class="flex items-center gap-4">
                         <div
-                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-                            :style="`color: var(--color-${project.color}-bright); background: var(--color-${project.color}-b-pale)`"
+                            class="project-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                            :data-color="colorKey(project.color)"
                         >
                             <i :class="project.icon"></i>
                         </div>

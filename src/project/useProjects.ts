@@ -1,5 +1,3 @@
-import { deleteConfirm } from '@churchtools/styleguide';
-import { CtColor, t, useToasts } from '@churchtools/utils';
 import { computed } from 'vue';
 import { usePlugin } from '../composables/usePlugin';
 import {
@@ -7,11 +5,12 @@ import {
     useCustomModuleDataCategoryMutations,
     useCustomModuleDataValuesMutations,
 } from '../data/ccm';
+import { CtColor } from '../platform';
+import { confirmDelete, showToast } from '../ui/state';
 import { createProjectShorty, ICONS, txx } from '../utils/utils';
 
 export default function useProjects() {
     const { moduleId } = usePlugin();
-    const { successToast } = useToasts();
     const { data: categories, isLoading, isError, refetch } = useCustomModuleDataCategoriesQuery<Project>(moduleId);
     const { createDataCategory, updateDataCategory, deleteDataCategory } =
         useCustomModuleDataCategoryMutations<Project>(moduleId);
@@ -38,20 +37,18 @@ export default function useProjects() {
             isDefault: true,
             dataCategoryId: created.id,
         });
-        successToast(t('actions.create.success'));
+        showToast('Projekt wurde erstellt.');
     };
     const updateProject = async (project: Project) => {
         await updateDataCategory({ ...project, description: project.description ?? '' });
-        successToast(t('actions.save.success'));
+        showToast('Projekt wurde gespeichert.');
     };
 
     const deleteProject = async (id: number) => {
-        const confirmed = await deleteConfirm(txx('Das Projekt und alle seine Aufgaben werden gelöscht.'), {
-            rejectOnCancel: false,
-        });
-        if (confirmed === 'ok') {
+        const confirmed = await confirmDelete(txx('Das Projekt und alle seine Aufgaben werden gelöscht.'));
+        if (confirmed) {
             const result = await deleteDataCategory(id);
-            successToast(t('actions.delete.success'));
+            showToast('Projekt wurde gelöscht.');
             void result;
             return true;
         }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Button, Input } from '@churchtools/styleguide';
-import { CtColor } from '@churchtools/utils';
 import { onMounted, ref, toRef } from 'vue';
 import { useTasks } from '../composables/useTasks';
 import { taskDraft } from '../domain/tasks';
+import { CtColor } from '../platform';
+import { Button, Input } from '../ui';
 
 const props = defineProps<{
     list: TransformedList;

@@ -1,8 +1,8 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
-import { type Person } from '@churchtools/utils';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { queryClient } from '../data/queryClient';
+import { type Person } from '../platform';
 
 export function usePersonsQueryAllPages(
     filter: MaybeRefOrGetter<{ ids: number[] }>,

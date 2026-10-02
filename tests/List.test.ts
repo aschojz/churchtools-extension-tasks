@@ -4,15 +4,6 @@ import { defineComponent, nextTick } from 'vue';
 import List from '../src/components/List.vue';
 
 const mocks = vi.hoisted(() => ({ updateTask: vi.fn(), updateList: vi.fn(), deleteList: vi.fn() }));
-vi.mock('@churchtools/styleguide', () => ({
-    Button: { template: '<button><slot /></button>' },
-    DropdownMenu: { template: '<div />' },
-    Tag: { template: '<span />' },
-}));
-vi.mock('@churchtools/utils', () => ({
-    CtColor: { GREEN: 'green', BASIC: 'basic' },
-    CtIcon: { EDIT: 'fas fa-pen', DELETE: 'fas fa-trash-alt' },
-}));
 vi.mock('../src/composables/storeTasks', () => ({ taskStore: () => ({ search: '', sortBy: 'dueDate' }) }));
 vi.mock('../src/composables/useLists', () => ({ useLists: () => mocks }));
 vi.mock('../src/composables/useTasks', () => ({ useTasks: () => mocks }));

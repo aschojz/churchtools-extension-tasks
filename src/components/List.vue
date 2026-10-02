@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { type DropdownSection, Button, DropdownMenu, Tag } from '@churchtools/styleguide';
-import { CtColor, CtIcon } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
@@ -8,6 +6,8 @@ import { taskStore } from '../composables/storeTasks';
 import { useLists } from '../composables/useLists';
 import { useTasks } from '../composables/useTasks.ts';
 import { reorderTasks } from '../domain/tasks';
+import { CtColor, CtIcon } from '../platform';
+import { type DropdownSection, Button, DropdownMenu, Tag } from '../ui';
 import DialogList from './DialogList.vue';
 import NewTask from './NewTask.vue';
 import Task from './TaskItem.vue';

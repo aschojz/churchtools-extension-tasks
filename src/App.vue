@@ -1,81 +1,55 @@
 <script setup lang="ts">
-import { Grid, GridHeader, InfoMessageContainer, LoadingMessage } from '@churchtools/styleguide';
-import { CtColor, useBodyScrollbarWidth, useToasts } from '@churchtools/utils';
 import { computed } from 'vue';
-import type { ComponentProps } from 'vue-component-type-helpers';
 import { useRoute } from 'vue-router';
 import { usePlugin } from './composables/usePlugin';
-import { createOrEditProject } from './project/projectHelper';
-import { ICONS, txx } from './utils/utils';
-
-useBodyScrollbarWidth();
+import DialogProject from './project/DialogProject.vue';
+import { activeProjectDialog, closeProjectDialog, createOrEditProject } from './project/projectHelper';
+import Button from './ui/Button.vue';
+import LoadingMessage from './ui/Loading.vue';
+import { removeToast, toasts } from './ui/state';
 
 const { isLoading, isError, refetch } = usePlugin();
 
 const isSmallScreen = computed(() => window.innerWidth < 768);
 const route = useRoute();
 
-const actions = computed(() => {
-    const actions: NonNullable<ComponentProps<typeof GridHeader>['actions']> = [
-        [
-            {
-                color: CtColor.VIOLET,
-                icon: 'fas fa-bug',
-                href: 'https://github.com/aschojz/churchtools-extension-tasks/issues',
-                label: isSmallScreen.value ? '' : txx('Fehler melden'),
-                outlined: true,
-                size: 'S',
-                target: '_blank',
-            },
-        ],
-    ];
-
-    if (route.name === 'overview') {
-        actions.push([
-            {
-                color: CtColor.GREEN,
-                icon: 'fas fa-plus',
-                label: isSmallScreen.value ? '' : txx('Neues Projekt'),
-                size: 'S',
-                onClick: () => createOrEditProject(),
-            },
-        ]);
-    }
-    return actions;
-});
-
-const { toasts, removeToast } = useToasts();
-const removeInfoMessage = (infoMessage: (typeof toasts.value)[0]) => removeToast(infoMessage.id);
+const showCreate = computed(() => route.name === 'overview');
 </script>
 <template>
-    <div id="tasks" class="flex grow flex-col" style="--menu-height: 0px">
+    <div id="tasks" class="tasks-app">
+        <header class="app-header">
+            <RouterLink class="brand" :to="{ name: 'overview' }"
+                ><span><i class="fas fa-check"></i></span><strong>Aufgaben</strong></RouterLink
+            >
+            <div class="app-header-actions">
+                <Button
+                    href="https://github.com/aschojz/churchtools-extension-tasks/issues"
+                    icon="fas fa-bug"
+                    :label="isSmallScreen ? '' : 'Feedback'"
+                    outlined
+                    size="S"
+                    target="_blank"
+                />
+                <Button
+                    v-if="showCreate"
+                    icon="fas fa-plus"
+                    label="Neues Projekt"
+                    size="S"
+                    @click="createOrEditProject()"
+                />
+            </div>
+        </header>
         <LoadingMessage v-if="isLoading" />
-        <div v-else-if="isError" class="p-6" role="alert">
+        <div v-else-if="isError" class="ui-error" role="alert">
             Das Aufgabenmodul konnte nicht geladen werden. <button @click="refetch()">Erneut versuchen</button>
         </div>
-        <Grid v-else min-height="56px" storage-key="ext-tasks" style="--sidebar-left: 0px">
-            <template #header>
-                <GridHeader :actions="actions" :icon="ICONS.MAIN" :title="txx('Aufgabenverwaltung')" />
-            </template>
-            <div class="col-span-2 flex grow">
-                <RouterView />
-            </div>
-        </Grid>
+        <main v-else class="app-content"><RouterView /></main>
     </div>
-    <div id="modal-container"></div>
-    <InfoMessageContainer :messages="toasts" @close-info-message="removeInfoMessage" />
+    <DialogProject v-if="activeProjectDialog.open" :project="activeProjectDialog.project" @close="closeProjectDialog" />
+    <div class="toast-stack">
+        <button v-for="toast in toasts" :key="toast.id" :class="toast.tone" @click="removeToast(toast.id)">
+            <i :class="toast.tone === 'success' ? 'fas fa-check-circle' : 'fas fa-circle-exclamation'"></i
+            >{{ toast.message }}
+        </button>
+    </div>
 </template>
-<style>
-@layer oldcss {
-    #tasks {
-        --color-link: var(--color-accent-bright);
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: none;
-        }
-    }
-}
-</style>

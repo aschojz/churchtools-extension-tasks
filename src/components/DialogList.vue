@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { DialogLarge, Input } from '@churchtools/styleguide';
 import { computed, ref, toRef } from 'vue';
 import { useLists } from '../composables/useLists';
+import { DialogLarge, Input } from '../ui';
 
 const props = withDefaults(
     defineProps<{

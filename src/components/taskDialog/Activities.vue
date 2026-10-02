@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Button, DomainObject, Textarea } from '@churchtools/styleguide';
-import { dateToStringLocale, notNullish, transformPersonToDomainObject, useCurrentUser } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
+import { formatDateTime, notNullish, personDisplay, useCurrentUser } from '../../platform';
+import { Button, DomainObject, Textarea } from '../../ui';
 import { txx } from '../../utils/utils';
 
 const props = withDefaults(
@@ -20,14 +20,12 @@ const filter = computed(() => ({
     ids: Array.from(new Set(props.activities.map(a => (a.personId > 0 ? a.personId : null)))).filter(notNullish),
 }));
 const { data } = usePersonsQueryAllPages(filter, { enabled: () => !!filter.value.ids.length });
-const personMap = computed(() =>
-    Object.fromEntries((data.value ?? []).map(p => [p.id, transformPersonToDomainObject(p)])),
-);
+const personMap = computed(() => Object.fromEntries((data.value ?? []).map(p => [p.id, personDisplay(p)])));
 
 const transformedActivities = computed(() => {
     const array = props.activities.map(e => {
         const person = personMap.value[e.personId];
-        return { ...e, dateDisplay: dateToStringLocale(new Date(e.date), true), person };
+        return { ...e, dateDisplay: formatDateTime(new Date(e.date)), person };
     });
     return sortBy(array, 'date').reverse();
 });

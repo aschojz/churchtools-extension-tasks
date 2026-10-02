@@ -1,20 +1,16 @@
 <script setup lang="ts">
-import { DialogSmall, Input, SelectDropdown } from '@churchtools/styleguide';
-import { CtColor, useColors } from '@churchtools/utils';
 import { computed, ref, toRef } from 'vue';
 import { useTags } from '../composables/useTags';
+import { colorOptions, CtColor } from '../platform';
+import { DialogSmall, Input, SelectDropdown } from '../ui';
 
 const props = defineProps<{
     projectId: number;
     tag?: TransformedTag;
 }>();
-const { ctColors } = useColors();
-
 const emit = defineEmits<{ (event: 'close'): void }>();
 
-const colors = computed(() =>
-    ctColors.map(c => ({ id: c.key, nameTranslated: c.key, color: c.key, icon: 'fas fa-circle' as const })),
-);
+const colors = computed(() => colorOptions);
 const { createTag, updateTag } = useTags(toRef(() => props.projectId));
 const draft = ref<Tag>({
     type: 'tag',

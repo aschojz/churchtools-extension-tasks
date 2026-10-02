@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Button, Input } from '@churchtools/styleguide';
-import { CtColor, getFirstOrSelf } from '@churchtools/utils';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
 import DialogTask from '../../components/taskDialog/DialogTask.vue';
 import { taskStore } from '../../composables/storeTasks';
+import { CtColor, firstOrSelf } from '../../platform';
+import { Button, Input } from '../../ui';
 
 withDefaults(
     defineProps<{
@@ -24,7 +24,7 @@ const store = taskStore();
 const listIsOpen = ref(false);
 
 const route = useRoute();
-const taskIsOpen = computed(() => !!getFirstOrSelf(route.params.taskId));
+const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
 </script>
 <template>
     <div
@@ -74,7 +74,7 @@ const taskIsOpen = computed(() => !!getFirstOrSelf(route.params.taskId));
                 <slot></slot>
             </div>
         </div>
-        <DialogTask v-if="taskIsOpen" :project-id="projectId" :task-id="getFirstOrSelf(route.params.taskId)" />
+        <DialogTask v-if="taskIsOpen" :project-id="projectId" :task-id="firstOrSelf(route.params.taskId)!" />
         <DialogList v-if="listIsOpen" :project-id="projectId" @close="listIsOpen = false" />
     </div>
 </template>

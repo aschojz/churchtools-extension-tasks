@@ -8,12 +8,14 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 ## Erledigt
 
 - Dependencies aktualisiert und per Lockfile reproduzierbar gemacht.
-- ChurchTools Styleguide und Utils auf eine zusammenpassende veröffentlichte
-  Kombination fixiert; die zuvor veränderlichen `file:`-Links entfernt.
+- ChurchTools Styleguide und Utils vollständig entfernt. Eine lokale UI-Bibliothek
+  unter `src/ui/` deckt Dialoge, Felder, Menüs, Tags, Karten und Statusanzeigen ab;
+  `src/platform.ts` kapselt die wenigen benötigten Plattformfunktionen.
+- Apollo, GraphQL und die externe Icon-Suche entfernt; Projekte verwenden eine
+  kuratierte lokale Font-Awesome-Auswahl.
 - CCM-Zugriffe, JSON-Serialisierung und Cache-Invalidierung in
   `src/data/ccm.ts` gekapselt.
-- Einen kompatiblen QueryClient für die Extension eingeführt. Der interne Client
-  des älteren Utils-Bundles wird nicht mit aktuellen TanStack-Observern vermischt.
+- Einen eigenen QueryClient für die Extension eingeführt.
 - Produktionsbuild repariert; Router- und Asset-Basis verwenden beide
   `VITE_KEY`.
 - Unbeabsichtigte Schreibzugriffe beim Laden, Refetch und Anzeigen virtueller
@@ -58,10 +60,9 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Ein weiterer echter Browser-/CCM-Test bestätigt die Projektanlage ohne
   `crypto.randomUUID`, den erzeugten Kategorie-Schlüssel und die Standardliste;
   auch dieses Testprojekt wurde danach vollständig gelöscht.
-- `npm audit`: keine kritischen oder hohen Befunde mehr. Sechs mittlere Befunde
-  bleiben in der veröffentlichten ChurchTools-Markdown-Kette (`showdown` /
-  `vue-showdown`). Der von npm vorgeschlagene Fix wäre ein inkompatibles Downgrade
-  von Utils auf 0.5.1 und wurde daher nicht automatisch angewendet.
+- `npm audit`: keine bekannten Befunde im aktuellen Abhängigkeitsbaum.
+- Browserprüfung der neuen lokalen UI im echten eingebetteten ChurchTools-Rahmen:
+  Übersicht, Projektansicht, Aufgaben- und Projekt-Dialog sind funktionsfähig.
 
 ## Noch offen
 
@@ -74,9 +75,7 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Unteraufgaben werden derzeit in zwei aufeinanderfolgenden Requests angelegt und
   verknüpft. Bei einem Teilausfall bleibt die neue Aufgabe als normale Aufgabe
   erhalten und ein Fehler wird angezeigt; eine serverseitige Transaktion fehlt.
-- Der veröffentlichte Styleguide bringt ein großes Bundle und eine fehlerhafte
-  Tailwind-Referenz mit. Die Extension enthält einen dokumentierten Build-Workaround.
-- Einige Styleguide-Inputs verbinden sichtbare Labels nicht mit dem nativen Input;
-  das sollte upstream für bessere Accessibility korrigiert werden.
+- Tastaturnavigation, Fokusführung und Screenreader-Beschriftungen der lokalen
+  Komponenten sollten in einem eigenen Accessibility-Durchlauf vertieft werden.
 - Produktfeatures aus der Analyse wie Vorlagen, Wiederholungen, Erinnerungen,
   Archiv und Mehrfachaktionen folgen nach der Testinstanz-Abnahme.

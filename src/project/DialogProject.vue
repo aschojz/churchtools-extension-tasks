@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { DialogLarge, Input, SelectDropdown, Textarea } from '@churchtools/styleguide';
-import { useColors } from '@churchtools/utils';
-import { useLazyQuery } from '@vue/apollo-composable';
-import gql from 'graphql-tag';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
+import { colorOptions } from '../platform';
+import { DialogLarge, Input, SelectDropdown, Textarea } from '../ui';
 import { txx } from '../utils/utils';
 import useProjects from './useProjects';
 
@@ -12,10 +10,17 @@ const emit = defineEmits<{ (event: 'close'): void }>();
 
 const proj = ref({ ...(props.project ?? ({} as Project)) });
 
-const { ctColors } = useColors();
-const colors = computed(() =>
-    ctColors.map(c => ({ id: c.key, nameTranslated: c.key, color: c.key, icon: 'fas fa-circle' as const })),
-);
+const icons = [
+    ['fas fa-folder', 'Ordner'],
+    ['fas fa-list-check', 'Aufgaben'],
+    ['fas fa-users', 'Team'],
+    ['fas fa-calendar', 'Kalender'],
+    ['fas fa-church', 'Gemeinde'],
+    ['fas fa-heart', 'Herz'],
+    ['fas fa-lightbulb', 'Idee'],
+    ['fas fa-music', 'Musik'],
+    ['fas fa-house', 'Haus'],
+].map(([id, nameTranslated]) => ({ id, nameTranslated }));
 
 const { createProject, updateProject } = useProjects();
 const saveError = ref('');
@@ -32,34 +37,6 @@ const onSave = async (close: () => void) => {
     } finally {
         saving.value = false;
     }
-};
-
-const CHARACTERS_QUERY = gql`
-    query getIcons($query: String!) {
-        search(version: "7.x", query: $query) {
-            id
-            label
-            familyStylesByLicense {
-                free {
-                    family
-                    style
-                }
-            }
-        }
-    }
-`;
-type FASearchResult = {
-    id: string;
-    label: string;
-    familyStylesByLicense: { free: { family: string; style: string }[] };
-};
-const { load, variables, result } = useLazyQuery<{
-    search: FASearchResult[];
-}>(CHARACTERS_QUERY, { query: '' });
-const onSearchForIcon = (query: string) => {
-    variables.value = { query };
-    load();
-    return Promise.resolve([]);
 };
 </script>
 <template>
@@ -78,23 +55,8 @@ const onSearchForIcon = (query: string) => {
                 :max-length="300"
                 @input="proj.description = $event"
             />
-            <SelectDropdown
-                v-model="proj.icon"
-                emit-id
-                label="Icon"
-                note="Nach englischen Bezeichnungen suchen"
-                :options="
-                    (result?.search ?? [])
-                        .filter(s => s.familyStylesByLicense.free.filter(i => i.style === 'solid').length)
-                        .map(s => ({
-                            id: `fas fa-${s.id}` as const,
-                            nameTranslated: s.label,
-                            icon: `fas fa-${s.id}` as const,
-                        }))
-                "
-                :search-function="onSearchForIcon"
-            />
-            <SelectDropdown v-model="proj.color" emit-id label="Farbe" :options="colors" />
+            <SelectDropdown v-model="proj.icon" emit-id label="Icon" :options="icons" />
+            <SelectDropdown v-model="proj.color" emit-id label="Farbe" :options="colorOptions" />
         </div>
     </DialogLarge>
 </template>

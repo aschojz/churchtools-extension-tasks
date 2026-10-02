@@ -40,16 +40,10 @@
         "vue-tsc": "3.3.11"
     },
     "dependencies": {
-        "@apollo/client": "3.14.0",
         "@churchtools/churchtools-client": "1.7.3",
-        "@churchtools/styleguide": "0.66.0",
-        "@churchtools/utils": "0.10.0",
         "@fortawesome/fontawesome-free": "7.3.1",
         "@tanstack/vue-query": "5.104.0",
-        "@vue/apollo-composable": "^4.2.2",
         "fuse.js": "7.5.0",
-        "graphql": "16.14.2",
-        "graphql-tag": "2.12.7",
         "lodash-es": "4.18.1",
         "pinia": "3.0.4",
         "vue": "3.5.43",
@@ -58,8 +52,5 @@
     },
     "engines": {
         "node": "^22.12.0 || ^24.0.0"
-    },
-    "overrides": {
-        "@churchtools/utils": "$@churchtools/utils"
     }
 }

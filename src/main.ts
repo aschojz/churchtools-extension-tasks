@@ -1,15 +1,10 @@
-import { createApp, h } from 'vue';
-
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client/core';
 import { churchtoolsClient } from '@churchtools/churchtools-client';
-import { ctStyleguide } from '@churchtools/styleguide';
-import '@churchtools/styleguide/style';
-import { ctUtils } from '@churchtools/utils';
 import { VueQueryPlugin } from '@tanstack/vue-query';
-import { provideApolloClient } from '@vue/apollo-composable';
 import { createPinia } from 'pinia';
+import { createApp } from 'vue';
 import App from './App.vue';
 import { queryClient } from './data/queryClient';
+import { loadCurrentUser } from './platform';
 import { router } from './router';
 import './tailwind.css';
 
@@ -40,18 +35,9 @@ const KEY = import.meta.env.VITE_KEY;
 export { KEY };
 
 const pinia = createPinia();
-const cache = new InMemoryCache();
-const apolloClient = new ApolloClient({ cache, link: new HttpLink({ uri: 'https://api.fontawesome.com' }) });
-const app = createApp({
-    setup() {
-        provideApolloClient(apolloClient);
-    },
-    render: () => h(App),
-});
-const translate = window.t ?? ((key = '') => key);
+await loadCurrentUser();
+const app = createApp(App);
 app.use(pinia);
-app.use(ctUtils, { baseUrl, pinia, t: translate });
-app.use(ctStyleguide, { baseUrl, t: translate });
 app.use(router);
 app.use(VueQueryPlugin, { queryClient });
 app.mount('#app');

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Button, deleteConfirm, DropdownMenu, Tag, type DropdownSection } from '@churchtools/styleguide';
-import { CtColor, CtIcon } from '@churchtools/utils';
 import { computed, ref } from 'vue';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
+import { CtColor, CtIcon } from '../../platform';
+import { Button, DropdownMenu, Tag, type DropdownSection } from '../../ui';
+import { confirmDelete } from '../../ui/state';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
@@ -17,10 +18,8 @@ const tagDialog = ref<TransformedTag | true>();
 const actionError = ref('');
 
 const deleteSelectedTag = async (tag: TransformedTag) => {
-    const confirmed = await deleteConfirm(`Der Tag „${tag.name}“ wird von allen Aufgaben entfernt.`, {
-        rejectOnCancel: false,
-    });
-    if (confirmed !== 'ok') return;
+    const confirmed = await confirmDelete(`Der Tag „${tag.name}“ wird von allen Aufgaben entfernt.`);
+    if (!confirmed) return;
     actionError.value = '';
     try {
         for (const task of tasks.value.filter(task => task.tags?.includes(tag.id))) {

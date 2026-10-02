@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { churchtoolsClient } from '@churchtools/churchtools-client';
-import { Button, Input, InputDate, SelectDropdown, Textarea } from '@churchtools/styleguide';
-import { type DomainObjectPerson, transformPersonToDomainObject } from '@churchtools/utils';
 import { computed, ref, watch } from 'vue';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
 import { taskDraft } from '../../domain/tasks';
+import { type PersonDisplay, personDisplay } from '../../platform';
+import { Button, Input, InputDate, SelectDropdown, Textarea } from '../../ui';
 import DialogTag from '../DialogTag.vue';
 
 const props = defineProps<{ taskId?: number; projectId: number }>();
@@ -47,13 +47,13 @@ const filter = computed(() => ({ ids: internTask.value.assignedTo ?? [] }));
 const { data } = usePersonsQueryAllPages(filter);
 const assignees = computed(() =>
     (data.value ?? []).map(p => ({
-        domainObject: transformPersonToDomainObject(p),
+        domainObject: personDisplay(p),
         id: p.id,
         nameTranslated: `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim(),
     })),
 );
 const onSearchForPerson = async (query: string) => {
-    const result = await churchtoolsClient.get<DomainObjectPerson[]>(
+    const result = await churchtoolsClient.get<PersonDisplay[]>(
         `/search?query=${encodeURIComponent(query)}&domainTypes[]=person`,
     );
     return result.map(r => ({ ...r, id: Number(r.domainIdentifier), nameTranslated: r.title }));

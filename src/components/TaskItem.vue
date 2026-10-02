@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Button, deleteConfirm, DomainObject, DropdownMenu, Tag, type DropdownSection } from '@churchtools/styleguide';
-import { CtColor, CtIcon } from '@churchtools/utils';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTask } from '../composables/useTask.ts';
 import { useTasks } from '../composables/useTasks.ts';
 import { descendantIds } from '../domain/tasks';
+import { CtColor, CtIcon } from '../platform';
+import { Button, DomainObject, DropdownMenu, Tag, type DropdownSection } from '../ui';
+import { confirmDelete } from '../ui/state';
 import ProgressRing from './ProgressRing.vue';
 
 const props = defineProps<{
@@ -83,10 +84,7 @@ const runAction = async (action: () => Promise<unknown>) => {
     }
 };
 const deleteRecursive = async (task: TransformedTask) => {
-    if (
-        (await deleteConfirm('Die Aufgabe und ihre Unteraufgaben werden gelöscht.', { rejectOnCancel: false })) !== 'ok'
-    )
-        return;
+    if (!(await confirmDelete('Die Aufgabe und ihre Unteraufgaben werden gelöscht.'))) return;
     const ids = descendantIds(task, tasksMap.value);
     const removed = new Set(ids);
     // Detach only the subtree root. On a partial failure, remaining children stay accessible in their lists.

@@ -1,8 +1,8 @@
-import { useCurrentUser } from '@churchtools/utils';
 import Fuse from 'fuse.js';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
 import { taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
+import { useCurrentUser } from '../platform';
 import { taskStore } from './storeTasks';
 import { useLists } from './useLists';
 import { usePlugin } from './usePlugin';

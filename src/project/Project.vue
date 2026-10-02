@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Button, DropdownMenu, LoadingMessage, PageHeader, Subgrid } from '@churchtools/styleguide';
-import { CtColor, CtIcon } from '@churchtools/utils';
 import { computed, toRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { CtColor, CtIcon, colorKey } from '../platform';
+import { Button, DropdownMenu, LoadingMessage } from '../ui';
 import { ICONS } from '../utils/utils';
 import { createOrEditProject } from './projectHelper';
 import { useProject } from './useProject';
@@ -38,40 +38,37 @@ const projectContextMenu = computed(() => {
 });
 </script>
 <template>
-    <Subgrid class="grow">
+    <div class="project-page">
         <LoadingMessage v-if="isLoading" />
         <p v-else-if="isError" role="alert">
             Projekt konnte nicht geladen werden. <button @click="refetch()">Erneut versuchen</button>
         </p>
         <p v-else-if="!project" role="alert">Projekt nicht gefunden oder keine Berechtigung.</p>
         <div v-else class="flex grow flex-col">
-            <PageHeader
-                :actions="[
-                    {
-                        icon: CtIcon.ADD,
-                        label: 'Aufgabe erstellen',
-                        color: CtColor.GREEN,
-                        to: { name: route.name!, params: { ...route.params, taskId: 'new' } },
-                    },
-                ]"
-                :breadcrumbs="[
-                    { title: 'Projekte', to: { name: 'overview' } },
-                    { title: project.name ?? '...', to: { name: 'project', params: { projectId: project.id } } },
-                ]"
-                class="pt-page-header-full-width mb-page-header-full-width mx-4 lg:mx-6"
-                :color="project.color ?? CtColor.BASIC"
-                :description="project.description"
-                :icon="project.icon ?? ICONS.DEFAULT_PROJECT"
-                :title="project.name"
-            >
-                <template #title-after>
+            <header class="project-header">
+                <RouterLink class="breadcrumb" :to="{ name: 'overview' }"
+                    ><i class="fas fa-arrow-left"></i> Projekte</RouterLink
+                >
+                <div class="project-title-row">
+                    <span class="project-icon" :data-color="colorKey(project.color)"
+                        ><i :class="project.icon ?? ICONS.DEFAULT_PROJECT"></i
+                    ></span>
+                    <div>
+                        <h1>{{ project.name }}</h1>
+                        <p v-if="project.description">{{ project.description }}</p>
+                    </div>
                     <DropdownMenu :menu-items="projectContextMenu">
                         <Button :color="CtColor.BASIC" icon="fas fa-ellipsis" size="S" text />
                     </DropdownMenu>
-                </template>
-            </PageHeader>
+                    <Button
+                        :icon="CtIcon.ADD"
+                        label="Aufgabe"
+                        :to="{ name: route.name!, params: { ...route.params, taskId: 'new' } }"
+                    />
+                </div>
+            </header>
 
             <RouterView />
         </div>
-    </Subgrid>
+    </div>
 </template>

@@ -11,11 +11,9 @@ export default defineConfig(({ mode }) => {
         base: `/ccm/${key}/`,
         plugins: [vue(), tailwindcss()],
         resolve: {
-            dedupe: ['vue', 'pinia', '@tanstack/vue-query', '@churchtools/utils'],
+            dedupe: ['vue', 'pinia', '@tanstack/vue-query'],
             alias: {
                 '@': fileURLToPath(new URL('./src', import.meta.url)),
-                // Styleguide 0.66.0 references this source file but does not publish it.
-                '@churchtools/styleguide/tailwind': fileURLToPath(new URL('./src/tailwind.css', import.meta.url)),
             },
         },
     };

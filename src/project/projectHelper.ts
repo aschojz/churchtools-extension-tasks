@@ -1,20 +1,11 @@
-import { mountDialog } from '@churchtools/styleguide';
-import { createApp, h } from 'vue';
-import DialogProject from './DialogProject.vue';
+import { reactive } from 'vue';
 
+export const activeProjectDialog = reactive<{ open: boolean; project?: Project }>({ open: false });
 export function createOrEditProject(project: Project | undefined = undefined) {
-    return new Promise<void>(resolve => {
-        const app = createApp({
-            render: function () {
-                return h(DialogProject, {
-                    project,
-                    onClose: () => {
-                        resolve(undefined);
-                        app.unmount();
-                    },
-                });
-            },
-        });
-        mountDialog(app);
-    });
+    activeProjectDialog.project = project;
+    activeProjectDialog.open = true;
+}
+export function closeProjectDialog() {
+    activeProjectDialog.open = false;
+    activeProjectDialog.project = undefined;
 }

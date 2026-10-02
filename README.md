@@ -57,6 +57,11 @@ müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 - `src/data/queryClient.ts` ist der gemeinsame Client für Extension-Abfragen.
 - `src/domain/tasks.ts` enthält reine Funktionen für Entwürfe, Hierarchie, Termine
   und Sortierung; die Regressionstests liegen unter `tests/`.
+- `src/ui/` ist die lokale, kompakte Komponentenbibliothek für Dialoge, Felder,
+  Menüs, Karten, Tags, Personen und Ladezustände. Sie besitzt keine Abhängigkeit
+  vom ChurchTools Styleguide.
+- `src/platform.ts` enthält die wenigen browser- und ChurchTools-nahen Adapter
+  für den aktuellen Benutzer, Farben, Icons und Formatierung.
 - Die Startseite bündelt offene, persönlich zugewiesene Aufgaben aus allen Projekten
   nach „Überfällig“, „Heute“, „Demnächst“ und „Ohne Termin“.
 - Ansichten schreiben keine Daten beim Mounten oder Refetch. Drag-and-drop speichert
@@ -64,23 +69,16 @@ müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 - Standardlisten werden beim expliziten Anlegen eines Projekts erzeugt. Für ältere
   Projekte ohne Liste kann über „Liste“ eine angelegt werden.
 
-## Bewusste Kompatibilitätsgrenzen
+## Abhängigkeiten und UI
 
-`@churchtools/styleguide` ist auf 0.66.0 und `@churchtools/utils` auf 0.10.0 fixiert.
-Utils 0.10.1 entfernt APIs, die dieser veröffentlichte Styleguide noch verwendet.
-Ein Override hält transitive Utils-Verwendungen auf demselben Stand. Die lokale
-ChurchTools-Entwicklung hat sich bereits weiterentwickelt; ein späterer Wechsel
-auf lokale/neue Pakete muss gemeinsam erfolgen.
+Die Extension verwendet aus dem ChurchTools-Ökosystem ausschließlich
+`@churchtools/churchtools-client`. UI, Farben, aktuelle Person, Toasts und
+Bestätigungsdialoge werden lokal bereitgestellt. Damit hängt der Build weder von
+internen Frontend-Paketen noch von einem benachbarten ChurchTools-Checkout ab.
 
-Das Utils-Bundle enthält eine ältere TanStack-Runtime. Deren interner QueryClient
-wird **nicht** an die aktuelle Extension-Runtime übergeben. ChurchTools-interne
-Abfragen bleiben in der Bibliothek, CCM- und Personenabfragen der Extension nutzen
-ihren eigenen Client.
-
-Styleguide 0.66.0 veröffentlicht einen falschen Typ-Einstieg und verweist aus dem
-CSS auf eine nicht mitgelieferte Tailwind-Quelldatei. `tsconfig.json` verweist auf die
-tatsächlich vorhandenen Deklarationen; Vite löst die CSS-Referenz auf das lokale
-Theme auf. Nach einem korrigierten Paketrelease können diese Anpassungen entfallen.
+Font Awesome bleibt für Icons erhalten. Die Projektauswahl nutzt eine kuratierte
+lokale Icon-Liste; dadurch sind für die Oberfläche weder Apollo noch GraphQL oder
+die externe Font-Awesome-Suche erforderlich.
 
 Offene Themen, Audit-Einordnung und Entwicklungsplan:
 [Projektanalyse](docs/PROJEKTANALYSE.md) und [Umsetzungsstand](docs/UMSETZUNGSSTAND.md).

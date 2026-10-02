@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useCurrentUser } from '@churchtools/utils';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import TaskItem from '../../components/TaskItem.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { useTasks } from '../../composables/useTasks';
+import { useCurrentUser } from '../../platform';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
