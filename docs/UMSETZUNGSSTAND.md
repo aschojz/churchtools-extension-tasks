@@ -11,6 +11,9 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - ChurchTools Styleguide und Utils vollständig entfernt. Nuxt UI deckt Dialoge,
   Felder, Menüs, Tags, Karten und Statusanzeigen ab; `src/platform.ts` kapselt die
   wenigen benötigten Plattformfunktionen.
+- Den App-Rahmen auf Nuxt UI Dashboard umgestellt: responsive Sidebar mit
+  Projekt- und Ansichts-Navigation, Navbar, globale Projektsuche/Aufgabensuche,
+  Kontextaktionen und kompaktere Dashboard-Karten.
 - Apollo, GraphQL und die externe Icon-Suche entfernt; Projekte verwenden eine
   kuratierte lokale Font-Awesome-Auswahl.
 - CCM-Zugriffe, JSON-Serialisierung und Cache-Invalidierung in
@@ -67,6 +70,9 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Browserprüfung der Nuxt-UI-Oberfläche im echten eingebetteten ChurchTools-Rahmen:
   Übersicht, Projektansicht, Select-Menüs sowie einfache und verschachtelte Dialoge
   sind funktionsfähig. Der Tailwind-Präfix verhindert Klassennamenskollisionen.
+- Dashboard-Sidebar einschließlich Ein-/Ausklappen, globale Suche und Navigation
+  von Suchergebnissen direkt in den bestehenden Aufgabendialog wurden im echten
+  ChurchTools-Rahmen geprüft.
 
 ## Noch offen
 

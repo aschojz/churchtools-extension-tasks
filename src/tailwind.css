@@ -56,34 +56,33 @@ button {
     cursor: pointer;
 }
 .tasks-app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    height: calc(100vh - 49px);
+    min-height: 560px;
     color: var(--ink);
+    background: #f7f6f4;
 }
-.app-header {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    height: 62px;
-    padding: 0 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgb(255 255 255 / 92%);
-    border-bottom: 1px solid var(--line);
-    backdrop-filter: blur(16px);
+.tasks-dashboard-group {
+    position: fixed !important;
+    inset: 49px 0 0 !important;
+    z-index: 20;
+    height: auto;
+    min-height: 0;
 }
-.brand,
-.app-header-actions,
-.project-title-row,
-.section-heading {
+.tasks-dashboard-sidebar,
+.tasks-dashboard-panel {
+    height: 100%;
+    min-height: 0 !important;
+}
+.dashboard-brand {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 }
-.brand > span,
-.section-heading > span,
+.dashboard-brand.collapsed {
+    justify-content: center;
+}
+.dashboard-brand > span,
 .project-icon,
 .project-card-icon {
     display: grid;
@@ -94,13 +93,15 @@ button {
     color: #c85d1e;
     background: var(--accent-soft);
 }
-.brand strong {
+.dashboard-brand strong {
     font-size: 17px;
 }
 .app-content {
     display: flex;
     flex: 1;
     min-width: 0;
+    min-height: 0;
+    overflow: auto;
 }
 [data-color='red'] {
     --chip: #ffd8d5;
@@ -130,37 +131,7 @@ button {
 .project-page {
     width: 100%;
     min-width: 0;
-}
-.project-header {
-    padding: 20px 24px 16px;
-    background: white;
-    border-bottom: 1px solid var(--line);
-}
-.breadcrumb {
-    display: inline-flex;
-    gap: 7px;
-    margin-bottom: 15px;
-    color: var(--muted);
-    font-size: 12px;
-}
-.project-title-row {
-    align-items: flex-start;
-}
-.project-title-row > div {
-    flex: 1;
-}
-.project-title-row h1,
-.section-heading h1 {
-    margin: 0;
-    font-size: 22px;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-}
-.project-title-row p,
-.section-heading p {
-    margin: 4px 0 0;
-    color: var(--muted);
-    font-size: 13px;
+    min-height: 100%;
 }
 .project-icon,
 .project-card-icon {
@@ -168,39 +139,52 @@ button {
     background: color-mix(in srgb, var(--chip), white 45%);
     color: color-mix(in srgb, var(--chip), #222 55%);
 }
-.overview-section {
-    padding: 26px 24px 14px;
+.dashboard-overview {
+    width: 100%;
+    max-width: 96rem;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
 }
-.projects-heading {
-    margin-top: 22px;
+.dashboard-section-heading {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
 }
-.text-action {
-    border: 0;
-    background: transparent;
-    color: #9b5229;
-    font-weight: 650;
+.dashboard-section-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.dashboard-section-heading p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 13px;
 }
 .task-sections,
 .project-grid {
-    padding: 0 24px !important;
+    gap: 16px;
+}
+.task-bucket {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgb(255 255 255 / 64%);
+}
+.overview-empty {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
 }
 .task-item {
     border-radius: 11px !important;
     box-shadow: 0 1px 2px rgb(30 25 20 / 5%) !important;
-}
-.tabs a {
-    padding: 9px 12px !important;
-    border-radius: 8px 8px 0 0 !important;
-    background: transparent !important;
-    color: var(--muted);
-}
-.tabs a.router-link-active {
-    background: #f1efec !important;
-    color: var(--ink) !important;
-    font-weight: 650;
 }
 .text-basic-tertiary,
 .text-ter,
@@ -215,13 +199,13 @@ button {
     background: #faf9f7;
 }
 @media (max-width: 720px) {
-    .project-title-row {
-        flex-wrap: wrap;
-    }
     .task-sections {
         grid-template-columns: 1fr !important;
     }
-    .app-header {
-        padding: 0 14px;
+    .dashboard-overview {
+        padding: 16px;
+    }
+    .dashboard-section-heading {
+        align-items: flex-start;
     }
 }

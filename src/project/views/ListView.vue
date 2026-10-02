@@ -24,7 +24,7 @@ const filteredTasks = computed(() => {
 </script>
 <template>
     <ViewWrapper :project-id="projectId">
-        <div class="flex w-full flex-col">
+        <div v-if="filteredTasks.length" class="flex w-full flex-col">
             <TaskItem
                 v-for="task in filteredTasks"
                 :key="task.id"
@@ -33,5 +33,6 @@ const filteredTasks = computed(() => {
                 :project-id="projectId"
             />
         </div>
+        <UEmpty v-else class="w-full" icon="i-lucide-list-checks" title="Keine Aufgaben gefunden" />
     </ViewWrapper>
 </template>

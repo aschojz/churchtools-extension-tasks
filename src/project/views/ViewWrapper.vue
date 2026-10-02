@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { NavigationMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
@@ -24,41 +25,50 @@ const listIsOpen = ref(false);
 
 const route = useRoute();
 const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
+const viewNavigation: NavigationMenuItem[] = [
+    { label: 'Meine Aufgaben', icon: 'i-lucide-user-check', to: { name: 'my-tasks' } },
+    { label: 'Board', icon: 'i-lucide-columns-3', to: { name: 'project-board' } },
+    { label: 'Liste', icon: 'i-lucide-list', to: { name: 'project-list' } },
+    { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags' } },
+    { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
+];
 </script>
 <template>
     <div
         class="flex w-full flex-grow flex-col"
         :class="{ 'fixed top-0 left-0 z-[2000] h-screen w-screen bg-gray-100': fullscreen }"
     >
-        <div class="w-full items-center border-b border-solid border-gray-300 px-4 lg:px-6">
-            <div class="flex gap-2 py-4">
-                <UInput v-model="store.search" class="flex-grow" icon="i-lucide-search" placeholder="Suchen" />
-                <slot name="extra-actions"></slot>
-                <slot name="actions">
-                    <UButton
-                        color="neutral"
-                        icon="i-lucide-plus"
-                        label="Liste"
-                        variant="outline"
-                        @click="listIsOpen = true"
+        <div class="border-default shrink-0 border-b">
+            <UDashboardToolbar>
+                <template #left>
+                    <UInput
+                        v-model="store.search"
+                        class="w-72 max-w-full"
+                        icon="i-lucide-search"
+                        placeholder="Aufgaben in diesem Projekt filtern …"
                     />
-                    <UButton
-                        color="neutral"
-                        :icon="fullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-                        variant="outline"
-                        @click="onFullscreen"
-                    />
-                </slot>
-            </div>
-            <div class="flex justify-between">
-                <div class="tabs flex gap-1">
-                    <RouterLink :to="{ name: 'my-tasks' }">Meine Aufgaben</RouterLink>
-                    <RouterLink :to="{ name: 'project-board' }">Board</RouterLink>
-                    <RouterLink :to="{ name: 'project-list' }">Liste</RouterLink>
-                    <RouterLink :to="{ name: 'project-tags' }">Tags</RouterLink>
-                    <RouterLink :to="{ name: 'project-tasks' }">Aufgaben</RouterLink>
-                </div>
-                <div class="flex gap-4"></div>
+                </template>
+                <template #right>
+                    <slot name="extra-actions"></slot>
+                    <slot name="actions">
+                        <UButton
+                            color="neutral"
+                            icon="i-lucide-plus"
+                            label="Liste"
+                            variant="outline"
+                            @click="listIsOpen = true"
+                        />
+                        <UButton
+                            color="neutral"
+                            :icon="fullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+                            variant="outline"
+                            @click="onFullscreen"
+                        />
+                    </slot>
+                </template>
+            </UDashboardToolbar>
+            <div class="overflow-x-auto px-4 sm:px-6">
+                <UNavigationMenu highlight :items="viewNavigation" orientation="horizontal" variant="link" />
             </div>
         </div>
         <div class="max-w-full grow overflow-x-auto p-4 lg:p-6">
@@ -70,14 +80,3 @@ const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
         <DialogList v-if="listIsOpen" :project-id="projectId" @close="listIsOpen = false" />
     </div>
 </template>
-<style scoped>
-@reference '../../tailwind.css';
-.tabs a {
-    padding: 8px 12px;
-    @apply rounded-t bg-gray-200;
-}
-a.router-link-active {
-    background: var(--color-accent-bright);
-    color: white;
-}
-</style>

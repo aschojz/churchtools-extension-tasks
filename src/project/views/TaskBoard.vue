@@ -54,5 +54,11 @@ const boardlists = computed(() => {
                 </template>
             </List>
         </template>
+        <UEmpty
+            v-if="!boardlists.length"
+            class="w-full"
+            icon="i-lucide-git-branch"
+            title="Noch keine Unteraufgaben vorhanden"
+        />
     </ViewWrapper>
 </template>

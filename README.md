@@ -60,6 +60,9 @@ müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 - Nuxt UI stellt Dialoge, Felder, Menüs, Karten, Tags, Personen und Ladezustände
   bereit. Die Vue/Vite-Einbindung liegt in `vite.config.ts` und `src/main.ts`;
   ein eigener Tailwind-Präfix verhindert CSS-Kollisionen mit dem ChurchTools-Rahmen.
+- Der App-Rahmen verwendet Nuxt UI Dashboard mit einklappbarer, größenveränderbarer
+  Projekt-Sidebar, Navbar, projektweiter Navigation und globaler Suche nach
+  Projekten und Aufgaben.
 - `src/platform.ts` enthält die wenigen browser- und ChurchTools-nahen Adapter
   für den aktuellen Benutzer, Farben, Icons und Formatierung.
 - Die Startseite bündelt offene, persönlich zugewiesene Aufgaben aus allen Projekten
