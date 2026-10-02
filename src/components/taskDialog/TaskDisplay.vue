@@ -47,7 +47,7 @@ const createChild = async () => {
 };
 </script>
 <template>
-    <div class="grid grid-cols-4 gap-3">
+    <div class="task-display-layout grid grid-cols-4 gap-3">
         <div class="col-span-3 flex flex-col gap-8">
             <div class="whitespace-pre-line">{{ task?.description }}</div>
             <div class="border-basic-divider border-b"></div>

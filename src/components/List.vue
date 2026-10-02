@@ -105,7 +105,7 @@ const listIsOpen = ref<TransformedList>();
 </script>
 <template>
     <div
-        class="flex max-h-[700px] flex-shrink-0 flex-col rounded-lg bg-gray-50 shadow-md"
+        class="board-column flex max-h-[700px] flex-shrink-0 flex-col"
         :class="list.isCollapsed ? 'min-h-[300px] w-12' : 'w-96'"
     >
         <div

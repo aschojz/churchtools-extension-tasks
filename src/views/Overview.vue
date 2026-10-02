@@ -136,7 +136,7 @@ const tasksBySection = computed(
                     class="h-full w-full"
                     :to="{ name: 'project', params: { projectId: project.id } }"
                 >
-                    <UCard class="h-full transition hover:-translate-y-0.5 hover:shadow-md">
+                    <UCard class="project-card h-full">
                         <div class="flex items-center gap-4">
                             <div
                                 class="project-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full"

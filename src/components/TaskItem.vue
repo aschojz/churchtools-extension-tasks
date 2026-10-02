@@ -131,10 +131,7 @@ const breadcrumbs = computed(() => {
 });
 </script>
 <template>
-    <div
-        class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 rounded border border-gray-100 bg-white p-3 shadow-sm transition-colors hover:border-gray-200"
-        @click="openTask"
-    >
+    <div class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3" @click="openTask">
         <div v-if="superParent && !showTask" class="-mb-1 flex items-center gap-2 text-xs text-gray-400">
             <template v-for="(crumb, index) in breadcrumbs" :key="index">
                 <span>{{ crumb }}</span>

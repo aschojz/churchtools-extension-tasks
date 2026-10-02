@@ -77,7 +77,13 @@ const onSave = async () => {
                   ? txx('Aufgabe bearbeiten')
                   : (task?.name ?? txx('Aufgabe anzeigen'))
         "
-        :ui="{ content: 'sm:max-w-4xl' }"
+        :ui="{
+            body: 'tasks-modal-body',
+            content: 'tasks-modal-content',
+            footer: 'tasks-modal-footer',
+            header: 'tasks-modal-header',
+            overlay: 'tasks-modal-overlay',
+        }"
         @update:open="(value: boolean) => !value && resetRoute()"
     >
         <template #actions

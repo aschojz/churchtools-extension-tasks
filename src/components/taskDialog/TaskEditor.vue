@@ -73,49 +73,86 @@ watch(personSearch, async query => {
 });
 </script>
 <template>
-    <p v-if="isLoading">Aufgabe wird geladen …</p>
-    <p v-else-if="missing" role="alert">Diese Aufgabe wurde nicht gefunden.</p>
-    <div v-else class="flex flex-col gap-2">
-        <UFormField label="Titel" required><UInput v-model="internTask.name" class="w-full" /></UFormField>
-        <UFormField label="Beschreibung"
-            ><UTextarea v-model="internTask.description" class="w-full" :rows="8"
-        /></UFormField>
-        <UFormField label="Fällig am"><UInput v-model="internTask.dueDate" class="w-full" type="date" /></UFormField>
-        <label v-if="parent" class="flex items-center gap-2">
-            Tage vor der übergeordneten Aufgabe
-            <input v-model.number="internTask.dueDateRelative" class="rounded border p-2" min="0" type="number" />
-        </label>
-        <UFormField label="Link"><UInput v-model="internTask.url" class="w-full" type="url" /></UFormField>
-        <div class="flex items-end gap-2">
-            <UFormField class="flex-grow" label="Tags"
-                ><USelectMenu
+    <div v-if="isLoading" class="p-8"><UProgress animation="carousel" /></div>
+    <UAlert v-else-if="missing" color="warning" title="Diese Aufgabe wurde nicht gefunden." />
+    <div v-else class="task-editor-layout">
+        <section class="task-editor-main">
+            <UFormField label="Titel" required>
+                <UInput
+                    v-model="internTask.name"
+                    autofocus
+                    class="w-full"
+                    icon="i-lucide-type"
+                    placeholder="Was soll erledigt werden?"
+                    size="lg"
+                />
+            </UFormField>
+            <UFormField hint="Optional" label="Beschreibung">
+                <UTextarea
+                    v-model="internTask.description"
+                    autoresize
+                    class="w-full"
+                    :maxrows="14"
+                    placeholder="Notizen, Details oder nächste Schritte …"
+                    :rows="9"
+                />
+            </UFormField>
+            <UFormField hint="Optional" label="Link">
+                <UInput
+                    v-model="internTask.url"
+                    class="w-full"
+                    icon="i-lucide-link"
+                    placeholder="https://…"
+                    type="url"
+                />
+            </UFormField>
+        </section>
+
+        <aside class="task-editor-meta">
+            <div class="task-editor-meta-heading">
+                <UIcon name="i-lucide-settings-2" />
+                <span>Details</span>
+            </div>
+            <UFormField label="Fällig am">
+                <UInput v-model="internTask.dueDate" class="w-full" type="date" />
+            </UFormField>
+            <UFormField v-if="parent" label="Tage vor der übergeordneten Aufgabe">
+                <UInput v-model.number="internTask.dueDateRelative" class="w-full" min="0" type="number" />
+            </UFormField>
+            <UFormField label="Tags">
+                <USelectMenu
                     v-model="internTask.tags"
                     class="w-full"
                     :items="tagOptions"
                     label-key="nameTranslated"
                     multiple
+                    placeholder="Tags auswählen …"
                     value-key="id"
-            /></UFormField>
+                />
+            </UFormField>
             <UButton
+                block
                 color="neutral"
                 icon="i-lucide-plus"
-                label="Tag erstellen"
+                label="Neuen Tag anlegen"
+                size="sm"
                 variant="outline"
                 @click="createTagIsOpen = true"
             />
-        </div>
-        <UFormField label="Verantwortliche"
-            ><USelectMenu
-                v-model="internTask.assignedTo"
-                v-model:search-term="personSearch"
-                class="w-full"
-                ignore-filter
-                :items="personOptions"
-                label-key="label"
-                multiple
-                placeholder="Person suchen …"
-                value-key="id"
-        /></UFormField>
+            <UFormField label="Verantwortliche">
+                <USelectMenu
+                    v-model="internTask.assignedTo"
+                    v-model:search-term="personSearch"
+                    class="w-full"
+                    ignore-filter
+                    :items="personOptions"
+                    label-key="label"
+                    multiple
+                    placeholder="Person suchen …"
+                    value-key="id"
+                />
+            </UFormField>
+        </aside>
         <DialogTag v-if="createTagIsOpen" :project-id="projectId" @close="createTagIsOpen = false" />
     </div>
 </template>
