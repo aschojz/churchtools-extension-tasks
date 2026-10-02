@@ -3,7 +3,6 @@ import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { formatDateTime, notNullish, personDisplay, useCurrentUser } from '../../platform';
-import { Button, DomainObject, Textarea } from '../../ui';
 import { txx } from '../../utils/utils';
 
 const props = withDefaults(
@@ -62,7 +61,7 @@ const formatActivity = (value: unknown) => {
             <div class="text-lg font-bold">Aktivitäten</div>
         </div>
         <div class="group flex flex-col gap-2">
-            <Textarea
+            <UTextarea
                 v-model="newComment"
                 placeholder="Kommentar hinzufügen"
                 :rows="1"
@@ -70,7 +69,14 @@ const formatActivity = (value: unknown) => {
                 @keydown.escape.stop="onCancelComment"
             />
             <div class="flex gap-2">
-                <Button :disabled="!newComment" :outlined="true" size="S" @click="onComment"> Kommentieren </Button>
+                <UButton
+                    color="neutral"
+                    :disabled="!newComment"
+                    label="Kommentieren"
+                    size="sm"
+                    variant="outline"
+                    @click="onComment"
+                />
             </div>
         </div>
         <div class="flex flex-col gap-3">
@@ -80,7 +86,7 @@ const formatActivity = (value: unknown) => {
                         class="border-basic-divider bg-foreground-secondary flex w-full flex-grow flex-col gap-2 rounded-lg border px-3 py-2"
                     >
                         <div v-if="entry.person" class="text-basic-tertiary flex items-center gap-2">
-                            <DomainObject :domain-object="entry.person" size="XS" />
+                            <UAvatar :alt="entry.person.title" size="xs" :src="entry.person.imageUrl" />
                             <span class="text-basic-secondary font-bold">
                                 {{ entry.person?.title }}
                             </span>
@@ -88,7 +94,7 @@ const formatActivity = (value: unknown) => {
                             <div>{{ entry.dateDisplay }}</div>
                         </div>
                         <div v-else class="text-basic-tertiary flex items-center gap-2">
-                            <DomainObject :domain-object="{ icon: 'fas fa-user' }" size="XS" />
+                            <UAvatar icon="i-lucide-user" size="xs" />
                             <span class="text-basic-secondary font-bold">
                                 {{ txx('Unbekannter Benutzer') }}
                             </span>

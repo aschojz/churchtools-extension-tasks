@@ -4,8 +4,7 @@ import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
 import DialogTask from '../../components/taskDialog/DialogTask.vue';
 import { taskStore } from '../../composables/storeTasks';
-import { CtColor, firstOrSelf } from '../../platform';
-import { Button, Input } from '../../ui';
+import { firstOrSelf } from '../../platform';
 
 withDefaults(
     defineProps<{
@@ -33,27 +32,20 @@ const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
     >
         <div class="w-full items-center border-b border-solid border-gray-300 px-4 lg:px-6">
             <div class="flex gap-2 py-4">
-                <Input
-                    v-model="store.search"
-                    class="flex-grow"
-                    clear
-                    label="Suche"
-                    placeholder="Suchen"
-                    :show-label="false"
-                />
+                <UInput v-model="store.search" class="flex-grow" icon="i-lucide-search" placeholder="Suchen" />
                 <slot name="extra-actions"></slot>
                 <slot name="actions">
-                    <Button
-                        :color="CtColor.BASIC"
-                        icon="fas fa-plus"
+                    <UButton
+                        color="neutral"
+                        icon="i-lucide-plus"
                         label="Liste"
-                        outlined
+                        variant="outline"
                         @click="listIsOpen = true"
                     />
-                    <Button
-                        :color="CtColor.BASIC"
-                        :icon="fullscreen ? 'fas fa-compress' : 'fas fa-expand'"
-                        outlined
+                    <UButton
+                        color="neutral"
+                        :icon="fullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+                        variant="outline"
                         @click="onFullscreen"
                     />
                 </slot>

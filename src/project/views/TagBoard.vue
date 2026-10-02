@@ -1,12 +1,11 @@
 <script setup lang="ts">
+import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
-import { CtColor, CtIcon } from '../../platform';
-import { Button, DropdownMenu, Tag, type DropdownSection } from '../../ui';
-import { confirmDelete } from '../../ui/state';
+import { CtColor, uiColor } from '../../platform';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
@@ -18,7 +17,7 @@ const tagDialog = ref<TransformedTag | true>();
 const actionError = ref('');
 
 const deleteSelectedTag = async (tag: TransformedTag) => {
-    const confirmed = await confirmDelete(`Der Tag „${tag.name}“ wird von allen Aufgaben entfernt.`);
+    const confirmed = window.confirm(`Der Tag „${tag.name}“ wird von allen Aufgaben entfernt.`);
     if (!confirmed) return;
     actionError.value = '';
     try {
@@ -31,29 +30,25 @@ const deleteSelectedTag = async (tag: TransformedTag) => {
     }
 };
 
-const tagMenu = (tagId: number): DropdownSection[] => {
+const tagMenu = (tagId: number): DropdownMenuItem[][] => {
     const tag = tags.value[tagId];
     if (!tag) return [];
     return [
-        {
-            title: `Tag „${tag.name}“`,
-            items: [
-                {
-                    id: 'edit',
-                    nameTranslated: 'Bearbeiten',
-                    icon: CtIcon.EDIT,
-                    callback: () => {
-                        tagDialog.value = tag;
-                    },
+        [
+            {
+                label: 'Bearbeiten',
+                icon: 'i-lucide-pencil',
+                onSelect: () => {
+                    tagDialog.value = tag;
                 },
-                {
-                    id: 'delete',
-                    nameTranslated: 'Löschen',
-                    icon: { icon: CtIcon.DELETE, class: 'text-red-500' },
-                    callback: () => deleteSelectedTag(tag),
-                },
-            ],
-        },
+            },
+            {
+                label: 'Löschen',
+                icon: 'i-lucide-trash-2',
+                color: 'error',
+                onSelect: () => deleteSelectedTag(tag),
+            },
+        ],
     ];
 };
 
@@ -92,16 +87,22 @@ const boardlists = computed(() => {
 <template>
     <ViewWrapper :project-id="projectId">
         <template #extra-actions>
-            <Button icon="fas fa-tag" label="Tag erstellen" outlined @click="tagDialog = true" />
+            <UButton
+                color="neutral"
+                icon="i-lucide-tag"
+                label="Tag erstellen"
+                variant="outline"
+                @click="tagDialog = true"
+            />
         </template>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <template v-for="list in boardlists" :key="list.id">
             <List :is-draggable="false" :items="tasksByTag[list.id] ?? []" :list="list" :project-id="projectId">
                 <template #header>
-                    <Tag :color="list.color?.key ?? CtColor.BASIC" :label="list.name" />
-                    <DropdownMenu v-if="list.id" :menu-items="tagMenu(list.id)">
-                        <Button :color="CtColor.BASIC" icon="fas fa-ellipsis" size="S" text />
-                    </DropdownMenu>
+                    <UBadge :color="uiColor(list.color?.key ?? CtColor.BASIC)" :label="list.name" variant="soft" />
+                    <UDropdownMenu v-if="list.id" :items="tagMenu(list.id)"
+                        ><UButton color="neutral" icon="i-lucide-ellipsis" size="sm" square variant="ghost"
+                    /></UDropdownMenu>
                 </template>
             </List>
         </template>

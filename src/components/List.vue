@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { DropdownMenuItem } from '@nuxt/ui';
 import { sortBy } from 'lodash-es';
 import { computed, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
@@ -6,8 +7,6 @@ import { taskStore } from '../composables/storeTasks';
 import { useLists } from '../composables/useLists';
 import { useTasks } from '../composables/useTasks.ts';
 import { reorderTasks } from '../domain/tasks';
-import { CtColor, CtIcon } from '../platform';
-import { type DropdownSection, Button, DropdownMenu, Tag } from '../ui';
 import DialogList from './DialogList.vue';
 import NewTask from './NewTask.vue';
 import Task from './TaskItem.vue';
@@ -61,56 +60,44 @@ const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
     }
 };
 
-const listContextMenu = computed<DropdownSection[]>(() => {
+const listContextMenu = computed<DropdownMenuItem[][]>(() => {
     if (props.list.type !== 'list') return [];
     const list = props.list;
-    const menu: DropdownSection[] = [
-        {
-            title: `Liste "${props.list.name}"`,
-            items: [
-                {
-                    id: 'showSubTasks',
-                    nameTranslated: 'Unteraufgaben anzeigen',
-                    icon: list.showSubTasks
-                        ? { icon: 'fas fa-toggle-on', class: 'text-green-500' }
-                        : 'fas fa-toggle-off',
-                    callback: () => {
-                        onUpdateList({ showSubTasks: !list.showSubTasks });
-                    },
+    const menu: DropdownMenuItem[][] = [
+        [
+            {
+                label: 'Unteraufgaben anzeigen',
+                icon: list.showSubTasks ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+                onSelect: () => {
+                    onUpdateList({ showSubTasks: !list.showSubTasks });
                 },
-                {
-                    id: 'showCompleted',
-                    nameTranslated: 'Erledigte Aufgaben anzeigen',
-                    icon: list.showCompleted
-                        ? { icon: 'fas fa-toggle-on', class: 'text-green-500' }
-                        : 'fas fa-toggle-off',
-                    callback: () => {
-                        onUpdateList({ showCompleted: !list.showCompleted });
-                    },
+            },
+            {
+                label: 'Erledigte Aufgaben anzeigen',
+                icon: list.showCompleted ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+                onSelect: () => {
+                    onUpdateList({ showCompleted: !list.showCompleted });
                 },
-            ],
-        },
-        {
-            items: [
-                {
-                    id: 'edit',
-                    nameTranslated: 'Bearbeiten',
-                    icon: CtIcon.EDIT,
-                    callback: () => {
-                        if (props.list.type === 'list') listIsOpen.value = props.list;
-                    },
+            },
+        ],
+        [
+            {
+                label: 'Bearbeiten',
+                icon: 'i-lucide-pencil',
+                onSelect: () => {
+                    if (props.list.type === 'list') listIsOpen.value = props.list;
                 },
-                {
-                    id: 'delete',
-                    nameTranslated: 'Löschen',
-                    disabled: list.isDefault,
-                    icon: { icon: CtIcon.DELETE, class: 'text-red-500' },
-                    callback: async () => {
-                        await deleteList(props.list.id);
-                    },
+            },
+            {
+                label: 'Löschen',
+                disabled: list.isDefault,
+                icon: 'i-lucide-trash-2',
+                color: 'error',
+                onSelect: async () => {
+                    await deleteList(props.list.id);
                 },
-            ],
-        },
+            },
+        ],
     ];
     return menu;
 });
@@ -152,30 +139,32 @@ const listIsOpen = ref<TransformedList>();
                     :class="{ 'items-center': !list.isCollapsed }"
                     :style="list.isCollapsed ? 'margin: calc(50% - 8px) 0; transform: rotate(90deg)' : ''"
                 >
-                    <Tag
+                    <UBadge
                         v-if="internItems?.length"
-                        color="secondary"
-                        icon="fas fa-tasks"
+                        color="neutral"
+                        icon="i-lucide-list-checks"
                         :label="String(internItems?.length)"
-                        size="0"
+                        size="sm"
+                        variant="soft"
                     />
-                    <Button
+                    <UButton
                         v-if="!list.isCollapsed && list.type === 'list'"
-                        :color="CtColor.GREEN"
-                        icon="fas fa-plus"
-                        size="S"
-                        text
+                        icon="i-lucide-plus"
+                        size="sm"
+                        square
+                        variant="ghost"
                         @click="newTaskIsOpen = !newTaskIsOpen"
                     />
-                    <DropdownMenu v-if="$route.name === 'project-board'" :menu-items="listContextMenu">
-                        <Button
+                    <UDropdownMenu v-if="$route.name === 'project-board'" :items="listContextMenu">
+                        <UButton
                             v-if="!list.isCollapsed"
-                            :color="CtColor.BASIC"
-                            icon="fas fa-ellipsis-h"
-                            size="S"
-                            text
+                            color="neutral"
+                            icon="i-lucide-ellipsis"
+                            size="sm"
+                            square
+                            variant="ghost"
                         />
-                    </DropdownMenu>
+                    </UDropdownMenu>
                 </span>
             </div>
         </div>

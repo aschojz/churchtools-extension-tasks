@@ -57,9 +57,9 @@ müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 - `src/data/queryClient.ts` ist der gemeinsame Client für Extension-Abfragen.
 - `src/domain/tasks.ts` enthält reine Funktionen für Entwürfe, Hierarchie, Termine
   und Sortierung; die Regressionstests liegen unter `tests/`.
-- `src/ui/` ist die lokale, kompakte Komponentenbibliothek für Dialoge, Felder,
-  Menüs, Karten, Tags, Personen und Ladezustände. Sie besitzt keine Abhängigkeit
-  vom ChurchTools Styleguide.
+- Nuxt UI stellt Dialoge, Felder, Menüs, Karten, Tags, Personen und Ladezustände
+  bereit. Die Vue/Vite-Einbindung liegt in `vite.config.ts` und `src/main.ts`;
+  ein eigener Tailwind-Präfix verhindert CSS-Kollisionen mit dem ChurchTools-Rahmen.
 - `src/platform.ts` enthält die wenigen browser- und ChurchTools-nahen Adapter
   für den aktuellen Benutzer, Farben, Icons und Formatierung.
 - Die Startseite bündelt offene, persönlich zugewiesene Aufgaben aus allen Projekten
@@ -72,8 +72,8 @@ müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
 ## Abhängigkeiten und UI
 
 Die Extension verwendet aus dem ChurchTools-Ökosystem ausschließlich
-`@churchtools/churchtools-client`. UI, Farben, aktuelle Person, Toasts und
-Bestätigungsdialoge werden lokal bereitgestellt. Damit hängt der Build weder von
+`@churchtools/churchtools-client`. Die Oberfläche basiert auf Nuxt UI; Farben und
+die aktuelle Person kapselt `src/platform.ts`. Damit hängt der Build weder von
 internen Frontend-Paketen noch von einem benachbarten ChurchTools-Checkout ab.
 
 Font Awesome bleibt für Icons erhalten. Die Projektauswahl nutzt eine kuratierte

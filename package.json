@@ -42,6 +42,8 @@
     "dependencies": {
         "@churchtools/churchtools-client": "1.7.3",
         "@fortawesome/fontawesome-free": "7.3.1",
+        "@iconify-json/lucide": "1.2.138",
+        "@nuxt/ui": "4.11.3",
         "@tanstack/vue-query": "5.104.0",
         "fuse.js": "7.5.0",
         "lodash-es": "4.18.1",

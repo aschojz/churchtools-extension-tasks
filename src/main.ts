@@ -1,9 +1,11 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
+import ui from '@nuxt/ui/vue-plugin';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import App from './App.vue';
 import { queryClient } from './data/queryClient';
+import './nuxt-ui.css';
 import { loadCurrentUser } from './platform';
 import { router } from './router';
 import './tailwind.css';
@@ -39,5 +41,6 @@ await loadCurrentUser();
 const app = createApp(App);
 app.use(pinia);
 app.use(router);
+app.use(ui);
 app.use(VueQueryPlugin, { queryClient });
 app.mount('#app');

@@ -1,12 +1,11 @@
 <script setup lang="ts">
+import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTask } from '../composables/useTask.ts';
 import { useTasks } from '../composables/useTasks.ts';
 import { descendantIds } from '../domain/tasks';
-import { CtColor, CtIcon } from '../platform';
-import { Button, DomainObject, DropdownMenu, Tag, type DropdownSection } from '../ui';
-import { confirmDelete } from '../ui/state';
+import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
 
 const props = defineProps<{
@@ -84,7 +83,7 @@ const runAction = async (action: () => Promise<unknown>) => {
     }
 };
 const deleteRecursive = async (task: TransformedTask) => {
-    if (!(await confirmDelete('Die Aufgabe und ihre Unteraufgaben werden gelöscht.'))) return;
+    if (!window.confirm('Die Aufgabe und ihre Unteraufgaben werden gelöscht.')) return;
     const ids = descendantIds(task, tasksMap.value);
     const removed = new Set(ids);
     // Detach only the subtree root. On a partial failure, remaining children stay accessible in their lists.
@@ -96,35 +95,28 @@ const deleteRecursive = async (task: TransformedTask) => {
     for (const id of ids) await deleteTask(id, task.dataCategoryId);
 };
 
-const contextMenu = computed<DropdownSection[]>(() => [
-    {
-        title: `Aufgabe "${props.item.name}"`,
-        items: [
-            {
-                id: 'fullfilled',
-                nameTranslated: props.item.fullfilled ? 'Als nicht-erfüllt markieren' : 'Abhaken',
-                icon: props.item.fullfilled ? 'far fa-square' : 'fas fa-check-square',
-                callback: () => runAction(toggleTask),
-            },
-        ],
-    },
-    {
-        items: [
-            { id: 'edit', nameTranslated: 'Bearbeiten', icon: CtIcon.EDIT, callback: () => openTask() },
-            {
-                id: 'duplicate',
-                nameTranslated: 'Duplizieren',
-                icon: 'fas fa-copy',
-                callback: () => runAction(duplicateTask),
-            },
-            {
-                id: 'delete',
-                nameTranslated: 'Löschen',
-                icon: { icon: CtIcon.DELETE, class: 'text-red-500' },
-                callback: () => runAction(() => deleteRecursive(props.item)),
-            },
-        ],
-    },
+const contextMenu = computed<DropdownMenuItem[][]>(() => [
+    [
+        {
+            label: props.item.fullfilled ? 'Als nicht erfüllt markieren' : 'Abhaken',
+            icon: props.item.fullfilled ? 'i-lucide-square' : 'i-lucide-square-check-big',
+            onSelect: () => runAction(toggleTask),
+        },
+    ],
+    [
+        { label: 'Bearbeiten', icon: 'i-lucide-pencil', onSelect: () => openTask() },
+        {
+            label: 'Duplizieren',
+            icon: 'i-lucide-copy',
+            onSelect: () => runAction(duplicateTask),
+        },
+        {
+            label: 'Löschen',
+            icon: 'i-lucide-trash-2',
+            color: 'error',
+            onSelect: () => runAction(() => deleteRecursive(props.item)),
+        },
+    ],
 ]);
 
 const breadcrumbs = computed(() => {
@@ -168,19 +160,23 @@ const breadcrumbs = computed(() => {
                 <span class="font-bold"> {{ item.name }} </span>
             </div>
             <div v-if="item.assignedTo?.length" class="flex flex-shrink-0 gap-1">
-                <DomainObject
+                <UAvatar
                     v-for="assignee in assignees"
                     :key="assignee.domainIdentifier"
-                    :domain-object="assignee"
-                    size="XS"
+                    :alt="assignee.title"
+                    size="xs"
+                    :src="assignee.imageUrl"
                 />
             </div>
-            <DropdownMenu
-                :button-bind="{ class: 'absolute hidden right-1 top-1 group-hover:inline-flex' }"
-                :menu-items="contextMenu"
-            >
-                <Button :color="CtColor.BASIC" icon="fas fa-ellipsis" outlined size="S" />
-            </DropdownMenu>
+            <UDropdownMenu :items="contextMenu"
+                ><UButton
+                    class="absolute top-1 right-1 hidden group-hover:inline-flex"
+                    color="neutral"
+                    icon="i-lucide-ellipsis"
+                    size="sm"
+                    square
+                    variant="outline"
+            /></UDropdownMenu>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <div v-if="item.description" class="l line-clamp-1">
@@ -188,31 +184,46 @@ const breadcrumbs = computed(() => {
         </div>
         <div v-if="showLastRow" class="flex flex-wrap justify-end gap-2">
             <div class="flex flex-grow items-center gap-3 text-gray-400">
-                <Tag
+                <UBadge
                     v-if="dueDate"
-                    :color="dueColor ?? CtColor.BASIC"
-                    icon="far fa-clock"
+                    :color="uiColor(dueColor)"
+                    icon="i-lucide-clock"
                     :label="
                         task?.dueDateRelative
                             ? `${toDayMonth(dueDate)} (${task?.dueDateRelative})`
                             : toDayMonth(dueDate)
                     "
-                    size="S"
+                    size="sm"
+                    variant="soft"
                 />
-                <Tag v-if="comments?.length" icon="far fa-comments" :label="String(comments.length)" size="0" />
-                <Button
+                <UBadge
+                    v-if="comments?.length"
+                    color="neutral"
+                    icon="i-lucide-messages-square"
+                    :label="String(comments.length)"
+                    size="sm"
+                    variant="soft"
+                />
+                <UButton
                     v-if="item.url"
-                    :color="CtColor.BASIC"
+                    color="neutral"
                     :href="item.url"
-                    icon="fas fa-link"
-                    size="S"
+                    icon="i-lucide-link"
+                    size="sm"
                     target="_blank"
-                    text
+                    variant="ghost"
                     @click.stop
                 />
             </div>
             <div class="flex gap-2">
-                <Tag v-for="tag in sortedTags" :key="tag.id" :color="tag.color" :label="tag.name" size="S" />
+                <UBadge
+                    v-for="tag in sortedTags"
+                    :key="tag.id"
+                    :color="uiColor(tag.color)"
+                    :label="tag.name"
+                    size="sm"
+                    variant="soft"
+                />
             </div>
         </div>
     </div>

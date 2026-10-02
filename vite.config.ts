@@ -1,3 +1,4 @@
+import ui from '@nuxt/ui/vite';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
@@ -9,7 +10,15 @@ export default defineConfig(({ mode }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(key)) throw new Error('VITE_KEY must be an extension key');
     return {
         base: `/ccm/${key}/`,
-        plugins: [vue(), tailwindcss()],
+        plugins: [
+            vue(),
+            tailwindcss(),
+            ui({
+                experimental: { componentDetection: true },
+                icon: { clientBundle: { scan: true } },
+                theme: { prefix: 'tasks' },
+            }),
+        ],
         resolve: {
             dedupe: ['vue', 'pinia', '@tanstack/vue-query'],
             alias: {

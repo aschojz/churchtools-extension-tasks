@@ -3,9 +3,7 @@ import { computed, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
-import { CtColor, CtIcon } from '../../platform';
 import { useProject } from '../../project/useProject';
-import { DialogLarge } from '../../ui';
 import { txx } from '../../utils/utils';
 import TaskDisplay from './TaskDisplay.vue';
 import TaskEditor from './TaskEditor.vue';
@@ -28,33 +26,15 @@ const resetRoute = () => {
 const { task, toggleTask } = useTask(projectId, taskId);
 const { updateTask, getObjectDiff, createTask } = useTasks(projectId);
 
-const actions = computed(() => {
-    if (isCreate.value || isEdit.value) {
-        return [];
-    }
-    return [
-        {
-            icon: CtIcon.EDIT,
-            label: txx('Bearbeiten'),
-            outlined: true,
-            onClick: () => (isEdit.value = true),
-        },
-    ];
-});
 const cancelButton = computed(() => (isCreate.value || isEdit.value ? txx('Abbrechen') : txx('Schließen')));
-const primaryButton = computed(() =>
+const primaryLabel = computed(() =>
     isCreate.value
         ? txx('Erstellen')
         : isEdit.value
           ? txx('Speichern')
           : task.value?.fullfilled
-            ? {
-                  label: txx('Als unerledigt markieren'),
-                  color: CtColor.RED,
-                  icon: 'fas fa-undo' as const,
-                  outlined: true,
-              }
-            : { label: txx('Als erledigt markieren'), color: CtColor.GREEN, icon: 'fas fa-check' as const },
+            ? txx('Als unerledigt markieren')
+            : txx('Als erledigt markieren'),
 );
 
 const internTask = ref<Task>();
@@ -86,25 +66,46 @@ const onSave = async () => {
 };
 </script>
 <template>
-    <DialogLarge
-        :button="isSaving ? false : primaryButton"
-        :cancel-button="cancelButton"
-        :context="project?.name"
-        :header="{
-            icon: task?.fullfilled ? 'fas fa-square-check' : 'far fa-square',
-            color: task?.fullfilled ? CtColor.GREEN : CtColor.BASIC,
-            title: isCreate
+    <UModal
+        :description="project?.name"
+        :open="true"
+        scrollable
+        :title="
+            isCreate
                 ? txx('Aufgabe erstellen')
                 : isEdit
                   ? txx('Aufgabe bearbeiten')
-                  : (task?.name ?? txx('Aufgabe anzeigen')),
-            actions,
-        }"
-        @close="resetRoute"
-        @save="onSave"
+                  : (task?.name ?? txx('Aufgabe anzeigen'))
+        "
+        :ui="{ content: 'sm:max-w-4xl' }"
+        @update:open="(value: boolean) => !value && resetRoute()"
     >
-        <p v-if="saveError" class="mb-3 text-red-600" role="alert">{{ saveError }}</p>
-        <TaskEditor v-if="showEditor" :project-id="projectId" :task-id="taskId" @change="onTaskChange" />
-        <TaskDisplay v-else-if="taskId" :projectId="projectId" :taskId="taskId" />
-    </DialogLarge>
+        <template #actions
+            ><UButton
+                v-if="!isCreate && !isEdit"
+                color="neutral"
+                icon="i-lucide-pencil"
+                label="Bearbeiten"
+                variant="outline"
+                @click="isEdit = true"
+        /></template>
+        <template #body
+            ><UAlert v-if="saveError" class="mb-3" color="error" :title="saveError" /><TaskEditor
+                v-if="showEditor"
+                :project-id="projectId"
+                :task-id="taskId"
+                @change="onTaskChange" /><TaskDisplay v-else-if="taskId" :project-id="projectId" :task-id="taskId"
+        /></template>
+        <template #footer
+            ><div class="flex w-full justify-end gap-2">
+                <UButton color="neutral" :label="cancelButton" variant="outline" @click="resetRoute" /><UButton
+                    :color="task?.fullfilled && !showEditor ? 'error' : 'primary'"
+                    :icon="!showEditor ? (task?.fullfilled ? 'i-lucide-undo-2' : 'i-lucide-check') : undefined"
+                    :label="primaryLabel"
+                    :loading="isSaving"
+                    :variant="task?.fullfilled && !showEditor ? 'outline' : 'solid'"
+                    @click="onSave"
+                /></div
+        ></template>
+    </UModal>
 </template>

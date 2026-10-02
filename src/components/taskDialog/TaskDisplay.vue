@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
-import { Button, DomainObject, Input, Tag } from '../../ui';
+import { uiColor } from '../../platform';
 import TaskItem from '../TaskItem.vue';
 import Activities from './Activities.vue';
 
@@ -60,8 +60,15 @@ const createChild = async () => {
                 </div>
             </div>
             <div class="flex gap-2">
-                <Input v-model="childName" label="Neue Unteraufgabe" @enter="createChild" />
-                <Button :disabled="childSaving || !childName.trim()" @click="createChild">Anlegen</Button>
+                <UFormField class="flex-1" label="Neue Unteraufgabe"
+                    ><UInput v-model="childName" class="w-full" @keydown.enter="createChild"
+                /></UFormField>
+                <UButton
+                    :disabled="childSaving || !childName.trim()"
+                    label="Anlegen"
+                    :loading="childSaving"
+                    @click="createChild"
+                />
             </div>
             <p v-if="childError" role="alert">{{ childError }}</p>
             <Activities v-if="task?.activity" :activities="task?.activity" @comment="onComment" />
@@ -70,14 +77,21 @@ const createChild = async () => {
             <div v-if="sortedTags.length">
                 <div class="text-basic-secondary">Tags:</div>
                 <div class="flex gap-2">
-                    <Tag v-for="tag in sortedTags" :key="tag.id" :color="tag.color" :label="tag.name" size="S" />
+                    <UBadge
+                        v-for="tag in sortedTags"
+                        :key="tag.id"
+                        :color="uiColor(tag.color)"
+                        :label="tag.name"
+                        size="sm"
+                        variant="soft"
+                    />
                 </div>
             </div>
             <div v-if="assignees.length">
                 <div class="text-basic-secondary">Assignee:</div>
                 <div class="flex flex-col gap-2">
                     <div v-for="assignee in assignees" :key="assignee.domainIdentifier" class="flex items-center gap-2">
-                        <DomainObject :domain-object="assignee" size="S" />
+                        <UAvatar :alt="assignee.title" size="sm" :src="assignee.imageUrl" />
                         <span class="font-bold">{{ assignee.title }}</span>
                     </div>
                 </div>

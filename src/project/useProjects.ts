@@ -1,3 +1,4 @@
+import { useToast } from '@nuxt/ui/composables';
 import { computed } from 'vue';
 import { usePlugin } from '../composables/usePlugin';
 import {
@@ -6,11 +7,11 @@ import {
     useCustomModuleDataValuesMutations,
 } from '../data/ccm';
 import { CtColor } from '../platform';
-import { confirmDelete, showToast } from '../ui/state';
 import { createProjectShorty, ICONS, txx } from '../utils/utils';
 
 export default function useProjects() {
     const { moduleId } = usePlugin();
+    const toast = useToast();
     const { data: categories, isLoading, isError, refetch } = useCustomModuleDataCategoriesQuery<Project>(moduleId);
     const { createDataCategory, updateDataCategory, deleteDataCategory } =
         useCustomModuleDataCategoryMutations<Project>(moduleId);
@@ -37,18 +38,18 @@ export default function useProjects() {
             isDefault: true,
             dataCategoryId: created.id,
         });
-        showToast('Projekt wurde erstellt.');
+        toast.add({ title: 'Projekt wurde erstellt.', color: 'success' });
     };
     const updateProject = async (project: Project) => {
         await updateDataCategory({ ...project, description: project.description ?? '' });
-        showToast('Projekt wurde gespeichert.');
+        toast.add({ title: 'Projekt wurde gespeichert.', color: 'success' });
     };
 
     const deleteProject = async (id: number) => {
-        const confirmed = await confirmDelete(txx('Das Projekt und alle seine Aufgaben werden gelöscht.'));
+        const confirmed = window.confirm(txx('Das Projekt und alle seine Aufgaben werden gelöscht.'));
         if (confirmed) {
             const result = await deleteDataCategory(id);
-            showToast('Projekt wurde gelöscht.');
+            toast.add({ title: 'Projekt wurde gelöscht.', color: 'success' });
             void result;
             return true;
         }

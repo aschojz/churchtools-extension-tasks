@@ -6,9 +6,8 @@ import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProje
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
 import { dueDateBucket, type DueDateBucket } from '../domain/tasks';
-import { colorKey, CtColor, useCurrentUser } from '../platform';
+import { colorKey, CtColor, uiColor, useCurrentUser } from '../platform';
 import { createOrEditProject } from '../project/projectHelper';
-import { Card, EmptyState, LoadingMessage, Tag } from '../ui';
 import { ICONS, txx } from '../utils/utils';
 
 defineEmits<{ (event: 'edit-project', project: Project): void }>();
@@ -40,19 +39,20 @@ const tasksBySection = computed(
 );
 </script>
 <template>
-    <LoadingMessage v-if="isLoading" />
-    <p v-else-if="isError" role="alert">
-        Projekte konnten nicht geladen werden. <button @click="refetch()">Erneut versuchen</button>
-    </p>
-    <EmptyState
+    <div v-if="isLoading" class="p-8"><UProgress animation="carousel" /></div>
+    <UAlert v-else-if="isError" class="m-6" color="error" title="Projekte konnten nicht geladen werden."
+        ><template #actions><UButton label="Erneut versuchen" @click="refetch()" /></template
+    ></UAlert>
+    <UEmpty
         v-else-if="projects.length === 0"
-        :action="{
-            label: txx('Neues Projekt'),
-            color: CtColor.GREEN,
-            icon: 'fas fa-plus',
-            onClick: () => createOrEditProject(),
-        }"
-        :icon="ICONS.MAIN"
+        :actions="[
+            {
+                label: txx('Neues Projekt'),
+                icon: 'i-lucide-plus',
+                onClick: () => createOrEditProject(),
+            },
+        ]"
+        icon="i-lucide-list-checks"
         :title="txx('Noch keine Projekte')"
     />
     <div v-else class="w-full">
@@ -65,7 +65,7 @@ const tasksBySection = computed(
                 </div>
             </div>
         </section>
-        <LoadingMessage v-if="tasksLoading" />
+        <div v-if="tasksLoading" class="p-8"><UProgress animation="carousel" /></div>
         <p v-else-if="tasksError" class="mx-4 mb-6 lg:mx-6" role="alert">
             Aufgaben konnten nicht geladen werden. <button @click="refetchTasks()">Erneut versuchen</button>
         </p>
@@ -73,7 +73,12 @@ const tasksBySection = computed(
             <section v-for="section in sections" :key="section.id" :aria-labelledby="section.id" class="min-w-0">
                 <div class="mb-2 flex items-center gap-2">
                     <h2 :id="section.id" class="text-lg font-bold">{{ section.title }}</h2>
-                    <Tag :color="section.color" :label="String(tasksBySection[section.id].length)" size="0" />
+                    <UBadge
+                        :color="uiColor(section.color)"
+                        :label="String(tasksBySection[section.id].length)"
+                        size="sm"
+                        variant="soft"
+                    />
                 </div>
                 <div class="flex flex-col gap-2">
                     <div v-for="item in tasksBySection[section.id]" :key="`${item.project.id}-${item.task.id}`">
@@ -88,7 +93,7 @@ const tasksBySection = computed(
                 </div>
             </section>
         </div>
-        <EmptyState v-else icon="fas fa-check-circle" :title="txx('Keine offenen Aufgaben für dich')" />
+        <UEmpty v-else icon="i-lucide-circle-check" :title="txx('Keine offenen Aufgaben für dich')" />
 
         <section class="overview-section projects-heading">
             <div class="section-heading">
@@ -109,7 +114,7 @@ const tasksBySection = computed(
                 class="h-full w-full"
                 :to="{ name: 'project', params: { projectId: project.id } }"
             >
-                <Card class="hover:border-basic-300 h-full">
+                <UCard class="h-full">
                     <div class="flex items-center gap-4">
                         <div
                             class="project-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
@@ -125,7 +130,7 @@ const tasksBySection = computed(
                     <div v-if="project.description" class="text-sec mt-3 line-clamp-3">
                         {{ project.description }}
                     </div>
-                </Card>
+                </UCard>
             </RouterLink>
         </div>
     </div>

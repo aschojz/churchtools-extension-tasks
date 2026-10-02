@@ -8,9 +8,9 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 ## Erledigt
 
 - Dependencies aktualisiert und per Lockfile reproduzierbar gemacht.
-- ChurchTools Styleguide und Utils vollständig entfernt. Eine lokale UI-Bibliothek
-  unter `src/ui/` deckt Dialoge, Felder, Menüs, Tags, Karten und Statusanzeigen ab;
-  `src/platform.ts` kapselt die wenigen benötigten Plattformfunktionen.
+- ChurchTools Styleguide und Utils vollständig entfernt. Nuxt UI deckt Dialoge,
+  Felder, Menüs, Tags, Karten und Statusanzeigen ab; `src/platform.ts` kapselt die
+  wenigen benötigten Plattformfunktionen.
 - Apollo, GraphQL und die externe Icon-Suche entfernt; Projekte verwenden eine
   kuratierte lokale Font-Awesome-Auswahl.
 - CCM-Zugriffe, JSON-Serialisierung und Cache-Invalidierung in
@@ -60,9 +60,13 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Ein weiterer echter Browser-/CCM-Test bestätigt die Projektanlage ohne
   `crypto.randomUUID`, den erzeugten Kategorie-Schlüssel und die Standardliste;
   auch dieses Testprojekt wurde danach vollständig gelöscht.
-- `npm audit`: keine bekannten Befunde im aktuellen Abhängigkeitsbaum.
-- Browserprüfung der neuen lokalen UI im echten eingebetteten ChurchTools-Rahmen:
-  Übersicht, Projektansicht, Aufgaben- und Projekt-Dialog sind funktionsfähig.
+- `npm audit`: ein niedriger Befund in der transitiven Windows-Dev-Server-Abhängigkeit
+  `fontless > esbuild`; `npm audit fix` kann ihn mit dem aktuellen Nuxt-UI-Baum
+  noch nicht auflösen. Produktionscode und die lokale macOS-Ausführung sind davon
+  nicht betroffen.
+- Browserprüfung der Nuxt-UI-Oberfläche im echten eingebetteten ChurchTools-Rahmen:
+  Übersicht, Projektansicht, Select-Menüs sowie einfache und verschachtelte Dialoge
+  sind funktionsfähig. Der Tailwind-Präfix verhindert Klassennamenskollisionen.
 
 ## Noch offen
 
@@ -75,7 +79,7 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
 - Unteraufgaben werden derzeit in zwei aufeinanderfolgenden Requests angelegt und
   verknüpft. Bei einem Teilausfall bleibt die neue Aufgabe als normale Aufgabe
   erhalten und ein Fehler wird angezeigt; eine serverseitige Transaktion fehlt.
-- Tastaturnavigation, Fokusführung und Screenreader-Beschriftungen der lokalen
-  Komponenten sollten in einem eigenen Accessibility-Durchlauf vertieft werden.
+- Die Accessibility der fachlichen Abläufe sollte trotz der zugänglichen
+  Nuxt-UI-Basis in einem eigenen Durchlauf mit Tastatur und Screenreader geprüft werden.
 - Produktfeatures aus der Analyse wie Vorlagen, Wiederholungen, Erinnerungen,
   Archiv und Mehrfachaktionen folgen nach der Testinstanz-Abnahme.

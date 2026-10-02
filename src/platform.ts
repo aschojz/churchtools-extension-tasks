@@ -48,3 +48,12 @@ export const colorKey = (color: unknown): string =>
         : color && typeof color === 'object' && 'key' in color
           ? String(color.key)
           : 'basic';
+export const uiColor = (color: unknown): 'neutral' | 'error' | 'warning' | 'success' | 'info' | 'primary' => {
+    const key = colorKey(color);
+    if (key === 'red') return 'error';
+    if (key === 'yellow' || key === 'orange') return 'warning';
+    if (key === 'green' || key === 'teal') return 'success';
+    if (key === 'blue') return 'info';
+    if (key === 'violet' || key === 'purple' || key === 'pink') return 'primary';
+    return 'neutral';
+};

@@ -2,8 +2,6 @@
 import { onMounted, ref, toRef } from 'vue';
 import { useTasks } from '../composables/useTasks';
 import { taskDraft } from '../domain/tasks';
-import { CtColor } from '../platform';
-import { Button, Input } from '../ui';
 
 const props = defineProps<{
     list: TransformedList;
@@ -48,11 +46,19 @@ const resetTask = () => {
         class="flex cursor-pointer flex-col justify-between gap-2 rounded border border-gray-100 bg-white p-3 shadow-sm transition-colors hover:border-gray-200"
         @keydown.escape="resetTask"
     >
-        <p v-if="error" role="alert">{{ error }}</p>
-        <Input ref="inputRef" v-model="task.name" label="Titel" @enter="onCreateTask" @input="task.name = $event" />
+        <UAlert v-if="error" color="error" :title="error" />
+        <UFormField label="Titel"
+            ><UInput ref="inputRef" v-model="task.name" class="w-full" @keydown.enter="onCreateTask"
+        /></UFormField>
         <div class="flex justify-between">
-            <Button :color="CtColor.BASIC" outlined size="S" @click="resetTask"> Abbrechen </Button>
-            <Button :disabled="saving || !task.name.trim()" size="S" @click="onCreateTask"> Erstellen </Button>
+            <UButton color="neutral" label="Abbrechen" size="sm" variant="outline" @click="resetTask" />
+            <UButton
+                :disabled="saving || !task.name.trim()"
+                label="Erstellen"
+                :loading="saving"
+                size="sm"
+                @click="onCreateTask"
+            />
         </div>
     </div>
 </template>

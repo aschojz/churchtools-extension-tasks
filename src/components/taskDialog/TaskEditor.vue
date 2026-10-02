@@ -6,7 +6,6 @@ import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
 import { taskDraft } from '../../domain/tasks';
 import { type PersonDisplay, personDisplay } from '../../platform';
-import { Button, Input, InputDate, SelectDropdown, Textarea } from '../../ui';
 import DialogTag from '../DialogTag.vue';
 
 const props = defineProps<{ taskId?: number; projectId: number }>();
@@ -58,46 +57,65 @@ const onSearchForPerson = async (query: string) => {
     );
     return result.map(r => ({ ...r, id: Number(r.domainIdentifier), nameTranslated: r.title }));
 };
+const personSearch = ref('');
+const personOptions = ref<Array<{ id: number; label: string }>>([]);
+watch(
+    assignees,
+    value => {
+        personOptions.value = value.map(person => ({ id: person.id, label: person.nameTranslated }));
+    },
+    { immediate: true },
+);
+watch(personSearch, async query => {
+    if (query.trim().length < 2) return;
+    const results = await onSearchForPerson(query);
+    personOptions.value = results.map(person => ({ id: person.id, label: person.nameTranslated }));
+});
 </script>
 <template>
     <p v-if="isLoading">Aufgabe wird geladen …</p>
     <p v-else-if="missing" role="alert">Diese Aufgabe wurde nicht gefunden.</p>
     <div v-else class="flex flex-col gap-2">
-        <Input v-model="internTask.name" :horizontal="true" label="Titel" required @input="internTask.name = $event" />
-        <Textarea
-            v-model="internTask.description"
-            :horizontal="true"
-            label="Beschreibung"
-            :rows="10"
-            @input="internTask.description = $event"
-        />
-        <InputDate v-model="internTask.dueDate" class="max-w-[520px]" :horizontal="true" label="Fällig am" />
+        <UFormField label="Titel" required><UInput v-model="internTask.name" class="w-full" /></UFormField>
+        <UFormField label="Beschreibung"
+            ><UTextarea v-model="internTask.description" class="w-full" :rows="8"
+        /></UFormField>
+        <UFormField label="Fällig am"><UInput v-model="internTask.dueDate" class="w-full" type="date" /></UFormField>
         <label v-if="parent" class="flex items-center gap-2">
             Tage vor der übergeordneten Aufgabe
             <input v-model.number="internTask.dueDateRelative" class="rounded border p-2" min="0" type="number" />
         </label>
-        <Input v-model="internTask.url" :horizontal="true" label="Link" />
+        <UFormField label="Link"><UInput v-model="internTask.url" class="w-full" type="url" /></UFormField>
         <div class="flex items-end gap-2">
-            <SelectDropdown
-                v-model="internTask.tags"
-                class="flex-grow"
-                emit-id
-                :horizontal="true"
-                label="Tags"
-                multiple
-                :options="tagOptions"
+            <UFormField class="flex-grow" label="Tags"
+                ><USelectMenu
+                    v-model="internTask.tags"
+                    class="w-full"
+                    :items="tagOptions"
+                    label-key="nameTranslated"
+                    multiple
+                    value-key="id"
+            /></UFormField>
+            <UButton
+                color="neutral"
+                icon="i-lucide-plus"
+                label="Tag erstellen"
+                variant="outline"
+                @click="createTagIsOpen = true"
             />
-            <Button icon="fas fa-plus" label="Tag erstellen" outlined @click="createTagIsOpen = true" />
         </div>
-        <SelectDropdown
-            v-model="internTask.assignedTo"
-            emit-id
-            :horizontal="true"
-            label="Verantwortliche"
-            multiple
-            :options="assignees"
-            :search-function="onSearchForPerson"
-        />
+        <UFormField label="Verantwortliche"
+            ><USelectMenu
+                v-model="internTask.assignedTo"
+                v-model:search-term="personSearch"
+                class="w-full"
+                ignore-filter
+                :items="personOptions"
+                label-key="label"
+                multiple
+                placeholder="Person suchen …"
+                value-key="id"
+        /></UFormField>
         <DialogTag v-if="createTagIsOpen" :project-id="projectId" @close="createTagIsOpen = false" />
     </div>
 </template>

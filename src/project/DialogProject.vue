@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { colorOptions } from '../platform';
-import { DialogLarge, Input, SelectDropdown, Textarea } from '../ui';
 import { txx } from '../utils/utils';
 import useProjects from './useProjects';
 
@@ -25,13 +24,13 @@ const icons = [
 const { createProject, updateProject } = useProjects();
 const saveError = ref('');
 const saving = ref(false);
-const onSave = async (close: () => void) => {
+const onSave = async () => {
     if (saving.value) return;
     saving.value = true;
     saveError.value = '';
     try {
         await (props.project?.id ? updateProject : createProject)(proj.value);
-        close();
+        emit('close');
     } catch (error) {
         saveError.value = error instanceof Error ? error.message : 'Projekt konnte nicht gespeichert werden.';
     } finally {
@@ -40,23 +39,41 @@ const onSave = async (close: () => void) => {
 };
 </script>
 <template>
-    <DialogLarge
-        :context="txx('Aufgabenverwaltung')"
+    <UModal
+        :description="txx('Aufgabenverwaltung')"
+        :open="true"
         :title="project ? txx('Projekt bearbeiten') : txx('Neues Projekt erstellen')"
-        @close="emit('close')"
-        @save="onSave"
+        @update:open="(value: boolean) => !value && emit('close')"
     >
-        <p v-if="saveError" role="alert">{{ saveError }}</p>
-        <div class="flex flex-col gap-4">
-            <Input v-model="proj.name" label="Name" :max-length="100" @input="proj.name = $event" />
-            <Textarea
-                v-model="proj.description"
-                label="Beschreibung"
-                :max-length="300"
-                @input="proj.description = $event"
-            />
-            <SelectDropdown v-model="proj.icon" emit-id label="Icon" :options="icons" />
-            <SelectDropdown v-model="proj.color" emit-id label="Farbe" :options="colorOptions" />
-        </div>
-    </DialogLarge>
+        <template #body
+            ><UAlert v-if="saveError" color="error" :title="saveError" />
+            <div class="flex flex-col gap-4">
+                <UFormField label="Name"><UInput v-model="proj.name" class="w-full" :maxlength="100" /></UFormField
+                ><UFormField label="Beschreibung"
+                    ><UTextarea v-model="proj.description" class="w-full" :maxlength="300" /></UFormField
+                ><UFormField label="Icon"
+                    ><USelect
+                        v-model="proj.icon"
+                        class="w-full"
+                        :items="icons"
+                        label-key="nameTranslated"
+                        value-key="id" /></UFormField
+                ><UFormField label="Farbe"
+                    ><USelect
+                        v-model="proj.color"
+                        class="w-full"
+                        :items="colorOptions"
+                        label-key="nameTranslated"
+                        value-key="id"
+                /></UFormField></div
+        ></template>
+        <template #footer
+            ><div class="flex w-full justify-end gap-2">
+                <UButton color="neutral" label="Abbrechen" variant="outline" @click="emit('close')" /><UButton
+                    label="Speichern"
+                    :loading="saving"
+                    @click="onSave"
+                /></div
+        ></template>
+    </UModal>
 </template>
