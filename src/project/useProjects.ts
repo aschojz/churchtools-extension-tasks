@@ -7,7 +7,7 @@ import {
     useCustomModuleDataCategoryMutations,
     useCustomModuleDataValuesMutations,
 } from '../data/ccm';
-import { ICONS, txx } from '../utils/utils';
+import { createProjectShorty, ICONS, txx } from '../utils/utils';
 
 export default function useProjects() {
     const { moduleId } = usePlugin();
@@ -27,7 +27,7 @@ export default function useProjects() {
             icon: ICONS.DEFAULT_PROJECT,
             ...project,
             description: project.description ?? '',
-            shorty: `project_${crypto.randomUUID()}`,
+            shorty: createProjectShorty(),
             securityLevelId: 1,
             customModuleId: id,
         });

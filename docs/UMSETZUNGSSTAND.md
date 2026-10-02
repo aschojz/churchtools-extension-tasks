@@ -1,6 +1,6 @@
 # Umsetzungsstand
 
-Stand: 28.09.2026
+Stand: 02.10.2026
 
 Die erste Stabilisierung aus der Projektanalyse ist umgesetzt. Der Stand baut,
 wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
@@ -36,10 +36,13 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
   passenden Projektdialog.
 - Tags lassen sich direkt in der Tag-Ansicht anlegen, bearbeiten und nach Bestätigung
   löschen. Beim Löschen werden Referenzen aus den betroffenen Aufgaben entfernt.
+- Die Projektanlage funktioniert auch in lokalen HTTP-Kontexten, in denen
+  `crypto.randomUUID` fehlt. Ein `getRandomValues`-basierter Fallback erzeugt einen
+  zulässigen, eindeutigen Kategorie-Schlüssel.
 
 ## Verifikation
 
-- `npm run check`: Typecheck, ESLint, 15 Vitest-Tests und Production-Build grün.
+- `npm run check`: Typecheck, ESLint, 17 Vitest-Tests und Production-Build grün.
 - Browser-Smoke-Test mit vollständig simulierten CCM-Daten: Übersicht, Board,
   Tags, Detail und Projekt-Dialog laden ohne Browserfehler.
 - Der Smoke-Test bestätigt: reine Navigation erzeugt keine Schreibanfrage,
@@ -52,6 +55,9 @@ wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
   Projekt und Standardliste, Aufgabenanlage, Bearbeitung, Statuswechsel,
   Aktivitätsverlauf sowie alle fünf Projektansichten. Das Testprojekt wurde danach
   vollständig gelöscht.
+- Ein weiterer echter Browser-/CCM-Test bestätigt die Projektanlage ohne
+  `crypto.randomUUID`, den erzeugten Kategorie-Schlüssel und die Standardliste;
+  auch dieses Testprojekt wurde danach vollständig gelöscht.
 - `npm audit`: keine kritischen oder hohen Befunde mehr. Sechs mittlere Befunde
   bleiben in der veröffentlichten ChurchTools-Markdown-Kette (`showdown` /
   `vue-showdown`). Der von npm vorgeschlagene Fix wäre ein inkompatibles Downgrade
