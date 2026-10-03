@@ -26,6 +26,14 @@ const resetRoute = () => {
 const { task, toggleTask } = useTask(projectId, taskId);
 const { updateTask, getObjectDiff, createTask } = useTasks(projectId);
 
+const dialogTitle = computed(() =>
+    isCreate.value
+        ? txx('Aufgabe erstellen')
+        : isEdit.value
+          ? txx('Aufgabe bearbeiten')
+          : (task.value?.name ?? txx('Aufgabe anzeigen')),
+);
+
 const cancelButton = computed(() => (isCreate.value || isEdit.value ? txx('Abbrechen') : txx('Schließen')));
 const primaryLabel = computed(() =>
     isCreate.value
@@ -70,13 +78,7 @@ const onSave = async () => {
         :description="project?.name"
         :open="true"
         scrollable
-        :title="
-            isCreate
-                ? txx('Aufgabe erstellen')
-                : isEdit
-                  ? txx('Aufgabe bearbeiten')
-                  : (task?.name ?? txx('Aufgabe anzeigen'))
-        "
+        :title="dialogTitle"
         :ui="{
             body: 'tasks-modal-body',
             content: 'tasks-modal-content',
@@ -86,15 +88,35 @@ const onSave = async () => {
         }"
         @update:open="(value: boolean) => !value && resetRoute()"
     >
-        <template #actions
-            ><UButton
-                v-if="!isCreate && !isEdit"
-                color="neutral"
-                icon="i-lucide-pencil"
-                label="Bearbeiten"
-                variant="outline"
-                @click="isEdit = true"
-        /></template>
+        <template #header>
+            <div class="task-dialog-header">
+                <div class="min-w-0">
+                    <h2>{{ dialogTitle }}</h2>
+                    <p v-if="project?.name">{{ project.name }}</p>
+                </div>
+                <div class="task-dialog-header-actions">
+                    <UButton
+                        v-if="!isCreate && !isEdit"
+                        aria-label="Aufgabe bearbeiten"
+                        color="neutral"
+                        icon="i-lucide-pencil"
+                        square
+                        title="Aufgabe bearbeiten"
+                        variant="ghost"
+                        @click="isEdit = true"
+                    />
+                    <UButton
+                        aria-label="Dialog schließen"
+                        color="neutral"
+                        icon="i-lucide-x"
+                        square
+                        title="Dialog schließen"
+                        variant="ghost"
+                        @click="resetRoute"
+                    />
+                </div>
+            </div>
+        </template>
         <template #body
             ><UAlert v-if="saveError" class="mb-3" color="error" :title="saveError" /><TaskEditor
                 v-if="showEditor"

@@ -116,7 +116,7 @@ button {
     flex: 1;
     min-width: 0;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
 }
 [data-color='red'] {
     --chip: #ffd8d5;
@@ -144,9 +144,11 @@ button {
     --chip: #cff0ed;
 }
 .project-page {
+    display: flex;
+    height: 100%;
     width: 100%;
     min-width: 0;
-    min-height: 100%;
+    min-height: 0;
 }
 .project-icon,
 .project-card-icon {
@@ -198,6 +200,13 @@ button {
     background: #f3f2f0;
     box-shadow: none;
 }
+.board-column-collapse {
+    color: #77726c !important;
+}
+.project-view-header {
+    border-color: #e5e2dd !important;
+    background: rgb(255 255 255 / 58%);
+}
 .overview-empty {
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -244,6 +253,32 @@ button {
     padding: 20px 24px 16px !important;
     color: #242322;
     background: #fff;
+}
+.task-dialog-header {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.task-dialog-header h2 {
+    margin: 0;
+    color: #242322;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+.task-dialog-header p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+.task-dialog-header-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+    margin: -4px -8px -4px 0;
 }
 .tasks-modal-body {
     padding: 0 !important;

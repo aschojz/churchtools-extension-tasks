@@ -4,54 +4,77 @@ import { computed } from 'vue';
 const props = defineProps<{
     percent: number;
 }>();
-const radius = 10;
+const radius = 9;
 const strokeWidth = 2;
 const circumference = radius * 2 * Math.PI;
+const size = 22;
+
+const safePercent = computed(() => Math.min(100, Math.max(0, Math.round(props.percent || 0))));
+const complete = computed(() => safePercent.value === 100);
 
 const strokeDasharray = computed(() => `${circumference} ${circumference}`);
 const strokeDashoffset = computed(() => {
-    const offset = circumference - (props.percent / 100) * circumference;
+    const offset = circumference - (safePercent.value / 100) * circumference;
     return offset;
 });
-const width = computed(() => 22);
 </script>
 <template>
-    <div class="relative">
-        <svg class="progress-ring" :height="width" :width="width">
+    <div :aria-label="`${safePercent} Prozent der Unteraufgaben erledigt`" class="progress-indicator" role="img">
+        <svg class="progress-ring" :height="size" :width="size">
+            <circle
+                class="progress-ring__track"
+                :cx="size / 2"
+                :cy="size / 2"
+                fill="transparent"
+                :r="radius"
+                :stroke-width="strokeWidth"
+            />
             <circle
                 class="progress-ring__circle"
-                :cx="radius + strokeWidth / 2"
-                :cy="radius + strokeWidth / 2"
+                :cx="size / 2"
+                :cy="size / 2"
                 fill="transparent"
                 :r="radius"
                 :stroke-width="strokeWidth"
                 :style="`stroke-dasharray: ${strokeDasharray}; stroke-dashoffset: ${strokeDashoffset}`"
             />
         </svg>
-        <span class="absolute">{{ percent }}%</span>
+        <UIcon v-if="complete" class="progress-indicator__check" name="i-lucide-check" />
+        <span v-else class="progress-indicator__value">{{ safePercent }}</span>
     </div>
 </template>
 <style scoped>
-.progress-ring {
-    flex-shrink: 0;
+.progress-indicator {
+    position: relative;
+    display: inline-grid;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    place-items: center;
 }
-
+.progress-ring {
+    position: absolute;
+    inset: 0;
+}
+.progress-ring__track {
+    stroke: #dedbd5;
+}
 .progress-ring__circle {
-    fill: var(--color-basic-b-pale);
-    stroke: var(--color-green-bright);
+    stroke: #3f8d63;
+    stroke-linecap: round;
     transition: 0.35s stroke-dashoffset;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
 }
-span {
-    color: black;
+.progress-indicator__value {
+    color: #55514d;
     font-size: 8px;
-    top: 0;
-    width: 22px;
-    text-align: center;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-weight: 700;
+    line-height: 1;
+}
+.progress-indicator__check {
+    width: 12px;
+    height: 12px;
+    color: #2f7b53;
 }
 </style>

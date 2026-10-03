@@ -105,7 +105,7 @@ const listIsOpen = ref<TransformedList>();
 </script>
 <template>
     <div
-        class="board-column flex max-h-[700px] flex-shrink-0 flex-col"
+        class="board-column flex h-full min-h-0 flex-shrink-0 flex-col"
         :class="list.isCollapsed ? 'min-h-[300px] w-12' : 'w-96'"
     >
         <div
@@ -115,15 +115,18 @@ const listIsOpen = ref<TransformedList>();
                 'flex min-h-96 flex-col items-center gap-2': list.isCollapsed,
             }"
         >
-            <button
+            <UButton
                 v-if="$route.name === 'project-board'"
-                class="my-auto flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-gray-50 text-gray-400"
+                :aria-label="list.isCollapsed ? 'Spalte ausklappen' : 'Spalte einklappen'"
+                class="board-column-collapse my-auto shrink-0"
                 :class="{ 'm-2': list.isCollapsed }"
+                color="neutral"
+                :icon="list.isCollapsed ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'"
+                size="sm"
+                square
+                variant="ghost"
                 @click="onUpdateList({ isCollapsed: !list.isCollapsed })"
-            >
-                <i v-if="list.isCollapsed" class="fas fa-angle-down relative left-px"></i>
-                <i v-else class="fas fa-angle-right relative top-px"></i>
-            </button>
+            />
             <div class="inline-flex flex-grow items-center overflow-hidden">
                 <span
                     class="flex items-center gap-2 overflow-hidden text-xl font-bold text-ellipsis whitespace-nowrap"

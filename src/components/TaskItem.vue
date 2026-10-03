@@ -167,12 +167,15 @@ const breadcrumbs = computed(() => {
             </div>
             <UDropdownMenu :items="contextMenu"
                 ><UButton
-                    class="absolute top-1 right-1 hidden group-hover:inline-flex"
+                    aria-label="Aufgabenaktionen"
+                    class="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                     color="neutral"
                     icon="i-lucide-ellipsis"
                     size="sm"
                     square
                     variant="outline"
+                    @click.stop
+                    @pointerdown.stop
             /></UDropdownMenu>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
