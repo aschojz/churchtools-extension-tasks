@@ -11,6 +11,7 @@ import useProjects from './project/useProjects';
 import { ICONS } from './utils/utils';
 
 const DialogProject = defineAsyncComponent(() => import('./project/DialogProject.vue'));
+const DiagnosticsDialog = defineAsyncComponent(() => import('./components/DiagnosticsDialog.vue'));
 
 const route = useRoute();
 const router = useRouter();
@@ -18,6 +19,8 @@ const { isLoading, isError, refetch } = usePlugin();
 const { projects, deleteProject } = useProjects();
 const sidebarCollapsed = ref(false);
 const searchOpen = ref(false);
+const diagnosticsOpen = ref(false);
+const appVersion = __APP_VERSION__;
 const appRoot = ref<HTMLElement>();
 const availableHeight = ref('100dvh');
 
@@ -178,6 +181,14 @@ const newTaskRoute = computed(() =>
                             <UButton
                                 block
                                 color="neutral"
+                                icon="i-lucide-activity"
+                                :label="sidebarCollapsed ? undefined : `Systemstatus · v${appVersion}`"
+                                variant="ghost"
+                                @click="diagnosticsOpen = true"
+                            />
+                            <UButton
+                                block
+                                color="neutral"
                                 href="https://github.com/aschojz/churchtools-extension-tasks/issues"
                                 icon="i-lucide-message-circle-warning"
                                 :label="sidebarCollapsed ? undefined : 'Feedback geben'"
@@ -300,5 +311,6 @@ const newTaskRoute = computed(() =>
             :project="activeProjectDialog.project"
             @close="closeProjectDialog"
         />
+        <DiagnosticsDialog v-if="diagnosticsOpen" @close="diagnosticsOpen = false" />
     </UApp>
 </template>

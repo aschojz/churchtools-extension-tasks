@@ -53,7 +53,7 @@ in einem ersten Stabilisierungsschritt bearbeitet:
 | UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                                                                               |
 | UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                                                                            |
 | A11Y-01 | **Weitgehend umgesetzt** | Aufgabentitel, Statusschalter und zentrale Icon-Aktionen verwenden semantische, benannte Bedienelemente. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                             |
-| UI-01   | **Weitgehend umgesetzt** | Tailwind Preflight ist deaktiviert, Utility-Selektoren werden unter `#tasks` erzeugt und das Dashboard berechnet seine Höhe aus dem tatsächlichen Einbaupunkt. Portal-Styles bleiben gezielt auf die aktive Extension-Seite begrenzt.          |
+| UI-01   | **Weitgehend umgesetzt** | Tailwind Preflight ist deaktiviert, Utility-Selektoren werden unter `#tasks` erzeugt und das Dashboard berechnet seine Höhe aus dem tatsächlichen Einbaupunkt. Portal-Styles bleiben gezielt auf die aktive Extension-Seite begrenzt.           |
 
 Beim Browser-Smoke-Test wurde außerdem ein älterer CCM-Wert mit einem ungültigen
 `tags`-Feld gefunden. Array-Felder werden in Karten, Lookups und Editor-Drafts
@@ -585,6 +585,11 @@ Vue-3-Linie; der als „latest“ gemeldete 2.x-Tag ist kein Upgrade.
 6. Security-Ausnahmen nur mit Begründung und Ablaufdatum dokumentieren.
 
 #### OPS-01 · P2 · Fehlende Diagnosefähigkeit
+
+**Status:** Umgesetzt. Die Sidebar zeigt die Paketversion und öffnet einen
+Systemstatus mit Build-Commit, Datenschemaversion, Modul-ID, Anmeldestatus und
+isolierten Validierungsfehlern. Die kopierbare Diagnose enthält bewusst keine
+Aufgabeninhalte und keine Personendaten.
 
 **Beobachtung:** Die Anwendung zeigt keine Build-Version und bietet keine
 Diagnoseansicht für fehlerhafte CCM-Werte, Migrationsstand oder fehlgeschlagene
