@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { failWithCompensation } from '../../application/compensation';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
 import { uiColor } from '../../platform';
@@ -15,7 +16,7 @@ const subTasks = computed(() =>
     (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []).map(st => tasksMap.value[st]).filter(st => st),
 );
 
-const { updateTask, createTask, tasksMap } = useTasks(pId);
+const { updateTask, createTask, deleteTask, tasksMap } = useTasks(pId);
 
 const onComment = (activities: ActivityEntry[]) => {
     if (!task.value) {
@@ -31,8 +32,9 @@ const createChild = async () => {
     childSaving.value = true;
     childError.value = '';
     const parent = task.value;
+    let child: Awaited<ReturnType<typeof createTask>> | undefined;
     try {
-        const child = await createTask({
+        child = await createTask({
             type: 'task',
             name: childName.value.trim(),
             fullfilled: false,
@@ -44,8 +46,17 @@ const createChild = async () => {
             subTasks: [...(Array.isArray(parent.subTasks) ? parent.subTasks : []), child.id],
         });
         childName.value = '';
-    } catch {
-        childError.value = 'Unteraufgabe konnte nicht vollständig gespeichert werden. Bitte die Aufgabenliste prüfen.';
+    } catch (error) {
+        if (child)
+            await failWithCompensation('Unteraufgabe anlegen', error, [
+                () => deleteTask(child!.id, props.projectId, 1),
+            ]).catch(compensationError => {
+                childError.value =
+                    compensationError instanceof Error
+                        ? compensationError.message
+                        : 'Unteraufgabe konnte nicht angelegt werden.';
+            });
+        else childError.value = error instanceof Error ? error.message : 'Unteraufgabe konnte nicht angelegt werden.';
     } finally {
         childSaving.value = false;
     }

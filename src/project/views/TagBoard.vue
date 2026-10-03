@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
+import { failWithCompensation } from '../../application/compensation';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
 import { useTags } from '../../composables/useTags';
@@ -20,13 +21,22 @@ const deleteSelectedTag = async (tag: TransformedTag) => {
     const confirmed = window.confirm(`Der Tag „${tag.name}“ wird von allen Aufgaben entfernt.`);
     if (!confirmed) return;
     actionError.value = '';
+    const changedTasks: TransformedTask[] = [];
     try {
         for (const task of tasks.value.filter(task => Array.isArray(task.tags) && task.tags.includes(tag.id))) {
             await updateTask({ ...task, tags: task.tags?.filter(id => id !== tag.id) });
+            changedTasks.push(task);
         }
         await deleteTag(tag.id);
-    } catch {
-        actionError.value = 'Tag konnte nicht vollständig gelöscht werden. Bitte erneut versuchen.';
+    } catch (error) {
+        await failWithCompensation(
+            'Tag löschen',
+            error,
+            changedTasks.map(original => () => updateTask({ ...original, revision: (original.revision ?? 0) + 1 })),
+        ).catch(compensationError => {
+            actionError.value =
+                compensationError instanceof Error ? compensationError.message : 'Tag konnte nicht gelöscht werden.';
+        });
     }
 };
 

@@ -222,6 +222,12 @@ zukünftige unbekannte Versionen kontrolliert abgewiesen.
 
 #### DATA-03 · P1 · Nicht atomare Mehrfachoperationen
 
+**Status:** Die bekannten mehrstufigen UI-Abläufe besitzen jetzt explizite
+Kompensationen. Schlägt die Standardliste, Elternverknüpfung, Tag-Bereinigung
+oder rekursive Duplizierung fehl, werden bereits erzeugte beziehungsweise
+geänderte Daten in umgekehrter Reihenfolge zurückgesetzt. Scheitert auch die
+Bereinigung, nennt die Fehlermeldung den möglichen manuellen Reparaturbedarf.
+
 **Beobachtung:** Mehrere Anwendungsfälle bestehen aus getrennten Requests:
 
 - Projekt erstellen, anschließend Standardliste erstellen
@@ -236,6 +242,11 @@ Referenzen. Ein manueller Retry kann Duplikate erzeugen.
 **Empfehlung:** Kommandos in einem Application-Service bündeln, idempotente
 Operation-IDs verwenden und Kompensationsschritte definieren. Die UI sollte
 erst Erfolg melden, wenn der vollständige Ablauf abgeschlossen ist.
+
+**Offen:** Die Kompensation reduziert inkonsistente Zustände, ersetzt aber keine
+serverseitige Transaktion. Persistente Operation-IDs für sichere Wiederholungen
+benötigen weiterhin Unterstützung durch das Backend oder ein separates
+Operation-Log.
 
 #### DATA-04 · P1 · Rekursives Löschen ohne Wiederherstellung
 

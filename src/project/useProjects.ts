@@ -1,5 +1,6 @@
 import { useToast } from '@nuxt/ui/composables';
 import { computed } from 'vue';
+import { failWithCompensation } from '../application/compensation';
 import { usePlugin } from '../composables/usePlugin';
 import {
     useCustomModuleDataCategoriesQuery,
@@ -33,13 +34,17 @@ export default function useProjects() {
             securityLevelId: 1,
             customModuleId: id,
         });
-        await createCustomDataValue({
-            type: 'list',
-            name: 'Unsortiert',
-            sortKey: 0,
-            isDefault: true,
-            dataCategoryId: created.id,
-        });
+        try {
+            await createCustomDataValue({
+                type: 'list',
+                name: 'Unsortiert',
+                sortKey: 0,
+                isDefault: true,
+                dataCategoryId: created.id,
+            });
+        } catch (error) {
+            await failWithCompensation('Projekt anlegen', error, [() => deleteDataCategory(created.id)]);
+        }
         toast.add({ title: 'Projekt wurde erstellt.', color: 'success' });
     };
     const updateProject = async (project: Project) => {

@@ -44,11 +44,11 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         };
         await updateCustomDataValue(payload);
     };
-    const deleteTask = async (taskId: number, categoryId = pId.value) => {
+    const deleteTask = async (taskId: number, categoryId = pId.value, revision?: number) => {
         return await deleteCustomDataValue({
             id: taskId,
             dataCategoryId: categoryId,
-            revision: tasksMap.value[taskId]?.revision,
+            revision: revision ?? tasksMap.value[taskId]?.revision,
         });
     };
 

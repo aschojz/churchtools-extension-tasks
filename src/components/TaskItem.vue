@@ -2,6 +2,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { failWithCompensation } from '../application/compensation';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
 import { descendantIds } from '../domain/tasks';
 import { uiColor } from '../platform';
@@ -71,14 +72,26 @@ const createTaskOrSubtask = async ({ id: taskId, ...data }: TransformedTask) => 
 };
 
 async function duplicateTask() {
-    const originalTask = task.value;
-    const newSubtaskIds = await duplicateSubtasks(
-        Array.isArray(originalTask.subTasks) ? originalTask.subTasks : undefined,
-    );
-    const newTask = await createTaskOrSubtask({ ...originalTask, subTasks: newSubtaskIds });
-    return newTask;
+    const createdIds: number[] = [];
+    try {
+        const originalTask = task.value;
+        const newSubtaskIds = await duplicateSubtasks(
+            Array.isArray(originalTask.subTasks) ? originalTask.subTasks : undefined,
+            new Set<number>(),
+            createdIds,
+        );
+        const newTask = await createTaskOrSubtask({ ...originalTask, subTasks: newSubtaskIds });
+        createdIds.push(newTask.id);
+        return newTask;
+    } catch (error) {
+        await failWithCompensation(
+            'Aufgabe duplizieren',
+            error,
+            createdIds.map(createdId => () => deleteTask(createdId, props.projectId, 1)),
+        );
+    }
 }
-async function duplicateSubtasks(subtaskIds?: number[], visited = new Set<number>()) {
+async function duplicateSubtasks(subtaskIds?: number[], visited = new Set<number>(), createdIds: number[] = []) {
     const newSubtaskIds = [];
 
     if (subtaskIds?.length) {
@@ -94,6 +107,7 @@ async function duplicateSubtasks(subtaskIds?: number[], visited = new Set<number
             const newSubtask = await createTaskOrSubtask({ ...originalSubtask, subTasks: nestedSubtaskIds });
             if (newSubtask) {
                 newSubtaskIds.push(newSubtask.id);
+                createdIds.push(newSubtask.id);
             }
         }
     }
