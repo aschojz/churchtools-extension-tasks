@@ -4,7 +4,6 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { failWithCompensation } from '../application/compensation';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
-import { descendantIds } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
 
@@ -24,7 +23,7 @@ const {
     calculateDueDate,
     createTask,
     deleteTask,
-    updateTask,
+    archiveTaskTree,
     toggleTask,
     getSuperParent,
     getProgress,
@@ -128,17 +127,8 @@ const runAction = async (action: () => Promise<unknown>) => {
     }
 };
 const deleteRecursive = async (task: TransformedTask) => {
-    if (!window.confirm('Die Aufgabe und ihre Unteraufgaben werden gelöscht.')) return;
-    const ids = descendantIds(task, tasksMap.value);
-    const removed = new Set(ids);
-    // Detach only the subtree root. On a partial failure, remaining children stay accessible in their lists.
-    for (const parent of Object.values(tasksMap.value)) {
-        const childIds = Array.isArray(parent.subTasks) ? parent.subTasks : [];
-        if (!removed.has(parent.id) && childIds.some(id => removed.has(id))) {
-            await updateTask({ ...parent, subTasks: childIds.filter(id => !removed.has(id)) });
-        }
-    }
-    for (const id of ids) await deleteTask(id, task.dataCategoryId);
+    if (!window.confirm('Die Aufgabe und ihre Unteraufgaben werden in den Papierkorb verschoben.')) return;
+    await archiveTaskTree(task);
 };
 
 const contextMenu = computed<DropdownMenuItem[][]>(() => [
@@ -157,7 +147,7 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
             onSelect: () => runAction(duplicateTask),
         },
         {
-            label: 'Löschen',
+            label: 'In Papierkorb',
             icon: 'i-lucide-trash-2',
             color: 'error',
             onSelect: () => runAction(() => deleteRecursive(task.value)),

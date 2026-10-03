@@ -1,7 +1,8 @@
 import Fuse from 'fuse.js';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { failWithCompensation } from '../application/compensation';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
-import { taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
+import { descendantIds, taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
 import { useCurrentUser } from '../platform';
 import { taskStore } from './storeTasks';
 import { useLists } from './useLists';
@@ -56,12 +57,14 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
 
     const getPercentFullfilled = (task: TransformedTask | undefined) => taskProgress(task, tasksMap.value);
 
-    const tasks = computed<TransformedTask[]>(() => {
+    const allTasks = computed<TransformedTask[]>(() => {
         const tasks: TransformedTask[] = (data.value ?? []).filter(
             (v: TransformedTask | TransformedList) => v.type === 'task',
         );
         return tasks;
     });
+    const tasks = computed(() => allTasks.value.filter(task => !task.deletedAt));
+    const deletedTasks = computed(() => allTasks.value.filter(task => !!task.deletedAt));
     const parentByChild = computed(() => {
         const result: Record<number, TransformedTask> = {};
         for (const parent of tasks.value) {
@@ -77,6 +80,65 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         }));
     });
     const tasksMap = computed(() => Object.fromEntries(tasks.value.map(t => [t.id, t])));
+    const allTasksMap = computed(() => Object.fromEntries(allTasks.value.map(t => [t.id, t])));
+
+    const archiveTaskTree = async (root: TransformedTask) => {
+        const originals = descendantIds(root, allTasksMap.value)
+            .map(id => allTasksMap.value[id])
+            .filter(Boolean);
+        const changed: TransformedTask[] = [];
+        try {
+            for (const original of originals) {
+                await updateTask({
+                    ...original,
+                    deletedAt: new Date().toISOString(),
+                    deletedBy: currentUser.id,
+                });
+                changed.push(original);
+            }
+        } catch (error) {
+            await failWithCompensation(
+                'In den Papierkorb verschieben',
+                error,
+                changed.map(
+                    original => () =>
+                        updateTask({
+                            ...original,
+                            revision: (original.revision ?? 0) + 1,
+                            deletedAt: undefined,
+                            deletedBy: undefined,
+                        }),
+                ),
+            );
+        }
+    };
+
+    const restoreTaskTree = async (root: TransformedTask) => {
+        const originals = descendantIds(root, allTasksMap.value)
+            .map(id => allTasksMap.value[id])
+            .filter((task): task is TransformedTask => !!task?.deletedAt);
+        const changed: TransformedTask[] = [];
+        try {
+            for (const original of originals) {
+                await updateTask({ ...original, deletedAt: undefined, deletedBy: undefined });
+                changed.push(original);
+            }
+        } catch (error) {
+            await failWithCompensation(
+                'Aus dem Papierkorb wiederherstellen',
+                error,
+                changed.map(
+                    original => () =>
+                        updateTask({
+                            ...original,
+                            revision: (original.revision ?? 0) + 1,
+                            deletedAt: original.deletedAt,
+                            deletedBy: original.deletedBy,
+                        }),
+                ),
+            );
+        }
+    };
 
     const getObjectDiff = taskDiff;
 
@@ -131,12 +193,16 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         tasksMap,
         parentByChild,
         tasks,
+        deletedTasks,
+        allTasksMap,
         showTask,
         createTask,
         updateTask,
         getObjectDiff,
         calculateDueDate,
         deleteTask,
+        archiveTaskTree,
+        restoreTaskTree,
         isLoading,
         findParent,
         getSuperParent,

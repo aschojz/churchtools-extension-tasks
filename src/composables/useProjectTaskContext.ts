@@ -14,6 +14,7 @@ export type ProjectTaskContext = {
     createTask: ReturnType<typeof useTasks>['createTask'];
     updateTask: ReturnType<typeof useTasks>['updateTask'];
     deleteTask: ReturnType<typeof useTasks>['deleteTask'];
+    archiveTaskTree: ReturnType<typeof useTasks>['archiveTaskTree'];
     toggleTask: (task: TransformedTask) => Promise<void>;
     getSuperParent: (task: TransformedTask | undefined) => TransformedTask | undefined;
     getProgress: (task: TransformedTask | undefined) => number;
@@ -60,6 +61,7 @@ export function provideProjectTaskContext(projectId: MaybeRefOrGetter<number>) {
         createTask: taskData.createTask,
         updateTask: taskData.updateTask,
         deleteTask: taskData.deleteTask,
+        archiveTaskTree: taskData.archiveTaskTree,
         toggleTask,
         getSuperParent: taskData.getSuperParent,
         getProgress: task => taskProgress(task, taskData.tasksMap.value),

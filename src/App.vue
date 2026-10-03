@@ -104,7 +104,10 @@ const projectMenu = computed<DropdownMenuItem[][]>(() => {
 const newTaskRoute = computed(() =>
     currentProject.value
         ? {
-              name: typeof route.name === 'string' && route.name !== 'project' ? route.name : 'project-board',
+              name:
+                  typeof route.name === 'string' && !['project', 'project-trash'].includes(route.name)
+                      ? route.name
+                      : 'project-board',
               params: { projectId: currentProject.value.id, taskId: 'new' },
           }
         : undefined,

@@ -112,6 +112,8 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
         const tags = numberArray(data.tags);
         const assignedTo = numberArray(data.assignedTo);
         const subTasks = numberArray(data.subTasks);
+        const deletedAt = storedUpdatedAt(data.deletedAt);
+        const deletedBy = positiveInteger(data.deletedBy);
         return {
             schemaVersion: CURRENT_SCHEMA_VERSION,
             ...persistenceMetadata(data),
@@ -131,6 +133,8 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
             ...(tags === undefined ? {} : { tags }),
             ...(assignedTo === undefined ? {} : { assignedTo }),
             ...(subTasks === undefined ? {} : { subTasks }),
+            ...(deletedAt === undefined ? {} : { deletedAt }),
+            ...(deletedBy === undefined ? {} : { deletedBy }),
         };
     }
     if (data.type === 'list') {

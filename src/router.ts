@@ -6,6 +6,7 @@ import ListView from './project/views/ListView.vue';
 import MyTasksList from './project/views/MyTasksList.vue';
 import TagBoard from './project/views/TagBoard.vue';
 import TaskBoard from './project/views/TaskBoard.vue';
+import TrashView from './project/views/TrashView.vue';
 import Overview from './views/Overview.vue';
 
 const routes: RouteRecordRaw[] = [
@@ -42,6 +43,12 @@ const routes: RouteRecordRaw[] = [
                 path: 'my-tasks/:taskId?',
                 name: 'my-tasks',
                 component: MyTasksList,
+                props: true,
+            },
+            {
+                path: 'trash',
+                name: 'project-trash',
+                component: TrashView,
                 props: true,
             },
             { path: '', redirect: { name: 'my-tasks' }, name: 'project' },

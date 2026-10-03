@@ -42,6 +42,8 @@ interface Task {
     assignedTo?: number[];
     subTasks?: number[];
     comments?: ActivityEntry[];
+    deletedAt?: string;
+    deletedBy?: number;
 }
 interface Tag {
     schemaVersion?: number;

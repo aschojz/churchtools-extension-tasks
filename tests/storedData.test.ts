@@ -83,10 +83,17 @@ describe('stored data schemas and migrations', () => {
                 name: 'Current',
                 fullfilled: false,
                 sortKey: 1,
+                deletedAt: '2026-10-03T10:00:00.000Z',
+                deletedBy: 9,
                 revision: 7,
                 updatedAt: '2026-10-03T10:00:00.000Z',
             }),
-        ).toMatchObject({ revision: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+        ).toMatchObject({
+            revision: 7,
+            updatedAt: '2026-10-03T10:00:00.000Z',
+            deletedAt: '2026-10-03T10:00:00.000Z',
+            deletedBy: 9,
+        });
     });
 
     it('rejects unsupported future versions and unusable values', () => {

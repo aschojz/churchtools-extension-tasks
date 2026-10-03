@@ -20,6 +20,8 @@ export function taskDraft(task: Partial<Task> = {}): Task {
             'tags',
             'assignedTo',
             'subTasks',
+            'deletedAt',
+            'deletedBy',
         ]),
     });
     if (!Array.isArray(draft.activity)) draft.activity = undefined;

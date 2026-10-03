@@ -35,6 +35,7 @@ const viewNavigation: NavigationMenuItem[] = [
     { label: 'Liste', icon: 'i-lucide-list', to: { name: 'project-list' } },
     { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags' } },
     { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
+    { label: 'Papierkorb', icon: 'i-lucide-trash-2', to: { name: 'project-trash' } },
 ];
 </script>
 <template>

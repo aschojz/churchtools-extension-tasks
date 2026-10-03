@@ -250,6 +250,11 @@ Operation-Log.
 
 #### DATA-04 · P1 · Rekursives Löschen ohne Wiederherstellung
 
+**Status:** Für Aufgaben umgesetzt. Löschen setzt einen validierten
+`deletedAt`-Zeitpunkt und verschiebt den vollständigen Unteraufgabenbaum in
+einen projektbezogenen Papierkorb. Dort lässt er sich samt Beziehungen wieder
+herstellen. Teilfehler beim Archivieren und Wiederherstellen werden kompensiert.
+
 **Beobachtung:** Aufgabe und Unteraufgaben werden nacheinander gelöscht.
 Referenzen werden ebenfalls in separaten Schritten angepasst.
 
@@ -259,6 +264,10 @@ Löschen ist endgültig.
 **Empfehlung:** Zunächst Soft Delete mit Papierkorb einführen. Ein Hintergrund-
 oder Wartungslauf kann endgültig löschen und Referenzen reparieren. Der
 Löschbefehl muss wiederholbar und transaktional modelliert sein.
+
+**Offen:** Projekte, Listen und Tags besitzen noch keinen Papierkorb. Eine
+konfigurierbare Aufbewahrungsfrist und eine kontrollierte endgültige Löschung
+fehlen ebenfalls.
 
 #### DATA-05 · P2 · Unsicherer Kommentarablauf
 
