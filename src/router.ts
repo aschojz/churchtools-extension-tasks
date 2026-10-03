@@ -1,4 +1,4 @@
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw, RouterHistory } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const Project = () => import('./project/Project.vue');
@@ -10,7 +10,7 @@ const TaskBoard = () => import('./project/views/TaskBoard.vue');
 const TrashView = () => import('./project/views/TrashView.vue');
 const Overview = () => import('./views/Overview.vue');
 
-const routes: RouteRecordRaw[] = [
+export const routes: RouteRecordRaw[] = [
     {
         path: '/:projectId',
         component: Project,
@@ -58,17 +58,20 @@ const routes: RouteRecordRaw[] = [
     { path: '', name: 'overview', component: Overview },
 ];
 
-export const router = createRouter({
-    routes,
-    history: createWebHistory(import.meta.env.BASE_URL),
-    scrollBehavior(to, from, savedPosition) {
-        if (to.hash) {
-            return { el: to.hash, left: 0, top: 70 };
-        } else if (savedPosition) {
-            return savedPosition;
-        } else if (to.name !== from.name) {
-            return { left: 0, top: 0 };
-        }
-        return {};
-    },
-});
+export const createAppRouter = (history: RouterHistory = createWebHistory(import.meta.env.BASE_URL)) =>
+    createRouter({
+        routes,
+        history,
+        scrollBehavior(to, from, savedPosition) {
+            if (to.hash) {
+                return { el: to.hash, left: 0, top: 70 };
+            } else if (savedPosition) {
+                return savedPosition;
+            } else if (to.name !== from.name) {
+                return { left: 0, top: 0 };
+            }
+            return {};
+        },
+    });
+
+export const router = createAppRouter();

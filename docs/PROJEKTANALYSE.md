@@ -519,6 +519,11 @@ Erfassung weiter beschleunigen.
 
 #### TEST-01 · P1 · Kritische Pfade ohne Testabdeckung
 
+**Status:** Weiter ausgebaut. Neben den Daten- und Kompensationstests prüfen
+Komponententests jetzt die semantische Bedienung der Aufgabenkarten. Routertests
+decken Projektweiterleitung und Deep Links für alle Aufgabenansichten ab. Eine
+vollständige Browser-Suite und echte Store-Upgrade-Tests bleiben offen.
+
 **Gut abgedeckt:** Kernoperationen der Aufgabenlogik, CCM-Invalidierung,
 UUID-Fallback, Rückabwicklung eines fehlerhaften Drag-and-drop-Schreibens,
 Schemavalidierung, Migration, Konflikterkennung, Kompensationslogik,
@@ -527,9 +532,7 @@ URL-Validierung und Benutzerfehler.
 **Fehlend:**
 
 - Dialoge und Formularvalidierung
-- Router- und Deep-Link-Verhalten
 - globale Suche und Request-Fan-out
-- Tastaturbedienung und zugängliche Namen
 - CCM-Store-Installation und Upgrade
 
 **Empfehlung:** Tests entlang der Risiken ergänzen. Wenige Browser-Szenarien
