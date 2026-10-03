@@ -1,195 +1,616 @@
-# Extension Tasks – Analyse und Entwicklungsplan
+# Extension Tasks – Projekt-Audit und Entwicklungsplan
 
-Stand: 27.09.2026 · untersuchter Commit: `a265d9c`, einschließlich vorhandenem Arbeitsstand.
+Stand: 03.10.2026
 
-> Diese Datei beschreibt den Ausgangsbefund. Die erste Stabilisierung wurde
-> anschließend umgesetzt; der aktuelle Stand steht in
-> [UMSETZUNGSSTAND.md](UMSETZUNGSSTAND.md).
+Untersuchter Commit: `e95424f`
 
-Die Extension besitzt einen brauchbaren Funktionskern, ist im untersuchten Checkout aber nicht releasefähig. Vorrang haben die Migration der ChurchTools-Anbindung, reproduzierbare Dependencies und die Datenintegrität. Insbesondere darf das Öffnen einer Ansicht keine Aufgaben umsortieren oder anderen Listen zuordnen. Ein vollständiger Neuaufbau ist dafür nicht erforderlich.
+## 1. Kurzfazit
 
-## Umfang und belastbare Ergebnisse
+Extension Tasks hat inzwischen einen tragfähigen Funktionskern und eine deutlich
+stimmigere Oberfläche. Projekte, Listen, Aufgaben, Unteraufgaben, Tags,
+Zuweisungen, Fälligkeiten, Kommentare, Suche und Drag-and-drop sind vorhanden.
+Die Anwendung lässt sich bauen, die vorhandenen Tests laufen durch und im
+lokalen ChurchTools-System treten auf der geprüften Board-Route keine
+Konsolenfehler auf.
 
-Untersucht wurden alle fachlichen Bereiche unter `src`, Typen, Build-/Release-Konfiguration sowie die tatsächlich verlinkten ChurchTools-Pakete im Nachbar-Repository. Die bereits vorhandenen Änderungen in `src/App.vue` und `src/project/views/ViewWrapper.vue` wurden berücksichtigt und unverändert belassen.
+Für einen verlässlichen produktiven Einsatz fehlen vor allem Schutzmechanismen
+auf der Datenebene. Aufgaben und Projekte werden als vollständige JSON-Objekte
+in CCM-Werten gespeichert. Gleichzeitige Änderungen können sich deshalb
+unbemerkt überschreiben. Außerdem werden gespeicherte Daten nicht gegen ein
+Laufzeitschema geprüft und besitzen keine explizite Schemaversion. Beschädigte
+oder ältere Daten können dadurch ganze Ansichten unbrauchbar machen.
 
-| Prüfung | Ergebnis |
-|---|---|
-| `vue-tsc --noEmit` | 167 Diagnosen, davon 121 unter `src`, 46 in eingebundenen generierten API-Typen |
-| `vite build --outDir /tmp/extension-tasks-analysis-build` | Fehler: `useCustomModuleQuery` wird von `@churchtools/utils` nicht exportiert |
-| `eslint src scripts` | 3 Fehler, 7 Warnungen; Befunde in `scripts/package.js` |
-| `npm outdated --json` | 26 Einträge; darunter auch abweichende Major-Versionen und ein irreführender `latest`-Tag bei `vuedraggable` |
-| `npm audit --json` | 18 betroffene Pakete: 1 kritisch, 12 hoch, 4 mittel, 1 niedrig |
-| Isolierte Ausführung der Originalfunktion `List.updateSortKeys` | Aufgabe mit `list: 100` wird beim Initialisieren einer virtuellen Spalte `200` als Update mit `list: 200` ausgegeben |
-| Router-Probe mit installiertem Vue Router | Öffnen `/1/board/11` und Schließen nach `/1/board` funktionieren in der isolierten Probe; ungewöhnliche Route-Spreads sind daher kein bestätigter Navigationsfehler |
-| Automatisierte Tests / CI | Keine projektspezifischen Tests oder CI-Konfiguration im untersuchten Repository gefunden |
+Die nächsten Arbeiten sollten sich daher zuerst auf Datenintegrität,
+Migrationen und robuste Schreibvorgänge konzentrieren. Danach folgen
+Performance, Berechtigungen, Barrierefreiheit, CSS-Isolation und der
+Store-/Release-Prozess. Produktfunktionen wie Prioritäten, gespeicherte
+Ansichten, Erinnerungen oder Kalenderansichten bauen sinnvoll auf dieser Basis
+auf.
 
-Die Laufzeitabläufe wurden nicht gegen eine ChurchTools-Instanz getestet. Es wurden keine produktiven Daten verändert und keine Dependencies installiert. Aussagen zu UI-Verhalten sind Quellcodebefunde, sofern nicht ausdrücklich als isoliert reproduziert bezeichnet. Die lokale ChurchTools-Version ist nicht automatisch die Version der Zielinstanz. Falls mit „CCM Store“ der Installations-/Distributionsstore gemeint ist, bleibt dessen End-to-End-Test separat erforderlich; nachgewiesen ist hier zunächst die defekte CCM-Datenanbindung.
+## 2. Prioritäten
 
-Die Registry- und Audit-Ergebnisse stehen dauerhaft in [dependency-snapshot.json](analysis/dependency-snapshot.json). Audit-Zahlen beziehen sich auf betroffene Pakete im untersuchten Abhängigkeitsbaum, nicht auf 18 nachgewiesene Angriffe auf die Anwendung. Lokale `file:`-Pakete und tatsächlich ausgelieferte Browser-Abhängigkeiten müssen zusätzlich bewertet werden.
+| Priorität | Bedeutung                                                                        | Reaktionsziel                              |
+| --------- | -------------------------------------------------------------------------------- | ------------------------------------------ |
+| **P0**    | Gefahr von Datenverlust oder ein grundlegender Stabilitätsfehler                 | Vor produktiver Freigabe beheben           |
+| **P1**    | Hohe Auswirkung auf Zuverlässigkeit, Sicherheit, Betrieb oder zentrale Bedienung | Im nächsten Stabilisierungsschritt beheben |
+| **P2**    | Klarer Qualitäts-, Wartungs- oder Funktionsgewinn                                | Danach geplant umsetzen                    |
+| **P3**    | Ausbau und Differenzierung des Produkts                                          | Nach stabiler Kernplattform priorisieren   |
 
-## Vorhandene Features und tatsächlicher Fertigstellungsgrad
+## 3. Verifizierter technischer Stand
 
-| Bereich | Vorhanden | Lücke / Einschränkung |
-|---|---|---|
-| Projekte | Übersicht, Anlegen, Bearbeiten, Löschen, Farbe und Icon | Berechtigungsdarstellung, Archivierung, saubere Fehlerzustände fehlen |
-| Aufgaben | Titel, Beschreibung, Datum, Link, mehrere Verantwortliche, Tags | Speichern/Abbrechen unsauber; Erledigen im Detaildialog ohne Implementierung |
-| Ansichten | Meine Aufgaben, Board, Liste, Tags, Unteraufgaben-Board | Filter unterscheiden sich; virtuelle Spalten werden teilweise wie echte Listen behandelt |
-| Listen | Standardliste, Bearbeiten, Löschen, Einklappen, Sichtbarkeitsoptionen | Neue Liste im aktiven Wrapper nicht erreichbar; gefährliche automatische Schreibzugriffe |
-| Unteraufgaben | Anzeige, Fortschritt, rekursives Duplizieren/Löschen | Erstellung/Verknüpfung fehlt im aktuellen Editor; Rekursion nicht gegen beschädigte Daten geschützt |
-| Tags | Auswahl, Anzeige, Datenfunktionen und separater Dialog | Plus-Button zeigt nur TODO; Editieren/Löschen kein vollständiger Nutzerablauf |
-| Termine | Absolute Termine; relative Berechnung im Datenmodell | Relative Termine im aktuellen Editor nicht bearbeitbar; Null-Tage-Abstand fehlerhaft |
-| Zusammenarbeit | Kommentare und Aktivitätsverlauf | Kein appseitiger Konfliktschutz; Kommentare sind Teil des gesamten Aufgabenobjekts |
-| Suche | Fuse-Suche nach Titel, Beschreibung, URL | Unteraufgaben-Board berücksichtigt Suche nicht; Filtermodell nicht einheitlich |
-| Bedienung | Vollbild, Drag-and-drop, Fehler-melden-Link | Board-Einstellungen und Projektverschiebung sind TODO; mobile/Tastaturbedienung ausbauen |
+### 3.1 Erfolgreich geprüft
 
-`DialogTaskOld.vue` enthält noch Funktionen für Tags, relative Termine und Unteraufgaben, ist jedoch nicht in den aktiven Dialog eingebunden. Das ist eine unvollständige Ablösung: benötigte Funktionen gezielt übertragen, dann den Altcode entfernen.
+- TypeScript-Prüfung erfolgreich
+- ESLint-Prüfung erfolgreich
+- 4 Testdateien mit 17 Tests erfolgreich
+- Produktions-Build erfolgreich
+- Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
+  Konsolenwarnungen oder Konsolenfehler geladen
+- `crypto.randomUUID` besitzt einen getesteten Fallback
+- Fehlgeschlagene Drag-and-drop-Schreibvorgänge werden zurückgerollt
+- Vue Query invalidiert betroffene CCM-Abfragen nach Mutationen
 
-## Architektur und CCM-Anbindung
+### 3.2 Build- und Bundle-Befunde
 
-Der aktuelle Datenfluss lautet:
+- Das größte JavaScript-Bundle umfasst ungefähr 1,28 MB minifiziert bzw.
+  387 KB gzip-komprimiert.
+- Vite meldet ein Chunk-Limit von mehr als 500 KB.
+- Das CSS umfasst ungefähr 117 KB minifiziert bzw. 18 KB gzip-komprimiert.
+- Die Routen werden derzeit nicht sichtbar in eigene, lazy geladene Chunks
+  aufgeteilt.
 
-```text
-Vue-Seiten / Dialoge / Karten
-  → useProjects / useLists / useTasks / useTask / useTags
-  → ChurchTools Query- und Mutation-Helfer
-  → Custom-Module-REST-API
+### 3.3 Dependency- und Security-Stand
 
-Projekt = CustomDataCategory
-Aufgabe / Liste / Tag = CustomDataValue mit JSON und type-Discriminator
-Pinia taskStore = globale Such-/Ansichtsoptionen und Standardlisten-Sperre
+`npm audit` meldet fünf bekannte Schwachstellen:
+
+- vier hohe Findings in der Entwicklungswerkzeug-Kette
+  `@vue/eslint-config-typescript → fast-glob → micromatch → braces`
+- ein niedriges Finding in einer verschachtelten `esbuild`-Version über
+  `@nuxt/ui → @nuxt/fonts → fontless`
+
+Mit `--omit=dev` bleibt nur das niedrige `esbuild`-Finding übrig. Es betrifft
+den Entwicklungsserver unter Windows. Der direkte Vite-Zweig verwendet bereits
+eine neuere `esbuild`-Version.
+
+`npm outdated --json` lieferte in zwei Versuchen kein Ergebnis und musste
+abgebrochen werden. Eine belastbare Liste aller verfügbaren Updates ist deshalb
+noch offen. Das von `npm audit` vorgeschlagene automatische Downgrade der
+ESLint-Konfiguration sollte nicht ungeprüft übernommen werden.
+
+### 3.4 Test- und CI-Umfang
+
+Die CI führt unter Node 24 `npm ci` und `npm run check` aus. Die Engine erlaubt
+Node 22 und 24, die CI prüft jedoch nur Node 24. Browser-End-to-End-Tests,
+Coverage-Grenzen, Store-Paket-Prüfungen, Upgrade-Tests und eine automatisierte
+Dependency-Pflege fehlen.
+
+## 4. Vorhandener Funktionsumfang
+
+| Bereich       | Vorhanden                                                     | Reifegrad / Einschränkung                                   |
+| ------------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
+| Projekte      | Erstellen, bearbeiten, löschen, Farbe, Icon, Beschreibung     | Gute Basis; Löschen und Fehlerfälle brauchen mehr Schutz    |
+| Aufgaben      | Titel, Beschreibung, URL, Datum, Abschluss                    | Kern funktionsfähig; keine Priorität und keine Archivierung |
+| Listen        | Mehrere Listen, Sortierung per Drag-and-drop, Ein-/Ausklappen | Anzeigeoptionen werden teamweit gespeichert                 |
+| Ansichten     | Board, Liste, „Meine Aufgaben“, Tags, Unteraufgaben           | Listenansicht nutzt weiterhin weitgehend Karten             |
+| Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, rekursives Löschen | Mehrere Schreibschritte sind nicht atomar                   |
+| Tags          | CRUD und Mehrfachauswahl                                      | Löschen über mehrere Aufgaben kann teilweise scheitern      |
+| Personen      | Zuweisung und Personensuche                                   | Fehler- und Reihenfolgebehandlung der Suche fehlen          |
+| Fälligkeit    | Absolutes und relatives Fälligkeitsdatum                      | Relative Eingabe nur in bestimmten Bearbeitungswegen        |
+| Aktivität     | Kommentare und Änderungsprotokoll                             | Keine robuste Fehleranzeige; gemischte Sprache              |
+| Suche         | Projektbezogene und globale Suche                             | Globale Suche erzeugt viele Requests                        |
+| Oberfläche    | Nuxt-UI-Dashboard, Navigation, Sidebar, Dialoge               | Gute Richtung; A11y, Fokus und Konsistenz noch offen        |
+| Auslieferung  | Build, ZIP-Skript, CI                                         | CCM-Store-Kompatibilität und Upgrade-Pfad nicht verifiziert |
+
+## 5. Priorisierte Übersicht
+
+| ID       | Prio   | Typ                | Finding                                                                             |
+| -------- | ------ | ------------------ | ----------------------------------------------------------------------------------- |
+| DATA-01  | **P0** | Datenintegrität    | Gleichzeitige Vollobjekt-Schreibvorgänge können Änderungen verlieren                |
+| DATA-02  | **P0** | Datenmodell        | Keine Laufzeitvalidierung, Schemaversion oder Migration gespeicherter Daten         |
+| DATA-03  | **P1** | Datenintegrität    | Mehrstufige Operationen sind nicht atomar und nicht wiederaufnehmbar                |
+| DATA-04  | **P1** | Datenintegrität    | Rekursives Löschen kann Teilzustände und verwaiste Referenzen hinterlassen          |
+| SEC-01   | **P1** | Sicherheit         | Gespeicherte Aufgaben-URLs werden nicht ausreichend normalisiert und eingeschränkt  |
+| PERF-01  | **P1** | Performance        | Die globale Suche lädt Aufgaben aller Projekte auf jeder Route                      |
+| PERF-02  | **P1** | Architektur        | Jede Aufgabenkarte erzeugt einen umfangreichen Composable-/Observer-Baum            |
+| UX-01    | **P1** | Produktlogik       | Persönliche Anzeigeoptionen werden als gemeinsame Projektdaten gespeichert          |
+| UI-01    | **P1** | Integration        | Globale CSS-Regeln können das umgebende ChurchTools-Frontend beeinflussen           |
+| ARCH-01  | **P1** | Abhängigkeiten     | Font Awesome hängt im Produktionsbetrieb weiterhin implizit vom Host ab             |
+| AUTH-01  | **P1** | Berechtigungen     | Fehlgeschlagene Benutzerauflösung wird verschluckt und führt zu Nutzer-ID 0         |
+| A11Y-01  | **P1** | Barrierefreiheit   | Karten, Checkboxen und Icon-Aktionen sind teilweise nicht per Tastatur bedienbar    |
+| STORE-01 | **P1** | Distribution       | CCM-Store-Paket, Metadaten und Update-/Migrationspfad sind nicht verifiziert        |
+| TEST-01  | **P1** | Qualität           | Kritische Daten-, Dialog-, Berechtigungs- und Integrationspfade sind ungetestet     |
+| DEP-01   | **P1** | Dependencies       | Bekannte Audit-Findings und fehlende Update-Automatisierung                         |
+| UX-02    | **P2** | Suche              | Suchzustand bleibt projektübergreifend erhalten und kann leere Boards erzeugen      |
+| UI-02    | **P2** | Informationsdichte | Listenansichten sind keine echte kompakte Listen- oder Tabellenansicht              |
+| UX-03    | **P2** | Feedback           | Bestätigungen und Fehlerdarstellung sind uneinheitlich                              |
+| PERF-03  | **P2** | Netzwerk           | Personensuche hat kein Debouncing, Abbrechen oder Schutz vor alten Antworten        |
+| DATA-05  | **P2** | Aktivität          | Kommentare werden optimistisch geleert, obwohl Speichern scheitern kann             |
+| UX-04    | **P2** | Aufgabenanlage     | Direkte Listenauswahl und ein konsistenter Quick-add-Ablauf fehlen                  |
+| ARCH-02  | **P2** | Codequalität       | Tote Zustände, unscharfe Typen und historische Feldnamen belasten das Modell        |
+| I18N-01  | **P2** | Lokalisierung      | Übersetzungsfunktion ist ein Platzhalter; Texte und Farbwerte sind gemischtsprachig |
+| OPS-01   | **P2** | Betrieb            | Keine sichtbare Version, Diagnoseansicht oder korrelierbare Fehlerkennung           |
+| FEAT-01  | **P2** | Feature            | Prioritäten, Filter, Sortierung, gespeicherte Ansichten und Mehrfachaktionen fehlen |
+| FEAT-02  | **P3** | Feature            | Wiederholungen, Erinnerungen, Vorlagen, Papierkorb und Abhängigkeiten fehlen        |
+| FEAT-03  | **P3** | Feature            | Anhänge, Erwähnungen, Abos und ChurchTools-Objektbezüge fehlen                      |
+| FEAT-04  | **P3** | Feature            | Kalender, Timeline, Kapazität und Auswertungen fehlen                               |
+
+## 6. Findings nach Typ
+
+### 6.1 Datenintegrität und Datenmodell
+
+#### DATA-01 · P0 · Verlorene Änderungen bei paralleler Bearbeitung
+
+**Beobachtung:** Aufgaben, Listen, Tags und Projekte werden als vollständige
+JSON-Objekte gelesen, lokal verändert und anschließend komplett in einen
+CCM-Wert zurückgeschrieben. Es gibt keine Revision, keinen ETag und keinen
+Compare-and-swap-Mechanismus.
+
+**Auswirkung:** Bearbeiten zwei Personen dieselbe Aufgabe kurz nacheinander,
+kann der spätere Schreibvorgang Felder des ersten Schreibvorgangs mit seinem
+älteren Stand überschreiben. Die Oberfläche meldet dabei Erfolg.
+
+**Empfehlung:**
+
+1. Jedes gespeicherte Objekt erhält `revision` und `updatedAt`.
+2. Updates senden die erwartete Revision mit.
+3. Der Server oder ein vorgeschalteter Repository-Layer weist veraltete
+   Revisionen zurück.
+4. Die UI zeigt einen Konfliktdialog mit Neuladen, Zusammenführen und erneutem
+   Speichern.
+5. Bis echte atomare Serveroperationen verfügbar sind, sollte die Anwendung
+   vor jedem Schreibvorgang den aktuellen Stand nachladen und Konflikte
+   erkennen.
+
+**Akzeptanz:** Ein automatisierter Test mit zwei Clients kann keine Änderung
+unbemerkt verlieren.
+
+#### DATA-02 · P0 · Fehlende Laufzeitvalidierung und Migrationen
+
+**Beobachtung:** Beim Lesen wird nur geprüft, ob JSON ein Objekt ist. Danach
+erfolgt ein TypeScript-Cast. Arrays, Feldtypen, Datumswerte und Diskriminatoren
+werden nicht validiert. Eine `schemaVersion` fehlt.
+
+**Auswirkung:** Manuell veränderte, alte oder teilweise geschriebene Werte
+können Laufzeitfehler wie `map is not a function` auslösen. Eine einzelne
+fehlerhafte Entität kann eine vollständige Projektabfrage blockieren.
+
+**Empfehlung:**
+
+- Ein Laufzeitschema für jede persistierte Entität einführen, beispielsweise
+  mit Zod oder Valibot.
+- `schemaVersion` verpflichtend speichern.
+- Migrationen als reine Funktionen von Version N nach N+1 implementieren.
+- Ungültige Werte isolieren, protokollieren und in einer reparierbaren
+  Diagnoseansicht anzeigen.
+- Parser und Migrationen mit alten, minimalen, maximalen und beschädigten
+  Beispieldaten testen.
+
+**Akzeptanz:** Kein ungültiger CCM-Wert kann die gesamte Anwendung zum Absturz
+bringen; unterstützte Altstände werden automatisch migriert.
+
+#### DATA-03 · P1 · Nicht atomare Mehrfachoperationen
+
+**Beobachtung:** Mehrere Anwendungsfälle bestehen aus getrennten Requests:
+
+- Projekt erstellen, anschließend Standardliste erstellen
+- Unteraufgabe erstellen, anschließend die Elternaufgabe verknüpfen
+- Tag aus allen Aufgaben entfernen, anschließend den Tag löschen
+- Aufgabe duplizieren, anschließend Nachfahren und Referenzen erzeugen
+
+**Auswirkung:** Netzfehler oder fehlende Berechtigungen zwischen den Schritten
+hinterlassen unvollständige Projekte, verwaiste Aufgaben oder inkonsistente
+Referenzen. Ein manueller Retry kann Duplikate erzeugen.
+
+**Empfehlung:** Kommandos in einem Application-Service bündeln, idempotente
+Operation-IDs verwenden und Kompensationsschritte definieren. Die UI sollte
+erst Erfolg melden, wenn der vollständige Ablauf abgeschlossen ist.
+
+#### DATA-04 · P1 · Rekursives Löschen ohne Wiederherstellung
+
+**Beobachtung:** Aufgabe und Unteraufgaben werden nacheinander gelöscht.
+Referenzen werden ebenfalls in separaten Schritten angepasst.
+
+**Auswirkung:** Teilfehler führen zu verwaisten Beziehungen. Versehentliches
+Löschen ist endgültig.
+
+**Empfehlung:** Zunächst Soft Delete mit Papierkorb einführen. Ein Hintergrund-
+oder Wartungslauf kann endgültig löschen und Referenzen reparieren. Der
+Löschbefehl muss wiederholbar und transaktional modelliert sein.
+
+#### DATA-05 · P2 · Unsicherer Kommentarablauf
+
+**Beobachtung:** Das Kommentarfeld wird nach dem Emit geleert. Der aufrufende
+Dialog wartet den Schreibvorgang nicht konsistent ab. Leerraum-Kommentare
+können gespeichert werden und jeder Kommentar schreibt das vollständige
+Aufgabenobjekt.
+
+**Empfehlung:** Text trimmen, leere Kommentare blockieren, Speichern abwarten,
+Fehler am Eingabefeld zeigen und erst nach Erfolg leeren. Kommentare sollten
+langfristig eigene Entitäten oder Append-only-Ereignisse sein.
+
+### 6.2 Sicherheit und Berechtigungen
+
+#### SEC-01 · P1 · URL-Validierung
+
+**Beobachtung:** Aufgaben-URLs werden über ein `type="url"`-Feld erfasst, aber
+nicht als Teil eines verlässlich validierten Formularschemas normalisiert. Der
+gespeicherte Wert wird als Linkziel verwendet.
+
+**Auswirkung:** Ungeeignete Protokolle und uneinheitliche URLs können in
+Bestandsdaten gelangen. Externe Links brauchen außerdem eine sichere
+Fensterbehandlung.
+
+**Empfehlung:** Beim Speichern mit `new URL()` parsen, ausschließlich `http:`
+und `https:` erlauben, normalisiert speichern und externe Links mit
+`rel="noopener noreferrer"` öffnen.
+
+#### AUTH-01 · P1 · Unklare Benutzer- und Rechtefehler
+
+**Beobachtung:** Schlägt das Laden des aktuellen Benutzers fehl, wird der Fehler
+verschluckt und der Benutzer bleibt bei ID `0`. Dadurch erscheinen „Meine
+Aufgaben“ und Zuweisungsoptionen leer oder unvollständig. Aktivitäten können
+mit einer unbekannten Person erzeugt werden.
+
+**Empfehlung:** Authentifizierungsfehler als eigenen App-Zustand behandeln,
+Schreibaktionen sperren und eine verständliche Wiederholen-Aktion anbieten.
+Die tatsächliche Wirkung von `securityLevelId: 1` auf Lesen, Schreiben und
+Löschen muss gegen ChurchTools verifiziert und dokumentiert werden.
+
+### 6.3 Architektur und Performance
+
+#### PERF-01 · P1 · Globale Suche lädt alle Aufgaben
+
+**Beobachtung:** Die App initialisiert die projektübergreifende Aufgabensuche
+bereits im Wurzel-Layout. Dafür wird pro Projekt eine Values-Abfrage ausgeführt,
+auch wenn die Suche nicht geöffnet ist.
+
+**Auswirkung:** Die Request-Zahl wächst linear mit der Projektanzahl. Große
+Installationen zahlen diese Kosten auf jeder Route.
+
+**Empfehlung:** Daten erst beim Öffnen der globalen Suche laden, Eingabe
+debouncen, Ergebnisse paginieren und mittelfristig einen serverseitigen
+Suchindex oder eine gezielte Such-API verwenden.
+
+#### PERF-02 · P1 · Composable-Baum pro Aufgabenkarte
+
+**Beobachtung:** Jede Aufgabenkarte initialisiert eigene Task-, Listen-, Tag-
+und Personen-Composables. Vue Query teilt zwar HTTP-Caches, trotzdem entstehen
+pro Karte Observer und abgeleitete Zustände. Eltern werden durch Scans über die
+Aufgabenmenge ermittelt.
+
+**Auswirkung:** Große Boards verursachen unnötige Reaktivitätsarbeit und einen
+hohen Speicherbedarf.
+
+**Empfehlung:** Normalisierte Daten und Lookup-Maps auf Ansichts- oder
+Projektebene bereitstellen. Karten erhalten fertige View-Models. Für sehr große
+Listen Virtualisierung ergänzen.
+
+#### PERF-03 · P2 · Personensuche ohne Request-Kontrolle
+
+**Beobachtung:** Die Suche besitzt kein Debouncing, kein Abort-Signal und keine
+Absicherung gegen verspätete Antworten.
+
+**Auswirkung:** Schnelles Tippen erzeugt viele Requests; ein älteres Ergebnis
+kann ein neueres überschreiben.
+
+**Empfehlung:** 200–300 ms debouncen, laufende Requests abbrechen, Query-Key
+über den Suchtext führen und Lade-, Leer- und Fehlerzustände unterscheiden.
+
+#### ARCH-01 · P1 · Implizite Font-Awesome-Abhängigkeit
+
+**Beobachtung:** Font-Awesome-CSS wird nur in der Entwicklung importiert. Der
+Produktions-Build verwendet weiterhin Font-Awesome-Klassennamen und verlässt
+sich damit auf das ChurchTools-Hostsystem. Lokale Font-Awesome-Dateien unter
+`src/assets/fontawesome` sind vorhanden, werden aber nicht genutzt.
+
+**Auswirkung:** Die Extension ist nicht vollständig eigenständig. Änderungen
+am Host können Icons verschwinden lassen oder verändern.
+
+**Empfehlung:** Icons vollständig über Nuxt UI/Iconify oder explizit gebündelte
+SVG-Komponenten abbilden. Danach ungenutzte Assets und die bedingte
+Host-Abhängigkeit entfernen.
+
+#### ARCH-02 · P2 · Typ- und Zustandsbereinigung
+
+**Beobachtung:** Domänentypen liegen global im Ambient Scope, `ActivityEntry`
+enthält `any`, Board-Komponenten benötigen Casts und das persistierte Feld
+`fullfilled` ist falsch geschrieben. Daneben existieren nicht oder nur teilweise
+genutzte Zustände wie `showSubTasks`, `sortBy`, `allDay` und historische
+`comments`.
+
+**Empfehlung:** Explizite Modul-Exports, diskriminierte Unions und ein
+versioniertes Domänenmodell einführen. Historische Felder über Migrationen
+bereinigen und ungenutzten Zustand entfernen oder vollständig implementieren.
+
+### 6.4 UI, UX und Barrierefreiheit
+
+#### UX-01 · P1 · Persönliche Einstellungen sind Teamdaten
+
+**Beobachtung:** `isCollapsed`, `showCompleted` und `showSubTasks` werden in der
+gemeinsamen Liste gespeichert. Diese Einstellungen wirken in der Bedienung wie
+persönliche Ansichtspräferenzen.
+
+**Auswirkung:** Eine Person ändert unbeabsichtigt die Ansicht aller anderen und
+erzeugt zusätzliche Schreibvorgänge.
+
+**Empfehlung:** Inhaltliche Listendaten von Benutzerpräferenzen trennen.
+Einklappzustand und Filter gehören in lokalen oder benutzerspezifischen
+Storage; gemeinsame Defaults können separat im Projekt liegen.
+
+#### UI-01 · P1 · CSS-Isolation gegenüber ChurchTools
+
+**Beobachtung:** Tailwind wird sowohl mit als auch ohne Prefix eingebunden.
+Globale Selektoren für `*`, `body`, Links, Buttons und Eingaben können außerhalb
+des Extension-Roots wirken. Layoutberechnungen verlassen sich zudem auf eine
+feste Headerhöhe von 49 Pixeln.
+
+**Auswirkung:** Die Extension kann das Host-Frontend verändern und umgekehrt
+durch Host-Styles beschädigt werden.
+
+**Empfehlung:** Alle Styles unter einem eindeutigen Extension-Root scopen,
+Preflight entweder deaktivieren oder vollständig scopen und nur eine
+Tailwind-Strategie behalten. Verfügbare Höhe aus dem Container statt aus einer
+festen Host-Annahme ableiten.
+
+#### A11Y-01 · P1 · Fehlende semantische Interaktion
+
+**Beobachtung:** Aufgabenkarten sind klickbare `div`-Elemente, Checkboxen teils
+klickbare Icons. Mehrere Icon-Buttons besitzen keinen zugänglichen Namen.
+
+**Auswirkung:** Tastatur- und Screenreader-Nutzung ist lückenhaft. Fokusführung
+und erwartete Button-Semantik fehlen.
+
+**Empfehlung:** Interaktive Elemente als `button`, `a` oder Checkbox rendern,
+zugängliche Namen vergeben, sichtbare Fokuszustände prüfen und Dialogfokus nach
+Öffnen und Schließen testen. Axe-Checks und Tastatur-Szenarien in die UI-Tests
+aufnehmen.
+
+#### UX-02 · P2 · Globaler Suchzustand
+
+**Beobachtung:** Der Suchtext im Store bleibt beim Projektwechsel erhalten.
+
+**Auswirkung:** Ein neu geöffnetes Projekt kann scheinbar leer sein, weil noch
+ein alter Filter aktiv ist.
+
+**Empfehlung:** Suche beim Projektwechsel leeren oder pro Projekt speichern und
+einen klar sichtbaren aktiven Filter mit Zurücksetzen-Aktion anzeigen.
+
+#### UI-02 · P2 · Fehlende kompakte Listenansicht
+
+**Beobachtung:** Board, „Meine Aufgaben“ und Listenansicht verwenden weitgehend
+dieselbe Kartenrepräsentation.
+
+**Auswirkung:** Für viele Aufgaben fehlen Informationsdichte, Spaltenvergleich
+und schnelles Scannen.
+
+**Empfehlung:** Eine echte kompakte Liste oder Tabelle mit konfigurierbaren
+Spalten, Sortierung und Inline-Aktionen ergänzen. Karten bleiben für das Board.
+
+#### UX-03 · P2 · Uneinheitliches Feedback
+
+**Beobachtung:** Projekte verwenden Toasts, andere Abläufe Inline-Fehler oder
+verschlucken Fehler. Für Bestätigungen existieren native Dialoge neben
+Nuxt-UI-Dialogen. Einige Löschaktionen haben keine Bestätigung.
+
+**Empfehlung:** Einen zentralen Mutation- und Feedback-Layer definieren:
+einheitliche Fehlermeldungen, Wiederholen-Aktion, fachliche Bestätigung und
+optimistische Updates nur mit sauberem Rollback.
+
+#### UX-04 · P2 · Aufgabenanlage und Listenzuordnung
+
+**Beobachtung:** Der Editor bietet keine klare direkte Listenauswahl. Je nach
+Einstieg wird implizit eine Liste verwendet.
+
+**Empfehlung:** Ein konsistentes Quick-add mit sichtbarem Ziel sowie eine
+Listenauswahl im vollständigen Editor ergänzen. Tastaturkürzel können die
+Erfassung weiter beschleunigen.
+
+### 6.5 Tests, Betrieb und Distribution
+
+#### TEST-01 · P1 · Kritische Pfade ohne Testabdeckung
+
+**Gut abgedeckt:** Kernoperationen der Aufgabenlogik, CCM-Invalidierung,
+UUID-Fallback und Rückabwicklung eines fehlerhaften Drag-and-drop-Schreibens.
+
+**Fehlend:**
+
+- Parser, Schemavalidierung und Migrationen
+- konkurrierende Änderungen und Konfliktbehandlung
+- partielle Fehler mehrstufiger Kommandos
+- Dialoge und Formularvalidierung
+- Rechte-, Login- und Nutzerfehler
+- Router- und Deep-Link-Verhalten
+- globale Suche und Request-Fan-out
+- Tastaturbedienung und zugängliche Namen
+- CCM-Store-Installation und Upgrade
+
+**Empfehlung:** Tests entlang der Risiken ergänzen. Wenige Browser-Szenarien
+sollten Erstellen, Bearbeiten, Verschieben, Konflikt, Löschen/Wiederherstellen
+und erneutes Laden abdecken.
+
+#### STORE-01 · P1 · CCM-Store-Prozess nicht verifiziert
+
+**Beobachtung:** Das Paket-Skript erstellt im Wesentlichen ein ZIP aus `dist`.
+Ein überprüfter Manifest-, Signatur-, Mindestversions- und Upgrade-Prozess ist
+im Projekt nicht dokumentiert oder getestet.
+
+**Auswirkung:** Ein lokaler Build kann funktionieren, während Installation,
+Routing, Assets oder Updates im CCM Store scheitern.
+
+**Empfehlung:** Die aktuelle CCM-Store-Spezifikation gegen das Paket prüfen und
+eine Testmatrix für Neuinstallation, Update mit Bestandsdaten, Assets unter
+Unterpfaden, Cache-Busting und Deinstallation anlegen. Das erzeugte ZIP sollte
+in CI strukturell validiert und als Release-Artefakt bereitgestellt werden.
+
+#### DEP-01 · P1 · Dependency-Pflege
+
+**Beobachtung:** Es bestehen Audit-Findings und kein automatisierter
+Update-Prozess. Ein vollständiger Outdated-Report war während dieses Audits
+nicht abrufbar.
+
+**Empfehlung:**
+
+1. Renovate oder Dependabot mit gruppierten, kleinen Updates einführen.
+2. Direkte und transitive Audit-Pfade einzeln prüfen.
+3. Nuxt UI, Vue, Vite, Vitest und TypeScript in getrennten PRs aktualisieren.
+4. Nach jedem UI-Framework-Update visuelle Smoke-Tests ausführen.
+5. Node 22 und 24 in CI prüfen.
+6. Security-Ausnahmen nur mit Begründung und Ablaufdatum dokumentieren.
+
+#### OPS-01 · P2 · Fehlende Diagnosefähigkeit
+
+**Beobachtung:** Die Anwendung zeigt keine Build-Version und bietet keine
+Diagnoseansicht für fehlerhafte CCM-Werte, Migrationsstand oder fehlgeschlagene
+Requests.
+
+**Empfehlung:** Version und Commit im Hilfebereich anzeigen, Fehler mit einer
+korrelierbaren ID versehen und eine exportierbare Diagnose mit Versions-,
+Schema- und Entitätsinformationen anbieten. Personenbezogene Inhalte dürfen
+dabei nicht ungefragt exportiert werden.
+
+### 6.6 Lokalisierung
+
+#### I18N-01 · P2 · Unvollständige Übersetzungsstrategie
+
+**Beobachtung:** `txx` gibt Texte unverändert zurück. Aktivitätstexte enthalten
+englische Zustände wie `checked` und `unchecked`; Farbnamen werden als englische
+Schlüssel dargestellt.
+
+**Empfehlung:** Entweder echte i18n-Schlüssel mit deutscher und englischer
+Übersetzung einführen oder die Anwendung bewusst deutsch halten und alle
+technischen Werte vor der Anzeige übersetzen. Datums- und relative Zeitformate
+müssen die aktive Locale verwenden.
+
+## 7. Fehlende Produktfunktionen
+
+### P2 · Nächster sinnvoller Produktumfang
+
+- Priorität mit klarer visueller, filterbarer Darstellung
+- kombinierbare Filter für Status, Person, Tag, Fälligkeit und Liste
+- Sortierung nach Fälligkeit, Priorität, Erstellungs- und Änderungsdatum
+- persönliche, gespeicherte Ansichten
+- Mehrfachauswahl und Bulk-Aktionen
+- schnelle Aufgabenerfassung mit Tastatur
+- Archiv für abgeschlossene Aufgaben
+- echte kompakte Tabellen-/Listenansicht
+- bessere Überfällig-, Heute- und Demnächst-Ansichten
+
+### P3 · Ausbau nach Stabilisierung
+
+- Wiederholende Aufgaben und Erinnerungen
+- Aufgabenvorlagen und Projektvorlagen
+- Papierkorb mit Wiederherstellung
+- Abhängigkeiten und Blocker zwischen Aufgaben
+- Startdatum und optionaler Zeitraum
+- Anhänge und ChurchTools-Dateibezüge
+- Erwähnungen, Abonnements und Benachrichtigungen
+- Bezüge zu ChurchTools-Personen, Gruppen, Kalenderterminen oder Songs
+- feinere Projektrollen und Sichtbarkeiten
+- Kalender- und Timeline-Ansicht
+- Kapazitäts-, Durchsatz- und Fälligkeitsauswertungen
+- Export und Import in dokumentierten Formaten
+
+## 8. Empfohlene Zielarchitektur
+
+```mermaid
+flowchart LR
+  UI[Nuxt-UI-Komponenten] --> VM[View-Models und Feature-Composables]
+  VM --> APP[Application Services / Commands]
+  APP --> DOMAIN[Versioniertes Domänenmodell]
+  APP --> REPO[Repository-Interfaces]
+  REPO --> CODEC[Schema-Validierung und Migrationen]
+  CODEC --> CCM[ChurchTools CCM API]
+  APP --> CONFLICT[Revisionen und Konfliktbehandlung]
+  APP --> EVENTS[Fehler, Toasts und Diagnostik]
 ```
 
-Das Modell ist für eine überschaubare Extension geeignet. Die Trennung zwischen Anzeige, Fachlogik und Schreiboperationen ist jedoch zu durchlässig. `List.vue` sortiert, speichert, bearbeitet und löscht Daten. `useTasks` erzeugt über `useLists` indirekt Standardlisten; schon die Verwendung eines Lese-Composables kann schreiben. Jede Aufgabenkarte baut zudem erneut Task-, Tag-, Listen- und Personen-Ableitungen auf. Query-Caching kann Requests bündeln, beseitigt aber die mehrfachen Observer, Watches und Berechnungen nicht.
+Die Trennung verfolgt vier konkrete Ziele:
 
-### Nachgewiesener Integrationsbruch
+1. Komponenten kennen keine CCM-Payload-Struktur.
+2. Jeder fachliche Anwendungsfall liegt in einem testbaren Kommando.
+3. Jede gelesene Entität wird validiert und bei Bedarf migriert.
+4. Schreibvorgänge erkennen Konflikte und liefern ein einheitliches Ergebnis.
 
-`package.json` verlinkt `@churchtools/utils` und `@churchtools/styleguide` auf `../churchtools/frontend-packages/...`. Der Lockfile fixiert damit keinen unveränderlichen Bibliotheksstand. Änderungen im Nachbarprojekt verändern die Extension ohne Änderung ihres eigenen Codes.
+Empfohlene Modulstruktur:
 
-Im aktuell verlinkten Code liegen die CCM-Helfer unter `../churchtools/frontend-packages/vue-query/src/customModules/` und werden von `@churchtools/vue-query` exportiert. Die Extension importiert sie weiterhin aus `@churchtools/utils`. Zusätzlich fehlen dort alte Exporte wie `useCurrentUser`, `useColors`, `EDIT_ICON` und `useBodyScrollbarWidth`; UI-Verträge für Farben, Menüs und Toasts haben sich verändert.
+```text
+src/
+  domain/          Typen, Regeln, Schemaversionen
+  application/     Commands, Queries, Kompensation
+  infrastructure/  CCM-Client, Repository, Codecs
+  features/        Projekt-, Aufgaben-, Tag- und Suchfunktionen
+  ui/              Wiederverwendbare Nuxt-UI-Komponenten
+  pages/           Route-Komposition
+```
 
-Ein bloßes Umschreiben der Importpfade reicht nicht:
+Eine vollständige Umsortierung ist nicht als einmaliger Umbau nötig. Neue
+Stabilitätsarbeit sollte in dieser Richtung entstehen; bestehende Funktionen
+können schrittweise migriert werden.
 
-- Die aktuelle Kategorien-Löschmutation erwartet `{ id, dryRun }`; `useProjects.ts:44` übergibt nur eine Zahl.
-- Die aktuelle Modulquery ist mit einer numerischen Modul-ID typisiert, `usePlugin.ts:5` übergibt den Extension-Key. Auflösung per Key und ID explizit vereinbaren und gegen die Ziel-API testen.
-- Das aktuelle Query-Paket verwendet einen eigenen exportierten `queryClient`; `main.ts` installiert `VueQueryPlugin` ohne diesen explizit zu übergeben. Bei der Migration einen gemeinsamen Client sicherstellen und Cache-Invalidierung testen.
-- Die aktuellen lokalen Pakete erwarten teilweise andere Vue-/Pinia-Stände. Runtime und Typen müssen dieselbe kompatible Paketfamilie verwenden.
-- Projekt-Metadaten werden in der aktuellen Kategorienmutation anders aufgeteilt. `securityLevelId: 1` in der Extension ist kein ausreichender Nachweis wirksamer Zugriffssteuerung. Tatsächliche Rechte für die Zielversion prüfen.
+## 9. Empfohlene Umsetzung
 
-### Empfohlenes Zielbild
+### Phase 1 · Datenbasis absichern
 
-1. Ein schmales CCM-Repository kapselt API-Aufrufe, Serialisierung, Query-Keys, Validierung und Fehlerbehandlung.
-2. Reine Fachfunktionen berechnen Hierarchien, Termine, Filter und Sortierung ohne Netzwerk oder Vue-Lifecycle.
-3. Projektbezogene Composables liefern gemeinsame, indizierte Daten; lesende Zugriffe erzeugen keine Daten.
-4. Dialoge bearbeiten eigene Entwürfe. Explizite Commands speichern, verschieben, vervollständigen oder löschen.
-5. Serverzustand bleibt im Query-Cache; benutzerspezifische Ansichtseinstellungen liegen getrennt davon. Teamweit gespeicherte Listeneinstellungen und persönliche Filter klar unterscheiden.
+1. Laufzeitschemas und `schemaVersion` ergänzen.
+2. Migrationen und Quarantäne für ungültige Werte bauen.
+3. Revisionen und Konflikterkennung einführen.
+4. Mehrstufige Kommandos idempotent und fehlertolerant machen.
+5. Soft Delete und Reparatur von Referenzen ergänzen.
 
-Keine zusätzliche Backend-Plattform oder große State-Management-Neuentwicklung ist für diesen Schritt notwendig. Konfliktkontrolle hängt allerdings von den Möglichkeiten der ChurchTools-API ab.
+**Ergebnis:** Bestandsdaten lassen sich sicher laden; parallele Arbeit verliert
+keine Änderungen unbemerkt.
 
-## Priorisierte Fehler und Abnahmekriterien
+### Phase 2 · Integration und Betrieb härten
 
-### P0 – vor einem weiteren Release
+1. Authentifizierung und Berechtigungen explizit behandeln.
+2. CSS vollständig auf den Extension-Root begrenzen.
+3. Font-Awesome-Hostabhängigkeit entfernen.
+4. CCM-Store-Paket und Upgrade-Pfad verifizieren.
+5. Dependencies aktualisieren und Update-Automatisierung einführen.
+6. Diagnoseinformationen und Versionsanzeige ergänzen.
 
-**F01: Build und ChurchTools-Verträge sind gebrochen.** Belege: `src/composables/usePlugin.ts:1`, `src/project/useProjects.ts`, tatsächlicher Buildfehler und Typecheck. Lösung: kompatible, versionierte Pakete festlegen und APIs vollständig migrieren. Abnahme: frischer Checkout kann ohne benachbartes ChurchTools-Repository installiert, typgeprüft und gebaut werden; Projekt-/Aufgaben-CRUD funktioniert auf der Zielversion.
+**Ergebnis:** Die Extension funktioniert reproduzierbar in ChurchTools und im
+CCM Store, ohne versteckte Abhängigkeiten zum Host-Frontend.
 
-**F02: Ansichten können Listenzuordnungen ungewollt überschreiben.** Belege: `src/components/List.vue:38–91`, `src/project/views/TagBoard.vue`, `src/project/views/TaskBoard.vue`. Initialisierung ersetzt `internItems`, dessen Watch `updateSortKeys` aufruft. Diese Funktion setzt `list` auf die Spalten-ID. Tag- und Aufgaben-Boards übergeben aber Tag- bzw. Aufgaben-IDs als virtuelle Listen. `isDraggable=false` deaktiviert diesen Watch nicht. Isoliert mit Originalfunktionscode reproduziert: `{id:11,list:100}` erzeugt Update `{id:11,list:200,sortKey:5000}` in Spalte 200. Bei mehreren Tags sind konkurrierende Updates möglich. Lösung: nur explizite Drag-Ereignisse persistieren; virtuelle Spalten und echte Listen getrennt typisieren. Abnahme: Mount, Refetch, Suche und Ansichtswechsel erzeugen **keine** Mutation; echtes Verschieben genau die beabsichtigte Änderung.
+### Phase 3 · Performance, A11y und UX
 
-**F03: Dependency-Sicherheitsbefunde und fehlende Reproduzierbarkeit.** Audit meldet u. a. `tar` kritisch sowie `vite`, `axios`, `lodash-es` und `rollup` hoch. npm meldet für alle 18 Pakete verfügbare Fixes, deren Kompatibilität trotzdem geprüft werden muss. Lösung und Abnahme siehe Dependency-Plan. `npm audit --omit=dev` allein reicht hier nicht: viele tatsächlich im Browser verwendete Pakete stehen unter `devDependencies`.
+1. Globale Suche nur bei Bedarf laden.
+2. Daten auf Projektebene normalisieren und Karten vereinfachen.
+3. Tastatur- und Screenreader-Bedienung schließen.
+4. Feedback, Bestätigungen und Fehlermeldungen vereinheitlichen.
+5. Persönliche Ansichtseinstellungen von Teamdaten trennen.
+6. Echte kompakte Listenansicht bauen.
 
-### P1 – Kernfunktionen und Datenintegrität
+**Ergebnis:** Große Projekte bleiben schnell und alle zentralen Abläufe sind
+verlässlich bedienbar.
 
-**F04: Aufgaben- und Listeneditor besitzen keinen unabhängigen Entwurf.** `TaskEditor.vue:37` übernimmt `tasksMap.value[tId]` direkt, `DialogList.vue` übernimmt `props.list`. Änderungen betreffen somit das gelieferte Objekt; je nach Readonly-Verhalten werden sie sichtbar oder vom Framework abgewiesen. Beim Aufgaben-Speichern können Entwurf und Vergleichsobjekt bereits identisch sein, sodass der Diff leer bleibt. Lösung: tief kopierter, validierter Entwurf und unveränderliche Ausgangsversion. Abnahme: Abbrechen ändert weder Anzeige noch Cache; Speichern produziert genau den tatsächlichen Diff.
+### Phase 4 · Produkt auf die nächste Stufe bringen
 
-**F05: Erledigen-Button im Detaildialog tut nichts.** `DialogTask.vue:59` behandelt nur Anlegen und Bearbeiten, obwohl der Primärbutton im Anzeigemodus „Als erledigt/unerledigt markieren“ anbietet. Lösung: fehlenden Status-Command ergänzen. Abnahme: beide Richtungen inklusive Aktivitätsverlauf, Fehleranzeige und Ladezustand funktionieren.
+1. Prioritäten, Filter, Sortierung und gespeicherte Ansichten
+2. Bulk-Aktionen, Quick-add und Archiv
+3. Wiederholungen, Erinnerungen und Vorlagen
+4. Benachrichtigungen und ChurchTools-Bezüge
+5. Kalender, Timeline und Auswertungen
 
-**F06: Neue Liste mit Sortierung wird fälschlich als vorhandene Liste erkannt.** `DialogList.vue` prüft mit `'sortKey' in list`, obwohl auch neue Listen einen Sortierschlüssel besitzen. Das kann einen Update-Aufruf ohne ID auslösen. Lösung: anhand einer validierten ID entscheiden und auf erfolgreiches Speichern warten. Abnahme: Anlegen mit/ohne eingegebene Sortierung verwendet POST, Bearbeiten PUT; Fehler lassen den Entwurf offen.
+## 10. Definition of Done für die nächste stabile Version
 
-**F07: Standardlisten-Erzeugung ist nicht robust.** `useLists.ts:17–29` verwendet eine globale Sperre für alle Projekte, setzt sie ohne `finally` zurück und prüft nur `!isLoading`. Das unterscheidet Erfolg nicht sauber von deaktivierter oder fehlgeschlagener Query. Es fehlt eine modul-/projektbezogene, idempotente Initialisierung; zwischen Clients sind Duplikate möglich. Abnahme: Fehler blockiert spätere Versuche nicht; schnelle Projektwechsel und zwei gleichzeitige Clients erzeugen keine falschen oder doppelten Standardlisten.
+- Persistierte Daten besitzen ein validiertes, versioniertes Schema.
+- Zwei parallele Bearbeitungen können sich nicht unbemerkt überschreiben.
+- Mehrstufige Operationen sind wiederholbar oder werden sauber kompensiert.
+- Fehlerhafte Einzelwerte blockieren keine vollständige Ansicht.
+- Login- und Rechtefehler sind sichtbar und verhindern ungültige Schreibvorgänge.
+- Globale Suche lädt erst bei Verwendung und skaliert nicht ungebremst mit allen
+  Projekten.
+- Zentrale Bedienwege funktionieren per Tastatur und besitzen zugängliche Namen.
+- Styles wirken nur innerhalb des Extension-Roots.
+- Der Produktions-Build hängt für Icons nicht vom Host-CSS ab.
+- Neuinstallation und Update des CCM-Store-Pakets sind mit Bestandsdaten getestet.
+- CI prüft Node 22 und 24 sowie Build, Tests, Lint, Typen und Paketstruktur.
+- Bekannte Dependency-Findings sind behoben oder mit Ablaufdatum dokumentiert.
 
-**F08: Virtuelle Spalten erzeugen Aufgaben mit falschem Kontext.** `NewTask.vue` setzt immer `{list: props.list.id}`. In Tagspalten müsste ein Tag gesetzt werden; in Unteraufgabenspalten müsste eine Elternbeziehung entstehen. Lösung: getrennte Erstellungs-Commands nach Spaltenart. Abnahme: neue Aufgabe ist nach Reload im richtigen Tag bzw. unter dem richtigen Parent und hat eine gültige Liste.
+## 11. Einordnung bestehender Dokumente
 
-**F09: Fehlende und beschädigte Daten können Abstürze verursachen.** `TaskEditor.initTask` liest `.name` auch bei nicht gefundener Aufgabe. `calculateDueDate` erwartet ein Objekt. Rekursive Funktionen in `useTasks.ts` und `TaskItem.vue` besitzen keinen Zyklenschutz; `duplicateSubtasks` und `deleteRecursive` greifen auf möglicherweise fehlende Kinder zu. Lösung: Lade-/404-Zustände, Laufzeitvalidierung, besuchte IDs und eindeutige Parent-Regeln. Abnahme: ungültige Route, fehlendes Kind und zyklische Testdaten werden kontrolliert behandelt.
-
-**F10: Löschen und Zusammenarbeit können Inkonsistenzen hinterlassen.** `deleteRecursive` wartet nicht auf die Löschoperationen, bereinigt Parent-Referenzen nicht und bietet keine Bestätigung. Kommentare/Änderungen schreiben jeweils das vollständige Aufgabenobjekt; ein Konfliktmechanismus ist in der Extension nicht vorhanden. Lösung: definierte Löschstrategie mit Ergebnis pro Schritt, Referenzbereinigung und Fehlerbehandlung; Versionsprüfung/ETag verwenden, sofern serverseitig unterstützt. Abnahme: Teilausfall bleibt sichtbar und reparierbar; zwei Bearbeiter überschreiben Kommentare nicht unbemerkt.
-
-**F11: Unteraufgaben-Board reagiert nicht korrekt auf Projektwechsel.** `TaskBoard.vue:14` übergibt `projectId.value` statt der reaktiven Referenz an `useTasks`. Bei wiederverwendeter Komponente bleibt die alte ID gebunden. Abnahme: Wechsel zwischen zwei Projekten zeigt ausschließlich die jeweils richtigen Aufgaben.
-
-**F12: Filterverhalten ist inkonsistent.** `showTask` erwartet `task.parent`, aber Liste, Meine Aufgaben und Tagboard übergeben rohe Aufgaben ohne abgeleitetes `parent`. Das Unteraufgaben-Board ignoriert die Suche ganz. Lösung: gemeinsame Selektoren auf einem konsistenten ViewModel. Abnahme: dieselbe Suche und dieselbe Unteraufgaben-/Erledigt-Einstellung liefern über alle relevanten Ansichten nachvollziehbare Ergebnisse.
-
-**F13: Pflichtfelder und Mutationszustände sind nicht verlässlich abgesichert.** Anlegen aus `{ } as Task` setzt erforderliche Defaults nicht; Enter im Schnellformular umgeht die alleinige Button-Deaktivierung. Projekt-, Listen- und Tagdialog schließen vor Abschluss der Mutation. Lösung: Commands validieren Titel und Defaults, verhindern Doppelspeichern und schließen erst bei Erfolg. Abnahme: leere Titel, Doppelklick und Serverfehler verlieren keine Eingaben.
-
-### P2 – Funktionale Bereinigung und Bedienung
-
-- `getPercentFullfilled` teilt bei Aufgaben ohne Kinder durch null; verwaiste Kinder verfälschen den Nenner. Definierten Wert und ausschließlich gültige Kinder verwenden.
-- `calculateDueDate` behandelt `dueDateRelative=0` als nicht gesetzt; `useTask.parent` schreibt ein berechnetes `Date` in das gespeicherte `dueDate`-Feld. Abgeleitete Termine separat führen und Kalendertage/Zeitzonen explizit testen.
-- `getObjectDiff` iteriert nur über Schlüssel des ersten Objekts; entfernte Felder im zweiten werden nicht erfasst. Union beider Schlüsselmengen vergleichen.
-- `TaskItem.showLastRow` prüft `item.comments` statt der Kommentare in `activity` und ignoriert reine Links. Dadurch können Kommentarzähler und Link verschwinden.
-- `router.ts` hardcodiert `/ccm/tasks/`, während Vite den Pfad aus `VITE_KEY` bildet. Einheitliche Basis verwenden; Installation unter alternativem Key testen.
-- Projekt nicht gefunden und Ladefehler erscheinen teilweise dauerhaft als Ladezustand; Überblick beobachtet Modul- statt Kategorien-Ladevorgang. Loading, Empty, Error und Forbidden trennen.
-- `onSearchForPerson` interpoliert Suchtext unkodiert in die URL. Query-Parameter korrekt kodieren.
-- Mobile Breite in `App.vue` ist nicht reaktiv; feste Boardbreiten und Vier-Spalten-Dialog testen. Klickbare Icons als beschriftete Buttons, Fokusführung und Tastaturbedienung ergänzen.
-- `txx` gibt nur den Ausgangstext zurück; deutsche und englische UI-Texte sind gemischt. Internationalisierung bei Bedarf systematisch vervollständigen.
-
-## Dependency- und Release-Plan
-
-Live aus der npm-Registry ermittelt; „Ziel“ bezeichnet einen sinnvollen ersten Update-Schritt, keine bereits verifizierte Gesamtkombination.
-
-| Paket | Installiert | Erster Zielkandidat | Entscheidung |
-|---|---|---|---|
-| ChurchTools Client | 1.4.0 | 1.7.3 | Mit CCM-Verträgen und transitive Axios-Version prüfen |
-| ChurchTools utils/styleguide | lokale Verzeichnisse | kompatible veröffentlichte Versionen | Höchste Priorität; Query-/API-Typ-Pakete explizit ergänzen |
-| Vue | 3.5.21 | 3.5.43 | Version über alle Pakete harmonisieren |
-| Vue Router | 4.5.1 | 4.6.4 | Major 5.3.1 getrennt bewerten |
-| TanStack Vue Query | 5.87.4 | 5.104.0 | Mit ChurchTools-Query-Paket und gemeinsamem Client testen |
-| Pinia | 3.0.3 | 3.0.4 oder 4.0.3 | Entscheidung nach ChurchTools-Kompatibilität, nicht isoliert |
-| Vite | 7.1.4 | 7.3.6 | Danach Major 8.3.1 separat prüfen |
-| Vite Vue Plugin | 6.0.1 | 6.0.9 | Mit gewähltem Vite-Stand |
-| Tailwind und Vite-Plugin | 4.1.13 | 4.3.3 | Gemeinsam und gegen Styleguide prüfen |
-| TypeScript | 5.9.2 | 5.9.3 | Major 7.0.2 separat; Konflikt um generierte Enums lösen |
-| vue-tsc / Component Type Helpers | 3.0.6 | 3.3.11 | Zusammen mit Vue/TypeScript |
-| ESLint | 9.35.0 | 9.39.5 | Major 10.11.0 separat |
-| lodash-es | 4.17.21 | 4.18.1 | Sicherheitsbefunde und Nutzung prüfen |
-| Font Awesome | 7.0.1 | 7.3.1 | Auch kopierte Dateien unter `src/assets` berücksichtigen |
-| vuedraggable | 4.1.0 | zunächst 4.1.0 | Registry-`latest` ist 2.24.3: nicht blind auf Vue-2-Zweig wechseln |
-
-Weitere verifizierte Versionen stehen im Snapshot. Vite 7.1 liegt außerhalb der aktuell unterstützten Minor-Linien; die offizielle [Vite-Supportübersicht](https://vite.dev/releases) nennt unter anderem 7.3 als unterstützte Linie. Deshalb ist 7.3.6 ein sinnvoller erster Schritt vor einer gesonderten Major-Migration.
-
-Reihenfolge:
-
-1. Ziel-ChurchTools-Version und kompatible Paketfamilie festlegen. Lokale Verzeichnislinks durch versionierte Artefakte ersetzen; private Registry-Konfiguration reproduzierbar dokumentieren.
-2. Node-Version/`engines` festlegen. Typecheck, Lint, Tests und Build als getrennte Skripte einführen. `build` verwendet aktuell `vue-tsc ; vite build`: durch `&&` ersetzen, damit Typfehler den Release tatsächlich stoppen.
-3. ChurchTools-Integration migrieren; UI- und API-Verträge anpassen. Importierte direkte Dependencies explizit deklarieren, z. B. `@apollo/client`, `@eslint/js`, `globals`, `typescript-eslint` statt Zufallsverfügbarkeit über Peers/Transitives.
-4. Kompatible Updates einschließlich Lockfile durchführen; transitive Audit-Fixes nachvollziehen. Major-Upgrades separat halten. Kein unkontrolliertes `npm audit fix --force`.
-5. Frische Installation, Typecheck, Lint, Regressionstests und Production-Build prüfen. Vollständiges Audit wiederholen und verbleibende Befunde nach Browser-/Build-/Node-Erreichbarkeit dokumentieren.
-6. Paket in einer Testinstanz installieren und aktualisieren. Assetpfade, Deep Links nach Reload, Berechtigungen und Erhalt vorhandener Daten prüfen.
-
-`scripts/package.js` erstellt lediglich ein ZIP aus `dist`. Das ist noch kein nachgewiesener CCM-Store-Releaseprozess. Archivstruktur und benötigte Metadaten gegen den tatsächlichen Installationsvertrag prüfen. Bei gleichem Versions-/Commitnamen aktualisiert `zip -r` ein bestehendes Archiv; entfernte Assets können darin verbleiben. Frisches Archiv, eindeutige Release-Version, Integritätsprüfung und dokumentierter Rollback gehören in den Ablauf. Die README beschreibt noch ein Boilerplate und verweist auf eine fehlende `.env-example`.
-
-## Was als Nächstes fehlen darf – und was nicht
-
-Vor neuen Produktfeatures müssen die sichtbaren Grundabläufe vollständig sein: Listen und Tags anlegen, Unteraufgaben erstellen, relative Termine bearbeiten, Status ändern, Fehler verstehen und gefahrlos abbrechen. TODO-Aktionen entweder fertigstellen oder bis dahin ausblenden.
-
-Danach sind die wertvollsten Erweiterungen:
-
-1. Projektübergreifende „Meine Aufgaben“ mit Heute, Überfällig und Demnächst sowie Filtern nach Verantwortlichen, Tags und Status.
-2. Projekt-/Aufgabenvorlagen und wiederkehrende Aufgaben für wiederkehrende Gemeindearbeit.
-3. Erinnerungen und Benachrichtigungen, sofern ChurchTools eine passende Integration bietet.
-4. Archivierung, Wiederherstellung/Undo und Mehrfachaktionen.
-5. Export und dokumentiertes Datenschema inklusive `schemaVersion` und Migrationen.
-
-Ein volles Kanban-Statusmodell, Prioritäten, Anhänge und Abhängigkeiten sind mögliche nächste Ausbaustufen. Zuerst klären, ob Listen organisatorische Sammlungen oder Workflow-Status darstellen sollen; das verhindert doppelte oder widersprüchliche Modelle.
-
-## Konkrete Arbeitspakete
-
-| Paket | Inhalt | Fertig, wenn … |
-|---|---|---|
-| A – Releasebasis | F01/F03, ChurchTools-Migration, Versionierung, Dependency-Updates, Build-Gates | frische Installation und alle Checks erfolgreich; Installation in Ziel-Testinstanz funktioniert |
-| B – Sichere Datenoperationen | F02/F04/F06/F07/F08/F09/F10/F13 | Ansichtswechsel schreibt nichts; Entwürfe abbrechbar; Operationen bei Fehlern nachvollziehbar |
-| C – Vollständiger Funktionskern | F05/F11/F12, Listen/Tags/Unteraufgaben/relative Termine, TODOs | alle angebotenen Kernaktionen funktionieren; Alt-Dialog kann entfallen |
-| D – Wartbarkeit und UX | Repository-Schicht, reine Fachlogik, einheitliche Filter, Zustände, mobile/Tastaturbedienung | keine Lifecycle-Schreibeffekte; übersichtliche Zustandsführung; dokumentierte Nutzerabläufe |
-| E – Produktnutzen | globale Aufgabenübersicht, Vorlagen, Wiederholungen/Erinnerungen | anhand konkreter Nutzerabläufe priorisiert und getestet |
-
-Notwendige Regressionstests für A–C: Mount/Refetch ohne Mutation; echter Drag zwischen Listen; Tag-/Parent-Kontext beim Erstellen; Editieren und Abbrechen; Statuswechsel; fehlende/zyklische Kinder; Standardliste nach API-Fehler; Projektwechsel; konsistente Suche; relative Termine einschließlich null Tagen; Speicherkonflikt und Teilausfall beim Löschen. Dazu ein Browserablauf Projekt → Liste → Aufgabe → Bearbeiten → Kommentar → Erledigen → Reload und ein Installation-/Upgrade-Test mit bestehendem Datenbestand.
-
-Der Dependency-Snapshot dokumentiert den Stand der Erstanalyse. Umgesetzte
-Reparaturen, aktuelle Prüfungen und verbleibende Grenzen werden separat im
-Umsetzungsstand geführt.
+[`UMSETZUNGSSTAND.md`](./UMSETZUNGSSTAND.md) beschreibt die historische
+Entwicklung und bleibt als Verlauf nützlich. Diese Datei ist die aktuelle
+technische und produktbezogene Bewertung. Ältere Dependency-Snapshots sind
+nicht als Aussage über den heutigen Update-Stand zu verwenden.
