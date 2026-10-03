@@ -1,5 +1,5 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
-import { reactive } from 'vue';
+import { reactive, readonly } from 'vue';
 
 export const CtColor = {
     BASIC: 'basic',
@@ -21,14 +21,32 @@ export type Person = { id: number; firstName?: string; lastName?: string; imageU
 export type PersonDisplay = { domainIdentifier: string; title: string; imageUrl?: string; icon?: string };
 
 const currentUser = reactive<Person>({ id: 0 });
+const currentUserState = reactive<{
+    status: 'loading' | 'authenticated' | 'error';
+    message?: string;
+}>({ status: 'loading' });
 export const useCurrentUser = () => currentUser;
+export const authState = readonly(currentUserState);
 export async function loadCurrentUser() {
+    currentUserState.status = 'loading';
+    currentUserState.message = undefined;
     try {
         const person = await churchtoolsClient.get<Person>('/whoami');
+        if (!Number.isSafeInteger(person.id) || person.id <= 0) throw new Error('Ungültige Benutzer-ID.');
         Object.assign(currentUser, person);
-    } catch {
-        // Read-only views remain usable when the session is not authenticated.
+        currentUserState.status = 'authenticated';
+    } catch (error) {
+        currentUser.id = 0;
+        currentUserState.status = 'error';
+        currentUserState.message =
+            error instanceof Error ? error.message : 'Der aktuelle Benutzer konnte nicht geladen werden.';
     }
+}
+
+export function requireCurrentUser(): Person {
+    if (currentUserState.status !== 'authenticated' || currentUser.id <= 0)
+        throw new Error('Schreiben ist derzeit nicht möglich. Bitte die Anmeldung prüfen und erneut versuchen.');
+    return currentUser;
 }
 
 export const personDisplay = (person: Person): PersonDisplay => ({

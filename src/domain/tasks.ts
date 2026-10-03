@@ -1,5 +1,19 @@
 import { cloneDeep, isEqual, pick } from 'lodash-es';
 
+export function normalizeTaskUrl(value: string | undefined): string | undefined {
+    const input = value?.trim();
+    if (!input) return undefined;
+    let url: URL;
+    try {
+        url = new URL(input);
+    } catch {
+        throw new Error('Der Link ist ungültig. Bitte eine vollständige http- oder https-Adresse eingeben.');
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:')
+        throw new Error('Der Link muss mit http:// oder https:// beginnen.');
+    return url.toString();
+}
+
 export function taskDraft(task: Partial<Task> = {}): Task {
     const draft: Task = cloneDeep({
         type: 'task',

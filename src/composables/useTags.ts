@@ -1,5 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
+import { requireCurrentUser } from '../platform';
 import { usePlugin } from './usePlugin';
 
 export function useTags(projectId: MaybeRefOrGetter<number>) {
@@ -23,12 +24,19 @@ export function useTags(projectId: MaybeRefOrGetter<number>) {
         })),
     );
 
-    const createTag = (tag: Tag) => createCustomDataValue({ ...tag, dataCategoryId: pId.value, type: 'tag' });
+    const createTag = (tag: Tag) => {
+        requireCurrentUser();
+        return createCustomDataValue({ ...tag, dataCategoryId: pId.value, type: 'tag' });
+    };
 
-    const updateTag = (tag: TransformedTag) =>
-        updateCustomDataValue({ ...tag, dataCategoryId: pId.value, type: 'tag' });
-    const deleteTag = (id: number) =>
-        deleteCustomDataValue({ id, dataCategoryId: pId.value, revision: tags.value[id]?.revision });
+    const updateTag = (tag: TransformedTag) => {
+        requireCurrentUser();
+        return updateCustomDataValue({ ...tag, dataCategoryId: pId.value, type: 'tag' });
+    };
+    const deleteTag = (id: number) => {
+        requireCurrentUser();
+        return deleteCustomDataValue({ id, dataCategoryId: pId.value, revision: tags.value[id]?.revision });
+    };
 
     return { tags, tagsArray, createTag, updateTag, deleteTag };
 }

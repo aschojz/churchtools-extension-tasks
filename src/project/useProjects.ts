@@ -8,7 +8,7 @@ import {
     useCustomModuleDataValuesMutations,
 } from '../data/ccm';
 import { CURRENT_SCHEMA_VERSION } from '../domain/storedData';
-import { CtColor } from '../platform';
+import { CtColor, requireCurrentUser } from '../platform';
 import { createProjectShorty, ICONS, txx } from '../utils/utils';
 
 export default function useProjects() {
@@ -22,6 +22,7 @@ export default function useProjects() {
     const projects = computed(() => (categories.value ?? []).filter(cat => cat.shorty?.startsWith('project')));
 
     const createProject = async (project: Project) => {
+        requireCurrentUser();
         const id = moduleId.value;
         if (!id) throw new Error('Modul ist noch nicht geladen.');
         const created = await createDataCategory({
@@ -48,6 +49,7 @@ export default function useProjects() {
         toast.add({ title: 'Projekt wurde erstellt.', color: 'success' });
     };
     const updateProject = async (project: Project) => {
+        requireCurrentUser();
         await updateDataCategory({
             ...project,
             schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -57,6 +59,7 @@ export default function useProjects() {
     };
 
     const deleteProject = async (id: number) => {
+        requireCurrentUser();
         const confirmed = window.confirm(txx('Das Projekt und alle seine Aufgaben werden gelöscht.'));
         if (confirmed) {
             const result = await deleteDataCategory(id);

@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { colorKey, CtColor } from '../platform';
+import { normalizeTaskUrl } from './tasks';
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
@@ -103,7 +104,12 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
     if (data.type === 'task') {
         const fullfilled = data.fullfilled === true;
         const description = optionalString(data.description);
-        const url = optionalString(data.url);
+        let url: string | undefined;
+        try {
+            url = normalizeTaskUrl(optionalString(data.url));
+        } catch {
+            url = undefined;
+        }
         const dueDate = optionalDate(data.dueDate);
         const dueDateRelative = optionalNumber(data.dueDateRelative);
         const allDay = optionalBoolean(data.allDay);

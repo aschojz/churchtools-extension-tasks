@@ -1,4 +1,5 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
+import '@fortawesome/fontawesome-free/css/all.css';
 import ui from '@nuxt/ui/vue-plugin';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
@@ -12,7 +13,6 @@ import './tailwind.css';
 
 // only import reset.css in development mode to keep the production bundle small and to simulate CT environment
 if (import.meta.env.MODE === 'development') {
-    import('@fortawesome/fontawesome-free/css/all.css');
     import('./utils/reset.css');
 }
 

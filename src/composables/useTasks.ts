@@ -2,8 +2,8 @@ import Fuse from 'fuse.js';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { failWithCompensation } from '../application/compensation';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
-import { descendantIds, taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
-import { useCurrentUser } from '../platform';
+import { descendantIds, normalizeTaskUrl, taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
+import { requireCurrentUser, useCurrentUser } from '../platform';
 import { taskStore } from './storeTasks';
 import { useLists } from './useLists';
 import { usePlugin } from './usePlugin';
@@ -18,9 +18,10 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         useCustomModuleDataValuesMutations<Task>(moduleId, pId);
 
     const createTask = async (newTask: Task) => {
+        requireCurrentUser();
         if (!newTask.name?.trim()) throw new Error('Bitte einen Titel eingeben.');
         return await createCustomDataValue({
-            ...taskDraft(newTask),
+            ...taskDraft({ ...newTask, url: normalizeTaskUrl(newTask.url) }),
             name: newTask.name.trim(),
             activity: [{ personId: currentUser.id, date: new Date().toISOString(), type: 'create' }],
             dataCategoryId: pId.value,
@@ -28,13 +29,14 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         });
     };
     const updateTask = async (task: TransformedTask, diff?: ReturnType<typeof taskDiff>) => {
+        requireCurrentUser();
         if (!task.name?.trim()) throw new Error('Bitte einen Titel eingeben.');
         const activity = [...(Array.isArray(task.activity) ? task.activity : [])];
         if (diff && Object.keys(diff).length) {
             activity.push({ personId: currentUser.id, date: new Date().toISOString(), type: 'update', value: diff });
         }
         const payload = {
-            ...taskDraft(task),
+            ...taskDraft({ ...task, url: normalizeTaskUrl(task.url) }),
             id: task.id,
             revision: task.revision,
             updatedAt: task.updatedAt,
@@ -46,6 +48,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         await updateCustomDataValue(payload);
     };
     const deleteTask = async (taskId: number, categoryId = pId.value, revision?: number) => {
+        requireCurrentUser();
         return await deleteCustomDataValue({
             id: taskId,
             dataCategoryId: categoryId,

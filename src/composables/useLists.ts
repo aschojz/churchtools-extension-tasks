@@ -1,5 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
+import { requireCurrentUser } from '../platform';
 import { usePlugin } from './usePlugin';
 
 export function useLists(projectId: MaybeRefOrGetter<number>) {
@@ -13,6 +14,7 @@ export function useLists(projectId: MaybeRefOrGetter<number>) {
     const lists = computed(() => (data.value ?? []).filter(v => v.type === 'list' && v.dataCategoryId === pId.value));
 
     const createList = (list: TaskList) => {
+        requireCurrentUser();
         return createCustomDataValue({
             ...list,
             dataCategoryId: pId.value,
@@ -20,10 +22,18 @@ export function useLists(projectId: MaybeRefOrGetter<number>) {
         });
     };
 
-    const updateList = (list: TransformedList) =>
-        updateCustomDataValue({ ...list, dataCategoryId: pId.value, type: 'list' });
-    const deleteList = (listId: number) =>
-        deleteCustomDataValue({ id: listId, dataCategoryId: pId.value, revision: getListById(listId)?.revision });
+    const updateList = (list: TransformedList) => {
+        requireCurrentUser();
+        return updateCustomDataValue({ ...list, dataCategoryId: pId.value, type: 'list' });
+    };
+    const deleteList = (listId: number) => {
+        requireCurrentUser();
+        return deleteCustomDataValue({
+            id: listId,
+            dataCategoryId: pId.value,
+            revision: getListById(listId)?.revision,
+        });
+    };
 
     const getListById = (id: number) => lists.value.find(l => l.id === id);
 

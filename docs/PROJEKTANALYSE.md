@@ -284,6 +284,10 @@ langfristig eigene Entitäten oder Append-only-Ereignisse sein.
 
 #### SEC-01 · P1 · URL-Validierung
 
+**Status:** Umgesetzt. Links werden vor dem Speichern getrimmt, mit `URL`
+normalisiert und ausschließlich für `http:` und `https:` akzeptiert. Unsichere
+oder beschädigte Bestandswerte werden beim Lesen nicht als Link ausgegeben.
+
 **Beobachtung:** Aufgaben-URLs werden über ein `type="url"`-Feld erfasst, aber
 nicht als Teil eines verlässlich validierten Formularschemas normalisiert. Der
 gespeicherte Wert wird als Linkziel verwendet.
@@ -298,6 +302,11 @@ und `https:` erlauben, normalisiert speichern und externe Links mit
 
 #### AUTH-01 · P1 · Unklare Benutzer- und Rechtefehler
 
+**Status:** Der Benutzerstatus ist jetzt explizit. Fehler von `/whoami` werden
+sichtbar angezeigt und können erneut geladen werden. Sämtliche fachlichen
+Schreibwege prüfen eine gültige Benutzer-ID; die primären Schreibaktionen sind
+in diesem Zustand deaktiviert und es entstehen keine Aktivitäten mit ID `0`.
+
 **Beobachtung:** Schlägt das Laden des aktuellen Benutzers fehl, wird der Fehler
 verschluckt und der Benutzer bleibt bei ID `0`. Dadurch erscheinen „Meine
 Aufgaben“ und Zuweisungsoptionen leer oder unvollständig. Aktivitäten können
@@ -307,6 +316,10 @@ mit einer unbekannten Person erzeugt werden.
 Schreibaktionen sperren und eine verständliche Wiederholen-Aktion anbieten.
 Die tatsächliche Wirkung von `securityLevelId: 1` auf Lesen, Schreiben und
 Löschen muss gegen ChurchTools verifiziert und dokumentiert werden.
+
+**Offen:** Die konkrete Semantik von `securityLevelId: 1` und differenzierte
+Lesen-/Schreiben-/Löschen-Rechte müssen weiterhin mit der ChurchTools-API und
+dem CCM-Store-Paket verifiziert werden.
 
 ### 6.3 Architektur und Performance
 
@@ -349,6 +362,11 @@ kann ein neueres überschreiben.
 über den Suchtext führen und Lade-, Leer- und Fehlerzustände unterscheiden.
 
 #### ARCH-01 · P1 · Implizite Font-Awesome-Abhängigkeit
+
+**Status:** Behoben. Das Font-Awesome-Paket und seine Webfonts werden jetzt in
+allen Modi in den Extension-Build aufgenommen. Dynamisch gespeicherte
+Projekticons bleiben kompatibel, ohne CSS oder Fonts des ChurchTools-Hosts zu
+benötigen.
 
 **Beobachtung:** Font-Awesome-CSS wird nur in der Entwicklung importiert. Der
 Produktions-Build verwendet weiterhin Font-Awesome-Klassennamen und verlässt

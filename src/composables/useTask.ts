@@ -1,7 +1,7 @@
 import { sortBy } from 'lodash-es';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations } from '../data/ccm';
-import { CtColor, notNullish, personDisplay, useCurrentUser } from '../platform';
+import { CtColor, notNullish, personDisplay, requireCurrentUser, useCurrentUser } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
 import { usePlugin } from './usePlugin';
 import { useTags } from './useTags';
@@ -44,6 +44,7 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
 
     const currentUser = useCurrentUser();
     const toggleTask = async () => {
+        requireCurrentUser();
         if (!task.value) return;
         const activity = [...(Array.isArray(task.value.activity) ? task.value.activity : [])];
         activity.push({
@@ -55,10 +56,12 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
         const payload = { ...task.value, fullfilled: !task.value.fullfilled, activity };
         await updateCustomDataValue(payload);
     };
-    const deleteTask = () =>
-        tId.value
+    const deleteTask = () => {
+        requireCurrentUser();
+        return tId.value
             ? deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value, revision: task.value?.revision })
             : undefined;
+    };
 
     const comments = computed(() =>
         (Array.isArray(task.value?.activity) ? task.value.activity : []).filter(a => a.type === 'comment'),

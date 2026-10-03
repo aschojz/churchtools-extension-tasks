@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAllProjectTasks } from './composables/useAllProjectTasks';
 import { usePlugin } from './composables/usePlugin';
 import { dataIssues } from './domain/storedData';
-import { colorKey } from './platform';
+import { authState, colorKey, loadCurrentUser } from './platform';
 import DialogProject from './project/DialogProject.vue';
 import { activeProjectDialog, closeProjectDialog, createOrEditProject } from './project/projectHelper';
 import useProjects from './project/useProjects';
@@ -85,12 +85,14 @@ const projectMenu = computed<DropdownMenuItem[][]>(() => {
             {
                 label: 'Projekt bearbeiten',
                 icon: 'i-lucide-pencil',
+                disabled: authState.status !== 'authenticated',
                 onSelect: () => createOrEditProject(currentProject.value),
             },
             {
                 label: 'Projekt löschen',
                 icon: 'i-lucide-trash-2',
                 color: 'error',
+                disabled: authState.status !== 'authenticated',
                 onSelect: async () => {
                     if (currentProject.value && (await deleteProject(currentProject.value.id))) {
                         await router.push({ name: 'overview' });
@@ -202,12 +204,14 @@ const newTaskRoute = computed(() =>
                                 </UDropdownMenu>
                                 <UButton
                                     v-if="currentProject"
+                                    :disabled="authState.status !== 'authenticated'"
                                     icon="i-lucide-plus"
                                     label="Neue Aufgabe"
                                     :to="newTaskRoute"
                                 />
                                 <UButton
                                     v-else
+                                    :disabled="authState.status !== 'authenticated'"
                                     icon="i-lucide-plus"
                                     label="Neues Projekt"
                                     @click="createOrEditProject()"
@@ -229,6 +233,24 @@ const newTaskRoute = computed(() =>
                             </template>
                         </UAlert>
                         <div v-else class="flex h-full min-h-0 flex-col">
+                            <UAlert
+                                v-if="authState.status === 'error'"
+                                class="m-4 mb-0 shrink-0"
+                                color="error"
+                                description="Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt."
+                                icon="i-lucide-user-x"
+                                title="Der aktuelle Benutzer konnte nicht geladen werden."
+                                variant="subtle"
+                            >
+                                <template #actions>
+                                    <UButton
+                                        color="error"
+                                        label="Erneut versuchen"
+                                        variant="soft"
+                                        @click="loadCurrentUser"
+                                    />
+                                </template>
+                            </UAlert>
                             <UAlert
                                 v-if="dataIssues.length"
                                 class="m-4 mb-0 shrink-0"

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     descendantIds,
     dueDateBucket,
+    normalizeTaskUrl,
     reorderTasks,
     taskDiff,
     taskDraft,
@@ -17,6 +18,12 @@ const task = (id: number, overrides: Partial<TransformedTask> = {}): Transformed
 });
 
 describe('task integrity', () => {
+    it('normalizes web URLs and rejects unsafe protocols', () => {
+        expect(normalizeTaskUrl(' https://example.org/path ')).toBe('https://example.org/path');
+        expect(normalizeTaskUrl('')).toBeUndefined();
+        expect(() => normalizeTaskUrl('javascript:alert(1)')).toThrow('http://');
+        expect(() => normalizeTaskUrl('example.org')).toThrow('ungültig');
+    });
     it('keeps edits and nested arrays separate from the cached task', () => {
         const source = task(1, { assignedTo: [2], activity: [{ personId: 1, date: '2026-09-27', type: 'create' }] });
         const draft = taskDraft(source);
