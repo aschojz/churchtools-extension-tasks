@@ -28,7 +28,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     };
     const updateTask = async (task: TransformedTask, diff?: ReturnType<typeof taskDiff>) => {
         if (!task.name?.trim()) throw new Error('Bitte einen Titel eingeben.');
-        const activity = [...(task.activity ?? [])];
+        const activity = [...(Array.isArray(task.activity) ? task.activity : [])];
         if (diff && Object.keys(diff).length) {
             activity.push({ personId: currentUser.id, date: new Date().toISOString(), type: 'update', value: diff });
         }
@@ -56,10 +56,17 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         );
         return tasks;
     });
+    const parentByChild = computed(() => {
+        const result: Record<number, TransformedTask> = {};
+        for (const parent of tasks.value) {
+            for (const childId of Array.isArray(parent.subTasks) ? parent.subTasks : []) result[childId] ??= parent;
+        }
+        return result;
+    });
     const transformedTasks = computed(() => {
         return tasks.value.map(task => ({
             ...task,
-            parent: tasks.value.find(t => t.subTasks?.includes(task.id))?.id,
+            parent: parentByChild.value[task.id]?.id,
             score: tasksInSearch.value[task.id]?.score,
         }));
     });
@@ -68,7 +75,8 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     const getObjectDiff = taskDiff;
 
     const tasksInSearch = computed(() => {
-        if (store.search) {
+        const search = store.searchForProject(pId.value);
+        if (search) {
             const fuse = new Fuse(tasks.value, {
                 includeScore: true,
                 minMatchCharLength: 2,
@@ -76,7 +84,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
                 keys: ['name', { name: 'description', weight: 0.5 }, { name: 'url', weight: 0.3 }],
             });
             return Object.fromEntries(
-                fuse.search(store.search).map(task => [task.item.id, { ...task.item, score: task.score }]),
+                fuse.search(search).map(task => [task.item.id, { ...task.item, score: task.score }]),
             );
         }
         return Object.fromEntries(tasks.value.map(task => [task.id, { ...task, score: undefined }]));
@@ -86,8 +94,12 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     const showTask = (task: TransformedTask) => {
         const defaultListId = lists.value.find(l => l.isDefault)?.id ?? 0;
         const listId = task.list && getListById(task.list) ? task.list : defaultListId;
-        const showCompleted = getListById(listId)?.showCompleted ?? false;
-        const showSubTasks = getListById(listId)?.showSubTasks ?? false;
+        const list = getListById(listId);
+        const preferences = list
+            ? store.preferencesForList(pId.value, list)
+            : { showCompleted: false, showSubTasks: false };
+        const showCompleted = preferences.showCompleted;
+        const showSubTasks = preferences.showSubTasks;
         const parent = findParent(task);
         return (
             tasksInSearch.value[task.id] &&
@@ -96,8 +108,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         );
     };
 
-    const findParent = (t: TransformedTask | undefined) =>
-        t ? tasks.value.find(task => task.subTasks?.includes(t.id)) : undefined;
+    const findParent = (t: TransformedTask | undefined) => (t ? parentByChild.value[t.id] : undefined);
     const calculateDueDate = (t: TransformedTask | undefined) => taskDueDate(t, findParent);
     const getSuperParent = (t: TransformedTask | undefined): TransformedTask | undefined => {
         const visited = new Set<number>();
@@ -112,6 +123,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     return {
         projectId,
         tasksMap,
+        parentByChild,
         tasks,
         showTask,
         createTask,

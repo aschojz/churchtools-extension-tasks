@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
-import TaskItem from '../components/TaskItem.vue';
 import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProjectTasks';
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
@@ -18,7 +17,10 @@ const currentUser = useCurrentUser();
 const { tasks: allTasks, isLoading: tasksLoading, isError: tasksError, refetch: refetchTasks } = useAllProjectTasks();
 const myTasks = computed(() =>
     sortBy(
-        allTasks.value.filter(({ task }) => !task.fullfilled && task.assignedTo?.includes(currentUser.id)),
+        allTasks.value.filter(
+            ({ task }) =>
+                !task.fullfilled && Array.isArray(task.assignedTo) && task.assignedTo.includes(currentUser.id),
+        ),
         item => item.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER,
     ),
 );
@@ -97,7 +99,25 @@ const tasksBySection = computed(
                             >
                                 <i class="mr-1" :class="item.project.icon"></i>{{ item.project.name }}
                             </RouterLink>
-                            <TaskItem :item="item.task" :project-id="item.project.id" />
+                            <RouterLink
+                                class="task-item overview-task-item flex min-w-0 items-start gap-3 p-3"
+                                :to="{
+                                    name: 'project-board',
+                                    params: { projectId: item.project.id, taskId: item.task.id },
+                                }"
+                            >
+                                <UIcon
+                                    class="mt-0.5 size-5 shrink-0 text-gray-400"
+                                    :name="item.task.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-circle'"
+                                />
+                                <span class="min-w-0 flex-1">
+                                    <strong class="block truncate">{{ item.task.name }}</strong>
+                                    <span v-if="item.task.description" class="text-muted mt-1 block truncate text-sm">
+                                        {{ item.task.description }}
+                                    </span>
+                                </span>
+                                <UIcon class="mt-1 size-4 shrink-0 text-gray-400" name="i-lucide-chevron-right" />
+                            </RouterLink>
                         </div>
                         <p v-if="!tasksBySection[section.id].length" class="text-muted py-6 text-center text-sm">
                             Keine Aufgaben

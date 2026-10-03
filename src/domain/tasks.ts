@@ -1,7 +1,7 @@
 import { cloneDeep, isEqual, pick } from 'lodash-es';
 
 export function taskDraft(task: Partial<Task> = {}): Task {
-    return cloneDeep({
+    const draft: Task = cloneDeep({
         type: 'task',
         name: '',
         fullfilled: false,
@@ -22,6 +22,11 @@ export function taskDraft(task: Partial<Task> = {}): Task {
             'subTasks',
         ]),
     });
+    if (!Array.isArray(draft.activity)) draft.activity = undefined;
+    if (!Array.isArray(draft.assignedTo)) draft.assignedTo = undefined;
+    if (!Array.isArray(draft.subTasks)) draft.subTasks = undefined;
+    if (!Array.isArray(draft.tags)) draft.tags = undefined;
+    return draft;
 }
 export function taskDiff(next: Partial<Task>, previous: Partial<Task>) {
     const result: Record<string, { from: unknown; to: unknown }> = {};
@@ -34,7 +39,8 @@ export function taskDiff(next: Partial<Task>, previous: Partial<Task>) {
     return result;
 }
 export function taskProgress(task: TransformedTask | undefined, tasks: Record<number, TransformedTask>) {
-    const children = (task?.subTasks ?? []).map(id => tasks[id]).filter(Boolean);
+    const childIds = Array.isArray(task?.subTasks) ? task.subTasks : [];
+    const children = childIds.map(id => tasks[id]).filter(Boolean);
     return children.length ? Math.floor((100 * children.filter(t => t.fullfilled).length) / children.length) : 0;
 }
 export function taskDueDate(
@@ -69,7 +75,9 @@ export function descendantIds(
     if (visited.has(task.id)) return [];
     visited.add(task.id);
     return [
-        ...(task.subTasks ?? []).flatMap(id => (tasks[id] ? descendantIds(tasks[id], tasks, visited) : [])),
+        ...(Array.isArray(task.subTasks) ? task.subTasks : []).flatMap(id =>
+            tasks[id] ? descendantIds(tasks[id], tasks, visited) : [],
+        ),
         task.id,
     ];
 }

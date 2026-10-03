@@ -16,7 +16,9 @@ const currentUser = useCurrentUser();
 const store = taskStore();
 
 const filteredTasks = computed(() => {
-    const filtered = tasks.value.filter(task => showTask(task) && task.assignedTo?.includes(currentUser.id));
+    const filtered = tasks.value.filter(
+        task => showTask(task) && Array.isArray(task.assignedTo) && task.assignedTo.includes(currentUser.id),
+    );
     return sortBy(
         filtered.map(t => ({ ...t, calculatedDueDate: calculateDueDate(t) })),
         store.sortBy === 'dueDate' ? 'calculatedDueDate' : store.sortBy,
@@ -30,6 +32,7 @@ const filteredTasks = computed(() => {
                 v-for="task in filteredTasks"
                 :key="task.id"
                 class="w-full"
+                density="row"
                 :item="task"
                 :project-id="projectId"
             />

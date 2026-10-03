@@ -2,8 +2,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useTask } from '../composables/useTask.ts';
-import { useTasks } from '../composables/useTasks.ts';
+import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
 import { descendantIds } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
@@ -12,24 +11,44 @@ const props = defineProps<{
     item: TransformedTask;
     showTask?: boolean;
     projectId: number;
+    density?: 'card' | 'row';
 }>();
 
 const id = computed(() => props.item.id);
-const pId = computed(() => props.projectId);
 const {
-    superParent,
-    parent,
-    hasSubTasks,
-    percentFullfilled,
-    assignees,
-    dueColor,
-    dueDate,
+    tasksMap,
+    parentByChild,
+    tags,
+    people,
+    calculateDueDate,
+    createTask,
+    deleteTask,
+    updateTask,
     toggleTask,
-    comments,
-    task,
-    sortedTags,
-    toDayMonth,
-} = useTask(pId, id);
+    getSuperParent,
+    getProgress,
+    dueColor,
+} = useProjectTaskContext();
+const task = computed(() => tasksMap.value[id.value] ?? props.item);
+const parent = computed(() => parentByChild.value[id.value]);
+const superParent = computed(() => (parent.value ? getSuperParent(task.value) : undefined));
+const hasSubTasks = computed(() =>
+    (Array.isArray(task.value.subTasks) ? task.value.subTasks : []).some(childId => !!tasksMap.value[childId]),
+);
+const percentFullfilled = computed(() => getProgress(task.value));
+const assignees = computed(() => taskAssignees(task.value, people.value));
+const dueDate = computed(() => calculateDueDate(task.value));
+const comments = computed(() =>
+    (Array.isArray(task.value.activity) ? task.value.activity : []).filter(entry => entry.type === 'comment'),
+);
+const sortedTags = computed(() =>
+    (Array.isArray(task.value.tags) ? task.value.tags : [])
+        .map(tagId => tags.value[tagId])
+        .filter((tag): tag is TransformedTag => !!tag)
+        .sort((a, b) => a.name.localeCompare(b.name, 'de')),
+);
+const toDayMonth = (date: string | Date) =>
+    new Date(date).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
 
 const router = useRouter();
 const openTask = () => {
@@ -38,18 +57,24 @@ const openTask = () => {
     router.push({ name, params: { projectId: props.projectId, taskId: props.item.id } });
 };
 
-const showLastRow = computed(() => dueDate.value || comments.value.length || props.item.tags?.length || props.item.url);
+const showLastRow = computed(
+    () =>
+        dueDate.value ||
+        comments.value.length ||
+        (Array.isArray(task.value.tags) && task.value.tags.length) ||
+        task.value.url,
+);
 
-const { tasksMap, createTask, deleteTask, updateTask } = useTasks(pId);
-
-const createTaskOrSubtask = async ({ id, ...data }: TransformedTask) => {
-    void id; // ensure we don't pass an id when creating a new task
+const createTaskOrSubtask = async ({ id: taskId, ...data }: TransformedTask) => {
+    void taskId; // ensure we don't pass an id when creating a new task
     return await createTask(data);
 };
 
 async function duplicateTask() {
-    const originalTask = props.item;
-    const newSubtaskIds = await duplicateSubtasks(originalTask.subTasks);
+    const originalTask = task.value;
+    const newSubtaskIds = await duplicateSubtasks(
+        Array.isArray(originalTask.subTasks) ? originalTask.subTasks : undefined,
+    );
     const newTask = await createTaskOrSubtask({ ...originalTask, subTasks: newSubtaskIds });
     return newTask;
 }
@@ -62,7 +87,10 @@ async function duplicateSubtasks(subtaskIds?: number[], visited = new Set<number
             if (!originalSubtask) continue;
             if (visited.has(subtaskId)) throw new Error('Zyklische Unteraufgaben können nicht dupliziert werden.');
             visited.add(subtaskId);
-            const nestedSubtaskIds = await duplicateSubtasks(originalSubtask.subTasks, visited);
+            const nestedSubtaskIds = await duplicateSubtasks(
+                Array.isArray(originalSubtask.subTasks) ? originalSubtask.subTasks : undefined,
+                visited,
+            );
             const newSubtask = await createTaskOrSubtask({ ...originalSubtask, subTasks: nestedSubtaskIds });
             if (newSubtask) {
                 newSubtaskIds.push(newSubtask.id);
@@ -88,8 +116,9 @@ const deleteRecursive = async (task: TransformedTask) => {
     const removed = new Set(ids);
     // Detach only the subtree root. On a partial failure, remaining children stay accessible in their lists.
     for (const parent of Object.values(tasksMap.value)) {
-        if (!removed.has(parent.id) && parent.subTasks?.some(id => removed.has(id))) {
-            await updateTask({ ...parent, subTasks: parent.subTasks.filter(id => !removed.has(id)) });
+        const childIds = Array.isArray(parent.subTasks) ? parent.subTasks : [];
+        if (!removed.has(parent.id) && childIds.some(id => removed.has(id))) {
+            await updateTask({ ...parent, subTasks: childIds.filter(id => !removed.has(id)) });
         }
     }
     for (const id of ids) await deleteTask(id, task.dataCategoryId);
@@ -98,9 +127,9 @@ const deleteRecursive = async (task: TransformedTask) => {
 const contextMenu = computed<DropdownMenuItem[][]>(() => [
     [
         {
-            label: props.item.fullfilled ? 'Als nicht erfüllt markieren' : 'Abhaken',
-            icon: props.item.fullfilled ? 'i-lucide-square' : 'i-lucide-square-check-big',
-            onSelect: () => runAction(toggleTask),
+            label: task.value.fullfilled ? 'Als nicht erfüllt markieren' : 'Abhaken',
+            icon: task.value.fullfilled ? 'i-lucide-square' : 'i-lucide-square-check-big',
+            onSelect: () => runAction(() => toggleTask(task.value)),
         },
     ],
     [
@@ -114,7 +143,7 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
             label: 'Löschen',
             icon: 'i-lucide-trash-2',
             color: 'error',
-            onSelect: () => runAction(() => deleteRecursive(props.item)),
+            onSelect: () => runAction(() => deleteRecursive(task.value)),
         },
     ],
 ]);
@@ -131,7 +160,11 @@ const breadcrumbs = computed(() => {
 });
 </script>
 <template>
-    <div class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3" @click="openTask">
+    <div
+        class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3"
+        :class="{ 'task-item-row': density === 'row' }"
+        @click="openTask"
+    >
         <div v-if="superParent && !showTask" class="-mb-1 flex items-center gap-2 text-xs text-gray-400">
             <template v-for="(crumb, index) in breadcrumbs" :key="index">
                 <span>{{ crumb }}</span>
@@ -146,17 +179,25 @@ const breadcrumbs = computed(() => {
                     class="progress-icon relative text-[20px] text-gray-500"
                     :percent="percentFullfilled"
                 />
-                <template v-else>
-                    <i
-                        v-if="item.fullfilled"
-                        class="far fa-check-square text-[20px] text-green-500"
-                        @click.stop="runAction(toggleTask)"
-                    ></i>
-                    <i v-else class="far fa-square text-[20px] text-gray-500" @click.stop="runAction(toggleTask)"></i>
-                </template>
-                <span class="font-bold"> {{ item.name }} </span>
+                <UButton
+                    v-else
+                    :aria-label="task.fullfilled ? 'Als unerledigt markieren' : 'Als erledigt markieren'"
+                    color="neutral"
+                    :icon="task.fullfilled ? 'i-lucide-square-check-big' : 'i-lucide-square'"
+                    size="sm"
+                    square
+                    variant="ghost"
+                    @click.stop="runAction(() => toggleTask(task))"
+                />
+                <button
+                    class="task-title-button appearance-none border-0 bg-transparent p-0 text-left font-bold"
+                    type="button"
+                    @click.stop="openTask"
+                >
+                    {{ task.name }}
+                </button>
             </div>
-            <div v-if="item.assignedTo?.length" class="flex flex-shrink-0 gap-1">
+            <div v-if="Array.isArray(task.assignedTo) && task.assignedTo.length" class="flex flex-shrink-0 gap-1">
                 <UAvatar
                     v-for="assignee in assignees"
                     :key="assignee.domainIdentifier"
@@ -179,19 +220,17 @@ const breadcrumbs = computed(() => {
             /></UDropdownMenu>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
-        <div v-if="item.description" class="l line-clamp-1">
-            {{ item.description }}
+        <div v-if="task.description" class="line-clamp-1 text-sm text-gray-600">
+            {{ task.description }}
         </div>
         <div v-if="showLastRow" class="flex flex-wrap justify-end gap-2">
             <div class="flex flex-grow items-center gap-3 text-gray-400">
                 <UBadge
                     v-if="dueDate"
-                    :color="uiColor(dueColor)"
+                    :color="uiColor(dueColor(dueDate))"
                     icon="i-lucide-clock"
                     :label="
-                        task?.dueDateRelative
-                            ? `${toDayMonth(dueDate)} (${task?.dueDateRelative})`
-                            : toDayMonth(dueDate)
+                        task.dueDateRelative ? `${toDayMonth(dueDate)} (${task.dueDateRelative})` : toDayMonth(dueDate)
                     "
                     size="sm"
                     variant="soft"
@@ -205,10 +244,12 @@ const breadcrumbs = computed(() => {
                     variant="soft"
                 />
                 <UButton
-                    v-if="item.url"
+                    v-if="task.url"
+                    aria-label="Verknüpfung in neuem Fenster öffnen"
                     color="neutral"
-                    :href="item.url"
+                    :href="task.url"
                     icon="i-lucide-link"
+                    rel="noopener noreferrer"
                     size="sm"
                     target="_blank"
                     variant="ghost"

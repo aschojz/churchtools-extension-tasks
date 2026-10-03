@@ -7,7 +7,7 @@ import DialogTask from '../../components/taskDialog/DialogTask.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { firstOrSelf } from '../../platform';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         subTaskToggle?: boolean;
         projectId: number;
@@ -21,6 +21,10 @@ const onFullscreen = () => {
 };
 
 const store = taskStore();
+const projectSearch = computed({
+    get: () => store.searchForProject(props.projectId),
+    set: value => store.setSearchForProject(props.projectId, value),
+});
 const listIsOpen = ref(false);
 
 const route = useRoute();
@@ -42,7 +46,7 @@ const viewNavigation: NavigationMenuItem[] = [
             <UDashboardToolbar>
                 <template #left>
                     <UInput
-                        v-model="store.search"
+                        v-model="projectSearch"
                         class="w-72 max-w-full"
                         icon="i-lucide-search"
                         placeholder="Aufgaben in diesem Projekt filtern …"
@@ -52,6 +56,7 @@ const viewNavigation: NavigationMenuItem[] = [
                     <slot name="extra-actions"></slot>
                     <slot name="actions">
                         <UButton
+                            :aria-label="fullscreen ? 'Vollbild verlassen' : 'Vollbild öffnen'"
                             color="neutral"
                             icon="i-lucide-plus"
                             label="Liste"

@@ -21,7 +21,7 @@ const deleteSelectedTag = async (tag: TransformedTag) => {
     if (!confirmed) return;
     actionError.value = '';
     try {
-        for (const task of tasks.value.filter(task => task.tags?.includes(tag.id))) {
+        for (const task of tasks.value.filter(task => Array.isArray(task.tags) && task.tags.includes(tag.id))) {
             await updateTask({ ...task, tags: task.tags?.filter(id => id !== tag.id) });
         }
         await deleteTag(tag.id);
@@ -56,8 +56,8 @@ const tasksByTag = computed(() => {
     const tagLists: Record<number, TransformedTask[]> = { 0: [] };
     tasks.value.forEach(task => {
         if (showTask(task)) {
-            if (task.tags?.length) {
-                task.tags?.forEach(tag => {
+            if (Array.isArray(task.tags) && task.tags.length) {
+                task.tags.forEach(tag => {
                     tagLists[tag] ??= [];
                     tagLists[tag].push(task);
                 });
@@ -101,7 +101,13 @@ const boardlists = computed(() => {
                 <template #header>
                     <UBadge :color="uiColor(list.color?.key ?? CtColor.BASIC)" :label="list.name" variant="soft" />
                     <UDropdownMenu v-if="list.id" :items="tagMenu(list.id)"
-                        ><UButton color="neutral" icon="i-lucide-ellipsis" size="sm" square variant="ghost"
+                        ><UButton
+                            :aria-label="`Aktionen für Tag ${list.name}`"
+                            color="neutral"
+                            icon="i-lucide-ellipsis"
+                            size="sm"
+                            square
+                            variant="ghost"
                     /></UDropdownMenu>
                 </template>
             </List>

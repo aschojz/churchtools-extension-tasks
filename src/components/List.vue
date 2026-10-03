@@ -25,15 +25,16 @@ const props = withDefaults(
 );
 
 const pId = computed(() => props.projectId);
-const { updateList, deleteList } = useLists(pId);
-const onUpdateList = (list: Partial<TaskList>) => {
-    if (props.list.type === 'list') return updateList({ ...props.list, ...list });
-};
+const { deleteList } = useLists(pId);
 
 const newTaskIsOpen = ref(false);
+const preferences = computed(() => store.preferencesForList(props.projectId, props.list));
+const updatePreferences = (update: Parameters<typeof store.updateListPreferences>[2]) =>
+    store.updateListPreferences(props.projectId, props.list.id, update);
+const projectSearch = computed(() => store.searchForProject(props.projectId));
 
 const initItems = (items: TransformedTask[]) => {
-    internItems.value = sortBy(items, store.search ? 'score' : 'sortKey');
+    internItems.value = sortBy(items, projectSearch.value ? 'score' : 'sortKey');
 };
 onMounted(() => initItems(props.items));
 watch(
@@ -46,6 +47,15 @@ const internItems = ref<TransformedTask[]>([]);
 const { updateTask } = useTasks(pId);
 const saveError = ref('');
 const isSaving = ref(false);
+const deleteSelectedList = async (list: TransformedList) => {
+    if (!window.confirm(`Die Liste „${list.name}“ wird gelöscht. Die enthaltenen Aufgaben bleiben erhalten.`)) return;
+    saveError.value = '';
+    try {
+        await deleteList(list.id);
+    } catch {
+        saveError.value = 'Liste konnte nicht gelöscht werden. Bitte erneut versuchen.';
+    }
+};
 const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
     if (!props.isDraggable || props.list.type !== 'list' || isSaving.value || (!event.added && !event.moved)) return;
     isSaving.value = true;
@@ -67,16 +77,16 @@ const listContextMenu = computed<DropdownMenuItem[][]>(() => {
         [
             {
                 label: 'Unteraufgaben anzeigen',
-                icon: list.showSubTasks ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+                icon: preferences.value.showSubTasks ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
                 onSelect: () => {
-                    onUpdateList({ showSubTasks: !list.showSubTasks });
+                    updatePreferences({ showSubTasks: !preferences.value.showSubTasks });
                 },
             },
             {
                 label: 'Erledigte Aufgaben anzeigen',
-                icon: list.showCompleted ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+                icon: preferences.value.showCompleted ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
                 onSelect: () => {
-                    onUpdateList({ showCompleted: !list.showCompleted });
+                    updatePreferences({ showCompleted: !preferences.value.showCompleted });
                 },
             },
         ],
@@ -93,9 +103,7 @@ const listContextMenu = computed<DropdownMenuItem[][]>(() => {
                 disabled: list.isDefault,
                 icon: 'i-lucide-trash-2',
                 color: 'error',
-                onSelect: async () => {
-                    await deleteList(props.list.id);
-                },
+                onSelect: () => deleteSelectedList(list),
             },
         ],
     ];
@@ -106,31 +114,31 @@ const listIsOpen = ref<TransformedList>();
 <template>
     <div
         class="board-column flex h-full min-h-0 flex-shrink-0 flex-col"
-        :class="list.isCollapsed ? 'min-h-[300px] w-12' : 'w-96'"
+        :class="preferences.isCollapsed ? 'min-h-[300px] w-12' : 'w-96'"
     >
         <div
             class="px-2 pt-2"
             :class="{
-                'mb-3 flex items-center justify-between gap-2': !list.isCollapsed,
-                'flex min-h-96 flex-col items-center gap-2': list.isCollapsed,
+                'mb-3 flex items-center justify-between gap-2': !preferences.isCollapsed,
+                'flex min-h-96 flex-col items-center gap-2': preferences.isCollapsed,
             }"
         >
             <UButton
                 v-if="$route.name === 'project-board'"
-                :aria-label="list.isCollapsed ? 'Spalte ausklappen' : 'Spalte einklappen'"
+                :aria-label="preferences.isCollapsed ? 'Spalte ausklappen' : 'Spalte einklappen'"
                 class="board-column-collapse my-auto shrink-0"
-                :class="{ 'm-2': list.isCollapsed }"
+                :class="{ 'm-2': preferences.isCollapsed }"
                 color="neutral"
-                :icon="list.isCollapsed ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'"
+                :icon="preferences.isCollapsed ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'"
                 size="sm"
                 square
                 variant="ghost"
-                @click="onUpdateList({ isCollapsed: !list.isCollapsed })"
+                @click="updatePreferences({ isCollapsed: !preferences.isCollapsed })"
             />
             <div class="inline-flex flex-grow items-center overflow-hidden">
                 <span
                     class="flex items-center gap-2 overflow-hidden text-xl font-bold text-ellipsis whitespace-nowrap"
-                    :style="list.isCollapsed ? 'margin: calc(50% - 8px) 0; transform: rotate(90deg)' : ''"
+                    :style="preferences.isCollapsed ? 'margin: calc(50% - 8px) 0; transform: rotate(90deg)' : ''"
                     :title="list.name"
                 >
                     <slot :list="list" name="header">{{ list.name }}</slot>
@@ -139,8 +147,8 @@ const listIsOpen = ref<TransformedList>();
             <div class="inline-flex">
                 <span
                     class="flex gap-1 whitespace-nowrap"
-                    :class="{ 'items-center': !list.isCollapsed }"
-                    :style="list.isCollapsed ? 'margin: calc(50% - 8px) 0; transform: rotate(90deg)' : ''"
+                    :class="{ 'items-center': !preferences.isCollapsed }"
+                    :style="preferences.isCollapsed ? 'margin: calc(50% - 8px) 0; transform: rotate(90deg)' : ''"
                 >
                     <UBadge
                         v-if="internItems?.length"
@@ -151,7 +159,8 @@ const listIsOpen = ref<TransformedList>();
                         variant="soft"
                     />
                     <UButton
-                        v-if="!list.isCollapsed && list.type === 'list'"
+                        v-if="!preferences.isCollapsed && list.type === 'list'"
+                        aria-label="Aufgabe in dieser Liste erstellen"
                         icon="i-lucide-plus"
                         size="sm"
                         square
@@ -160,7 +169,8 @@ const listIsOpen = ref<TransformedList>();
                     />
                     <UDropdownMenu v-if="$route.name === 'project-board'" :items="listContextMenu">
                         <UButton
-                            v-if="!list.isCollapsed"
+                            v-if="!preferences.isCollapsed"
+                            aria-label="Listenaktionen"
                             color="neutral"
                             icon="i-lucide-ellipsis"
                             size="sm"
@@ -172,13 +182,13 @@ const listIsOpen = ref<TransformedList>();
             </div>
         </div>
         <p v-if="saveError" class="px-2 text-red-600" role="alert">{{ saveError }}</p>
-        <div v-if="!list.isCollapsed" class="flex flex-grow flex-col gap-2 overflow-y-auto px-2 pb-2">
+        <div v-if="!preferences.isCollapsed" class="flex flex-grow flex-col gap-2 overflow-y-auto px-2 pb-2">
             <draggable
                 v-if="isDraggable && list.type === 'list'"
                 v-model="internItems"
                 animation="200"
                 class="flex min-h-full flex-col gap-2"
-                :disabled="isSaving || !!store.search"
+                :disabled="isSaving || !!projectSearch"
                 group="tasks"
                 item-key="id"
                 @change="onDragChange"

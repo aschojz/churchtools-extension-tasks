@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { computed, ref, watch } from 'vue';
+import { useLists } from '../../composables/useLists';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
@@ -12,6 +13,10 @@ const props = defineProps<{ taskId?: number; projectId: number }>();
 const emit = defineEmits<{ (event: 'change', payload: Task): void }>();
 const projectId = computed(() => props.projectId);
 const { tasksMap, isLoading, findParent } = useTasks(projectId);
+const { lists } = useLists(projectId);
+const listOptions = computed(() =>
+    [...lists.value].sort((a, b) => a.sortKey - b.sortKey).map(list => ({ id: list.id, label: list.name })),
+);
 const { tagsArray } = useTags(projectId);
 const tagOptions = computed(() =>
     tagsArray.value.map(tag => ({
@@ -25,12 +30,14 @@ const internTask = ref<Task>(taskDraft());
 const createTagIsOpen = ref(false);
 const missing = ref(false);
 watch(
-    [() => props.taskId, () => props.projectId, isLoading],
+    [() => props.taskId, () => props.projectId, isLoading, () => lists.value.length],
     () => {
         if (isLoading.value) return;
         const task = props.taskId ? tasksMap.value[props.taskId] : undefined;
         missing.value = !!props.taskId && !task;
-        internTask.value = taskDraft(task);
+        const draft = taskDraft(task);
+        if (!draft.list) draft.list = lists.value.find(list => list.isDefault)?.id ?? lists.value[0]?.id;
+        internTask.value = draft;
     },
     { immediate: true },
 );
@@ -59,17 +66,49 @@ const onSearchForPerson = async (query: string) => {
 };
 const personSearch = ref('');
 const personOptions = ref<Array<{ id: number; label: string }>>([]);
+const personSearchLoading = ref(false);
+const personSearchError = ref('');
+const selectedPersonOptions = () => assignees.value.map(person => ({ id: person.id, label: person.nameTranslated }));
 watch(
     assignees,
     value => {
-        personOptions.value = value.map(person => ({ id: person.id, label: person.nameTranslated }));
+        if (personSearch.value.trim().length < 2) {
+            personOptions.value = value.map(person => ({ id: person.id, label: person.nameTranslated }));
+        }
     },
     { immediate: true },
 );
-watch(personSearch, async query => {
-    if (query.trim().length < 2) return;
-    const results = await onSearchForPerson(query);
-    personOptions.value = results.map(person => ({ id: person.id, label: person.nameTranslated }));
+let personSearchSequence = 0;
+watch(personSearch, (query, _previous, onCleanup) => {
+    const sequence = ++personSearchSequence;
+    const normalizedQuery = query.trim();
+    personSearchError.value = '';
+    if (normalizedQuery.length < 2) {
+        personSearchLoading.value = false;
+        personOptions.value = selectedPersonOptions();
+        return;
+    }
+    personSearchLoading.value = true;
+    const timer = window.setTimeout(async () => {
+        try {
+            const results = await onSearchForPerson(normalizedQuery);
+            if (sequence !== personSearchSequence) return;
+            const merged = new Map(selectedPersonOptions().map(person => [person.id, person]));
+            for (const person of results) merged.set(person.id, { id: person.id, label: person.nameTranslated });
+            personOptions.value = [...merged.values()];
+        } catch {
+            if (sequence === personSearchSequence) {
+                personSearchError.value = 'Personen konnten nicht geladen werden.';
+                personOptions.value = selectedPersonOptions();
+            }
+        } finally {
+            if (sequence === personSearchSequence) personSearchLoading.value = false;
+        }
+    }, 250);
+    onCleanup(() => {
+        window.clearTimeout(timer);
+        if (sequence === personSearchSequence) personSearchLoading.value = false;
+    });
 });
 </script>
 <template>
@@ -113,6 +152,16 @@ watch(personSearch, async query => {
                 <UIcon name="i-lucide-settings-2" />
                 <span>Details</span>
             </div>
+            <UFormField label="Liste">
+                <USelect
+                    v-model="internTask.list"
+                    class="w-full"
+                    :items="listOptions"
+                    label-key="label"
+                    placeholder="Liste auswählen …"
+                    value-key="id"
+                />
+            </UFormField>
             <UFormField label="Fällig am">
                 <UInput v-model="internTask.dueDate" class="w-full" type="date" />
             </UFormField>
@@ -139,7 +188,7 @@ watch(personSearch, async query => {
                 variant="outline"
                 @click="createTagIsOpen = true"
             />
-            <UFormField label="Verantwortliche">
+            <UFormField :error="personSearchError || undefined" label="Verantwortliche">
                 <USelectMenu
                     v-model="internTask.assignedTo"
                     v-model:search-term="personSearch"
@@ -147,6 +196,7 @@ watch(personSearch, async query => {
                     ignore-filter
                     :items="personOptions"
                     label-key="label"
+                    :loading="personSearchLoading"
                     multiple
                     placeholder="Person suchen …"
                     value-key="id"

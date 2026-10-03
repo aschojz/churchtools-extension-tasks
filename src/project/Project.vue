@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
+import { provideProjectTaskContext } from '../composables/useProjectTaskContext';
 import { useProject } from './useProject';
 
 const props = defineProps<{ projectId: string }>();
-const { project, isLoading, isError, refetch } = useProject(toRef(() => Number(props.projectId)));
+const projectId = toRef(() => Number(props.projectId));
+const { project, isLoading, isError, refetch } = useProject(projectId);
+provideProjectTaskContext(projectId);
 </script>
 
 <template>

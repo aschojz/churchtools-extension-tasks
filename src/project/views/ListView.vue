@@ -29,6 +29,7 @@ const filteredTasks = computed(() => {
                 v-for="task in filteredTasks"
                 :key="task.id"
                 class="w-full"
+                density="row"
                 :item="task"
                 :project-id="projectId"
             />

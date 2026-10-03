@@ -39,7 +39,10 @@ const createChild = async () => {
             sortKey: Date.now(),
             list: parent.list,
         });
-        await updateTask({ ...parent, subTasks: [...(parent.subTasks ?? []), child.id] });
+        await updateTask({
+            ...parent,
+            subTasks: [...(Array.isArray(parent.subTasks) ? parent.subTasks : []), child.id],
+        });
         childName.value = '';
     } catch {
         childError.value = 'Unteraufgabe konnte nicht vollständig gespeichert werden. Bitte die Aufgabenliste prüfen.';
@@ -127,6 +130,7 @@ const createChild = async () => {
                 :href="task.url"
                 icon="i-lucide-external-link"
                 label="Verknüpfung öffnen"
+                rel="noopener noreferrer"
                 target="_blank"
                 variant="outline"
             />

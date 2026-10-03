@@ -36,13 +36,36 @@ auf.
 | **P2**    | Klarer Qualitäts-, Wartungs- oder Funktionsgewinn                                | Danach geplant umsetzen                    |
 | **P3**    | Ausbau und Differenzierung des Produkts                                          | Nach stabiler Kernplattform priorisieren   |
 
+### Umsetzungsstand vom 03.10.2026
+
+Die im Anschluss an den Audit beauftragten Performance- und UI/UX-Punkte wurden
+in einem ersten Stabilisierungsschritt bearbeitet:
+
+| Finding | Status                   | Umsetzung                                                                                                                                                                              |
+| ------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                   |
+| PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                |
+| PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                   |
+| UX-01   | **Umgesetzt**            | Einklappen sowie die Anzeige erledigter Aufgaben und Unteraufgaben werden lokal pro Projekt und Liste gespeichert.                                                                     |
+| UX-02   | **Umgesetzt**            | Suchtexte werden pro Projekt getrennt gehalten.                                                                                                                                        |
+| UI-02   | **Umgesetzt**            | Listenansichten besitzen eine kompakte Zeilendarstellung.                                                                                                                              |
+| UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                      |
+| UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                   |
+| A11Y-01 | **Teilweise umgesetzt**  | Aufgabenkarten, Statusschalter und zentrale Icon-Aktionen sind benannt und per Tastatur erreichbar. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                         |
+| UI-01   | **Teilweise umgesetzt**  | Globale Reset-Regeln und Tailwind Preflight wurden entfernt bzw. auf den Extension-Root begrenzt. Die generierten unpräfixierten Utility-Klassen bleiben als Integrationsrisiko offen. |
+
+Beim Browser-Smoke-Test wurde außerdem ein älterer CCM-Wert mit einem ungültigen
+`tags`-Feld gefunden. Array-Felder werden in Karten, Lookups und Editor-Drafts
+nun defensiv normalisiert. Das ersetzt nicht die unter DATA-02 geforderte
+vollständige Schemavalidierung und Migration.
+
 ## 3. Verifizierter technischer Stand
 
 ### 3.1 Erfolgreich geprüft
 
 - TypeScript-Prüfung erfolgreich
 - ESLint-Prüfung erfolgreich
-- 4 Testdateien mit 17 Tests erfolgreich
+- 5 Testdateien mit 20 Tests erfolgreich
 - Produktions-Build erfolgreich
 - Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
   Konsolenwarnungen oder Konsolenfehler geladen

@@ -14,10 +14,9 @@ const route = useRoute();
 const router = useRouter();
 const { isLoading, isError, refetch } = usePlugin();
 const { projects, deleteProject } = useProjects();
-const { tasks: allTasks } = useAllProjectTasks();
-
 const sidebarCollapsed = ref(false);
 const searchOpen = ref(false);
+const { tasks: allTasks } = useAllProjectTasks({ enabled: searchOpen });
 const projectId = computed(() => {
     const value = Array.isArray(route.params.projectId) ? route.params.projectId[0] : route.params.projectId;
     return value ? Number(value) : undefined;
@@ -178,7 +177,13 @@ const newTaskRoute = computed(() =>
                             </template>
                             <template #right>
                                 <UDropdownMenu v-if="currentProject" :items="projectMenu">
-                                    <UButton color="neutral" icon="i-lucide-ellipsis" square variant="ghost" />
+                                    <UButton
+                                        aria-label="Projektaktionen"
+                                        color="neutral"
+                                        icon="i-lucide-ellipsis"
+                                        square
+                                        variant="ghost"
+                                    />
                                 </UDropdownMenu>
                                 <UButton
                                     v-if="currentProject"

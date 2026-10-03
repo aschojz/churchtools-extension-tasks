@@ -1,6 +1,8 @@
-@import 'tailwindcss';
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 
-:root {
+.tasks-app {
     font-family:
         Inter,
         ui-sans-serif,
@@ -46,28 +48,27 @@ body:has(#tasks) [data-slot='content'][role='listbox'] {
 body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     overflow-x: hidden !important;
 }
-* {
+.tasks-app,
+.tasks-app *,
+.tasks-app *::before,
+.tasks-app *::after {
     box-sizing: border-box;
 }
-body {
-    margin: 0;
-    background: #f7f6f4;
-}
-button,
-input,
-textarea,
-select {
+.tasks-app button,
+.tasks-app input,
+.tasks-app textarea,
+.tasks-app select {
     font: inherit;
 }
-button,
-a {
+.tasks-app button,
+.tasks-app a {
     -webkit-tap-highlight-color: transparent;
 }
-a {
+.tasks-app a {
     color: inherit;
     text-decoration: none;
 }
-button {
+.tasks-app button {
     cursor: pointer;
 }
 .tasks-app {
@@ -226,6 +227,31 @@ button {
     border-color: #cbc5bd;
     box-shadow: 0 4px 14px rgb(40 34 28 / 7%) !important;
     transform: translateY(-1px);
+}
+.task-title-button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent), white 15%);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+.task-item-row {
+    min-height: 54px;
+    margin-top: -1px;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+.task-item-row:first-child {
+    margin-top: 0;
+    border-radius: 10px 10px 0 0 !important;
+}
+.task-item-row:last-child {
+    border-radius: 0 0 10px 10px !important;
+}
+.task-item-row:only-child {
+    border-radius: 10px !important;
+}
+.overview-task-item {
+    text-decoration: none;
 }
 .project-card {
     border: 1px solid #e5e2dd;

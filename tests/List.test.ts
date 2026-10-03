@@ -4,7 +4,14 @@ import { defineComponent, nextTick } from 'vue';
 import List from '../src/components/List.vue';
 
 const mocks = vi.hoisted(() => ({ updateTask: vi.fn(), updateList: vi.fn(), deleteList: vi.fn() }));
-vi.mock('../src/composables/storeTasks', () => ({ taskStore: () => ({ search: '', sortBy: 'dueDate' }) }));
+vi.mock('../src/composables/storeTasks', () => ({
+    taskStore: () => ({
+        searchForProject: () => '',
+        preferencesForList: () => ({ isCollapsed: false, showCompleted: false, showSubTasks: false }),
+        updateListPreferences: vi.fn(),
+        sortBy: 'dueDate',
+    }),
+}));
 vi.mock('../src/composables/useLists', () => ({ useLists: () => mocks }));
 vi.mock('../src/composables/useTasks', () => ({ useTasks: () => mocks }));
 vi.mock('../src/components/TaskItem.vue', () => ({ default: { template: '<div />' } }));

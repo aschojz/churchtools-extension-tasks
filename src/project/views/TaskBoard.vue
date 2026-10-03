@@ -15,7 +15,7 @@ const { tasks, tasksMap, getPercentFullfilled } = useTasks(projectId);
 const store = taskStore();
 
 const tasksByParent = computed(() => {
-    const tasksWithSub = tasks.value.filter(task => task.subTasks?.length);
+    const tasksWithSub = tasks.value.filter(task => Array.isArray(task.subTasks) && task.subTasks.length);
     return Object.fromEntries(
         tasksWithSub.map(parent => [
             parent.id,
@@ -28,7 +28,7 @@ const tasksByParent = computed(() => {
 
 const boardlists = computed(() => {
     const li = tasks.value
-        .filter(task => task.subTasks?.filter(st => tasksMap.value[st]).length)
+        .filter(task => Array.isArray(task.subTasks) && task.subTasks.filter(st => tasksMap.value[st]).length)
         .map(task => ({
             id: task.id,
             name: task.name,

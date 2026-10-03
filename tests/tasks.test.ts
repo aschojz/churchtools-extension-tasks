@@ -27,6 +27,19 @@ describe('task integrity', () => {
         expect(source.assignedTo).toEqual([2]);
         expect(source.activity![0].personId).toBe(1);
     });
+    it('normalizes malformed array fields from older stored values', () => {
+        const draft = taskDraft({
+            name: 'Legacy',
+            activity: {} as ActivityEntry[],
+            assignedTo: '4' as unknown as number[],
+            subTasks: 2 as unknown as number[],
+            tags: { id: 7 } as unknown as number[],
+        });
+        expect(draft.activity).toBeUndefined();
+        expect(draft.assignedTo).toBeUndefined();
+        expect(draft.subTasks).toBeUndefined();
+        expect(draft.tags).toBeUndefined();
+    });
     it('detects removal and false/zero changes without diffing the audit history', () => {
         expect(
             taskDiff({ name: 'Task', fullfilled: false, dueDateRelative: 0 }, {

@@ -45,7 +45,7 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
     const currentUser = useCurrentUser();
     const toggleTask = async () => {
         if (!task.value) return;
-        const activity = [...(task.value.activity ?? [])];
+        const activity = [...(Array.isArray(task.value.activity) ? task.value.activity : [])];
         activity.push({
             personId: currentUser.id,
             date: new Date().toISOString(),
@@ -58,7 +58,9 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
     const deleteTask = () =>
         tId.value ? deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value }) : undefined;
 
-    const comments = computed(() => (task.value?.activity ?? [])?.filter(a => a.type === 'comment'));
+    const comments = computed(() =>
+        (Array.isArray(task.value?.activity) ? task.value.activity : []).filter(a => a.type === 'comment'),
+    );
 
     const dueDate = computed(() => calculateDueDate(task.value));
     const dueColor = computed(() => {

@@ -1,2 +1,4 @@
-@import 'tailwindcss' prefix(tasks);
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme) prefix(tasks);
+@import 'tailwindcss/utilities.css' layer(utilities) prefix(tasks);
 @import '@nuxt/ui';
