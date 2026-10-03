@@ -43,7 +43,7 @@ const resetTask = () => {
 </script>
 <template>
     <div
-        class="flex cursor-pointer flex-col justify-between gap-2 rounded border border-gray-100 bg-white p-3 shadow-sm transition-colors hover:border-gray-200"
+        class="flex flex-col justify-between gap-2 rounded border border-gray-100 bg-white p-3 shadow-sm transition-colors hover:border-gray-200"
         @keydown.escape="resetTask"
     >
         <UAlert v-if="error" color="error" :title="error" />

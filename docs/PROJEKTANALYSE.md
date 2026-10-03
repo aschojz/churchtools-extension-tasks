@@ -52,8 +52,8 @@ in einem ersten Stabilisierungsschritt bearbeitet:
 | UI-02   | **Umgesetzt**            | Listenansichten besitzen eine kompakte Zeilendarstellung.                                                                                                                                                                                       |
 | UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                                                                               |
 | UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                                                                            |
-| A11Y-01 | **Teilweise umgesetzt**  | Aufgabenkarten, Statusschalter und zentrale Icon-Aktionen sind benannt und per Tastatur erreichbar. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                                  |
-| UI-01   | **Teilweise umgesetzt**  | Globale Reset-Regeln und Tailwind Preflight wurden entfernt bzw. auf den Extension-Root begrenzt. Die generierten unpräfixierten Utility-Klassen bleiben als Integrationsrisiko offen.                                                          |
+| A11Y-01 | **Weitgehend umgesetzt** | Aufgabentitel, Statusschalter und zentrale Icon-Aktionen verwenden semantische, benannte Bedienelemente. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                             |
+| UI-01   | **Weitgehend umgesetzt** | Tailwind Preflight ist deaktiviert, Utility-Selektoren werden unter `#tasks` erzeugt und das Dashboard berechnet seine Höhe aus dem tatsächlichen Einbaupunkt. Portal-Styles bleiben gezielt auf die aktive Extension-Seite begrenzt.          |
 
 Beim Browser-Smoke-Test wurde außerdem ein älterer CCM-Wert mit einem ungültigen
 `tags`-Feld gefunden. Array-Felder werden in Karten, Lookups und Editor-Drafts
@@ -434,6 +434,14 @@ Storage; gemeinsame Defaults können separat im Projekt liegen.
 
 #### UI-01 · P1 · CSS-Isolation gegenüber ChurchTools
 
+**Status:** Weitgehend umgesetzt. Die eigenen Tailwind-Utilities werden über
+den eindeutigen Root `#tasks` gescopt, Preflight bleibt deaktiviert und die
+veraltete Styleguide-Quelle wurde aus der Tailwind-Konfiguration entfernt. Das
+Dashboard verwendet keine fest codierte ChurchTools-Headerhöhe mehr, sondern
+berechnet die verfügbare Höhe aus seiner tatsächlichen Position. Nur die für
+Nuxt-UI-Portale erforderlichen Overlay-, Dialog- und Menüregeln liegen unter
+`body:has(#tasks)` außerhalb des Roots.
+
 **Beobachtung:** Tailwind wird sowohl mit als auch ohne Prefix eingebunden.
 Globale Selektoren für `*`, `body`, Links, Buttons und Eingaben können außerhalb
 des Extension-Roots wirken. Layoutberechnungen verlassen sich zudem auf eine
@@ -448,6 +456,13 @@ Tailwind-Strategie behalten. Verfügbare Höhe aus dem Container statt aus einer
 festen Host-Annahme ableiten.
 
 #### A11Y-01 · P1 · Fehlende semantische Interaktion
+
+**Status:** Weitgehend umgesetzt. Aufgabentitel öffnen die Detailansicht über
+echte Buttons, Status und Menü sind benannte Buttons und die nicht semantische
+Klickbehandlung der gesamten Kartenfläche wurde entfernt. Zentrale reine
+Icon-Aktionen besitzen zugängliche Namen und sichtbare Fokuszustände. Ein
+vollständiger automatisierter Axe-Test sowie ein manueller Screenreader-Test
+bleiben offen.
 
 **Beobachtung:** Aufgabenkarten sind klickbare `div`-Elemente, Checkboxen teils
 klickbare Icons. Mehrere Icon-Buttons besitzen keinen zugänglichen Namen.

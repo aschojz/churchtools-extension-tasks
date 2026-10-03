@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup, DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
-import { computed, defineAsyncComponent, ref } from 'vue';
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAllProjectTasks } from './composables/useAllProjectTasks';
 import { usePlugin } from './composables/usePlugin';
@@ -18,6 +18,26 @@ const { isLoading, isError, refetch } = usePlugin();
 const { projects, deleteProject } = useProjects();
 const sidebarCollapsed = ref(false);
 const searchOpen = ref(false);
+const appRoot = ref<HTMLElement>();
+const availableHeight = ref('100dvh');
+
+const updateAvailableHeight = () => {
+    if (!appRoot.value) return;
+    const top = Math.max(0, appRoot.value.getBoundingClientRect().top);
+    availableHeight.value = `${Math.max(320, window.innerHeight - top)}px`;
+};
+
+let layoutObserver: ResizeObserver | undefined;
+onMounted(() => {
+    updateAvailableHeight();
+    window.addEventListener('resize', updateAvailableHeight, { passive: true });
+    layoutObserver = new ResizeObserver(updateAvailableHeight);
+    layoutObserver.observe(document.documentElement);
+});
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateAvailableHeight);
+    layoutObserver?.disconnect();
+});
 const { tasks: allTasks } = useAllProjectTasks({ enabled: searchOpen });
 const projectId = computed(() => {
     const value = Array.isArray(route.params.projectId) ? route.params.projectId[0] : route.params.projectId;
@@ -119,7 +139,7 @@ const newTaskRoute = computed(() =>
 
 <template>
     <UApp>
-        <div id="tasks" class="tasks-app">
+        <div id="tasks" ref="appRoot" class="tasks-app" :style="{ height: availableHeight }">
             <UDashboardGroup class="tasks-dashboard-group" storage-key="tasks-dashboard" unit="rem">
                 <UDashboardSidebar
                     v-model:collapsed="sidebarCollapsed"
