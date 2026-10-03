@@ -18,6 +18,12 @@ const snapshot = computed(() =>
     }),
 );
 const diagnosticText = computed(() => JSON.stringify(snapshot.value, null, 2));
+const authenticationLabel = computed(
+    () =>
+        ({ loading: 'Wird geladen', authenticated: 'Angemeldet', error: 'Fehler' })[
+            snapshot.value.runtime.authentication
+        ],
+);
 const copyDiagnostics = async () => {
     copyState.value = 'idle';
     try {
@@ -59,7 +65,7 @@ const copyDiagnostics = async () => {
                         <dt class="text-muted">Modul-ID</dt>
                         <dd>{{ snapshot.runtime.moduleId ?? 'Nicht geladen' }}</dd>
                         <dt class="text-muted">Anmeldung</dt>
-                        <dd>{{ snapshot.runtime.authentication }}</dd>
+                        <dd>{{ authenticationLabel }}</dd>
                         <dt class="text-muted">Datenfehler</dt>
                         <dd>{{ snapshot.dataIssues.length }}</dd>
                     </dl>

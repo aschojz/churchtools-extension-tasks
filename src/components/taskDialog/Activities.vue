@@ -2,8 +2,8 @@
 import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
+import { formatActivityChanges } from '../../domain/activity';
 import { formatDateTime, notNullish, personDisplay } from '../../platform';
-import { txx } from '../../utils/utils';
 
 const props = withDefaults(
     defineProps<{
@@ -44,17 +44,6 @@ const onComment = async () => {
     }
 };
 const onCancelComment = () => (newComment.value = '');
-const formatActivity = (value: unknown) => {
-    if (!value || typeof value !== 'object') return String(value ?? '');
-    return Object.entries(value)
-        .map(([key, change]) => {
-            if (change && typeof change === 'object' && 'from' in change && 'to' in change) {
-                return `${key}: ${String(change.from ?? '')} → ${String(change.to ?? '')}`;
-            }
-            return `${key}: ${String(change)}`;
-        })
-        .join(', ');
-};
 </script>
 <template>
     <div class="flex flex-col gap-4">
@@ -99,9 +88,7 @@ const formatActivity = (value: unknown) => {
                         </div>
                         <div v-else class="text-basic-tertiary flex items-center gap-2">
                             <UAvatar icon="i-lucide-user" size="xs" />
-                            <span class="text-basic-secondary font-bold">
-                                {{ txx('Unbekannter Benutzer') }}
-                            </span>
+                            <span class="text-basic-secondary font-bold"> Unbekannter Benutzer </span>
                             <span>·</span>
                             <div>{{ entry.dateDisplay }}</div>
                         </div>
@@ -115,26 +102,23 @@ const formatActivity = (value: unknown) => {
                     class="text-basic-secondary flex items-baseline gap-1 text-xs"
                 >
                     <span class="font-bold">
-                        {{ entry.person?.title ?? txx('Unbekannter Benutzer') }}
+                        {{ entry.person?.title ?? 'Unbekannter Benutzer' }}
                     </span>
-                    <span>
-                        {{ entry.value ? 'checked' : 'unchecked' }}
-                        die Aufgabe
-                    </span>
+                    <span>{{ entry.value ? 'erledigte die Aufgabe' : 'öffnete die Aufgabe wieder' }}</span>
                     <span class="text-basic-tertiary"> am {{ entry.dateDisplay }} </span>
                 </div>
                 <div v-else-if="entry.type === 'create'" class="text-basic-secondary flex items-baseline gap-1 text-xs">
                     <span class="font-bold">
-                        {{ entry.person?.title ?? txx('Unbekannter Benutzer') }}
+                        {{ entry.person?.title ?? 'Unbekannter Benutzer' }}
                     </span>
                     <span> erstellte die Aufgabe </span>
                     <span class="text-basic-tertiary"> am {{ entry.dateDisplay }} </span>
                 </div>
                 <div v-else class="text-basic-tertiary flex flex-wrap items-baseline gap-x-2 text-xs">
                     <span class="font-bold">
-                        {{ entry.person?.title ?? txx('Unbekannter Benutzer') }}
+                        {{ entry.person?.title ?? 'Unbekannter Benutzer' }}
                     </span>
-                    <span>{{ entry.type }}: {{ formatActivity(entry.value) }}</span>
+                    <span>änderte {{ formatActivityChanges(entry.value) }}</span>
                     <span class="text-basic-tertiary">
                         {{ entry.dateDisplay }}
                     </span>

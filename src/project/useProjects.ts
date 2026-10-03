@@ -9,7 +9,7 @@ import {
 } from '../data/ccm';
 import { CURRENT_SCHEMA_VERSION } from '../domain/storedData';
 import { CtColor, requireCurrentUser } from '../platform';
-import { createProjectShorty, ICONS, txx } from '../utils/utils';
+import { createProjectShorty, ICONS } from '../utils/utils';
 
 export default function useProjects() {
     const { moduleId } = usePlugin();
@@ -60,7 +60,7 @@ export default function useProjects() {
 
     const deleteProject = async (id: number) => {
         requireCurrentUser();
-        const confirmed = window.confirm(txx('Das Projekt und alle seine Aufgaben werden gelöscht.'));
+        const confirmed = window.confirm('Das Projekt und alle seine Aufgaben werden gelöscht.');
         if (confirmed) {
             const result = await deleteDataCategory(id);
             toast.add({ title: 'Projekt wurde gelöscht.', color: 'success' });

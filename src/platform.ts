@@ -59,7 +59,19 @@ export const notNullish = <T>(value: T | null | undefined): value is T => value 
 export const firstOrSelf = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 export const formatDateTime = (date: Date) => date.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
 
-export const colorOptions = Object.values(CtColor).map(key => ({ id: key, nameTranslated: key }));
+const COLOR_LABELS: Record<CtColor, string> = {
+    basic: 'Neutral',
+    red: 'Rot',
+    orange: 'Orange',
+    yellow: 'Gelb',
+    green: 'Grün',
+    blue: 'Blau',
+    violet: 'Violett',
+    purple: 'Lila',
+    pink: 'Pink',
+    teal: 'Türkis',
+};
+export const colorOptions = Object.values(CtColor).map(key => ({ id: key, nameTranslated: COLOR_LABELS[key] }));
 export const colorKey = (color: unknown): string =>
     typeof color === 'string'
         ? color

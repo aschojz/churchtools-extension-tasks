@@ -7,7 +7,6 @@ import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
 import { dueDateBucket, type DueDateBucket } from '../domain/tasks';
 import { colorKey, CtColor, uiColor, useCurrentUser } from '../platform';
 import { createOrEditProject } from '../project/projectHelper';
-import { txx } from '../utils/utils';
 
 defineEmits<{ (event: 'edit-project', project: Project): void }>();
 const { moduleId } = usePlugin();
@@ -49,19 +48,19 @@ const tasksBySection = computed(
         v-else-if="projects.length === 0"
         :actions="[
             {
-                label: txx('Neues Projekt'),
+                label: 'Neues Projekt',
                 icon: 'i-lucide-plus',
                 onClick: () => createOrEditProject(),
             },
         ]"
         icon="i-lucide-list-checks"
-        :title="txx('Noch keine Projekte')"
+        title="Noch keine Projekte"
     />
     <div v-else class="dashboard-overview">
         <section>
             <div class="dashboard-section-heading">
                 <div>
-                    <h2>{{ txx('Meine Aufgaben') }}</h2>
+                    <h2>Meine Aufgaben</h2>
                     <p>Alles, was als Nächstes deine Aufmerksamkeit braucht.</p>
                 </div>
                 <UBadge color="neutral" :label="String(myTasks.length)" variant="subtle" />
@@ -129,7 +128,7 @@ const tasksBySection = computed(
                 v-else
                 class="overview-empty"
                 icon="i-lucide-circle-check"
-                :title="txx('Keine offenen Aufgaben für dich')"
+                title="Keine offenen Aufgaben für dich"
             />
         </section>
 
@@ -138,7 +137,7 @@ const tasksBySection = computed(
         <section>
             <div class="dashboard-section-heading">
                 <div>
-                    <h2>{{ txx('Projekte') }}</h2>
+                    <h2>Projekte</h2>
                     <p>Organisiere Aufgaben in klaren Arbeitsbereichen.</p>
                 </div>
                 <UButton

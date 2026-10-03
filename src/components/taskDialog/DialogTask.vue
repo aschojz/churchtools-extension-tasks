@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
 import { useProject } from '../../project/useProject';
-import { txx } from '../../utils/utils';
 import TaskDisplay from './TaskDisplay.vue';
 import TaskEditor from './TaskEditor.vue';
 
@@ -28,21 +27,21 @@ const { updateTask, getObjectDiff, createTask } = useTasks(projectId);
 
 const dialogTitle = computed(() =>
     isCreate.value
-        ? txx('Aufgabe erstellen')
+        ? 'Aufgabe erstellen'
         : isEdit.value
-          ? txx('Aufgabe bearbeiten')
-          : (task.value?.name ?? txx('Aufgabe anzeigen')),
+          ? 'Aufgabe bearbeiten'
+          : (task.value?.name ?? 'Aufgabe anzeigen'),
 );
 
-const cancelButton = computed(() => (isCreate.value || isEdit.value ? txx('Abbrechen') : txx('Schließen')));
+const cancelButton = computed(() => (isCreate.value || isEdit.value ? 'Abbrechen' : 'Schließen'));
 const primaryLabel = computed(() =>
     isCreate.value
-        ? txx('Erstellen')
+        ? 'Erstellen'
         : isEdit.value
-          ? txx('Speichern')
+          ? 'Speichern'
           : task.value?.fullfilled
-            ? txx('Als unerledigt markieren')
-            : txx('Als erledigt markieren'),
+            ? 'Als unerledigt markieren'
+            : 'Als erledigt markieren',
 );
 
 const internTask = ref<Task>();

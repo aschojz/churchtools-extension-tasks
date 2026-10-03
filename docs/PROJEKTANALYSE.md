@@ -604,6 +604,12 @@ dabei nicht ungefragt exportiert werden.
 
 #### I18N-01 · P2 · Unvollständige Übersetzungsstrategie
 
+**Status:** Für die bewusst deutschsprachige Oberfläche umgesetzt. Technische
+Farb- und Aktivitätswerte werden vor der Anzeige auf deutsche Bezeichnungen
+abgebildet; Datumswerte verwenden weiterhin die deutsche Locale. Der bisherige
+englische `checked`/`unchecked`-Text ist entfernt. Eine mehrsprachige Oberfläche
+ist derzeit kein Produktziel.
+
 **Beobachtung:** `txx` gibt Texte unverändert zurück. Aktivitätstexte enthalten
 englische Zustände wie `checked` und `unchecked`; Farbnamen werden als englische
 Schlüssel dargestellt.

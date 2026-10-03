@@ -18,8 +18,7 @@ const loadPreferences = (): Record<string, ListPreferences> => {
 };
 
 export const taskStore = defineStore('tasks', () => {
-    const showSubTasks = ref(false),
-        showFullfilled = ref(true),
+    const showFullfilled = ref(true),
         sortBy = ref('dueDate'),
         searchByProject = ref<Record<number, string>>({}),
         listPreferences = ref<Record<string, ListPreferences>>(loadPreferences());
@@ -56,7 +55,6 @@ export const taskStore = defineStore('tasks', () => {
     };
 
     return {
-        showSubTasks,
         showFullfilled,
         sortBy,
         searchForProject,

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { colorOptions } from '../platform';
-import { txx } from '../utils/utils';
 import useProjects from './useProjects';
 
 const props = defineProps<{ project?: Project }>();
@@ -40,9 +39,9 @@ const onSave = async () => {
 </script>
 <template>
     <UModal
-        :description="txx('Aufgabenverwaltung')"
+        description="Aufgabenverwaltung"
         :open="true"
-        :title="project ? txx('Projekt bearbeiten') : txx('Neues Projekt erstellen')"
+        :title="project ? 'Projekt bearbeiten' : 'Neues Projekt erstellen'"
         @update:open="(value: boolean) => !value && emit('close')"
     >
         <template #body
