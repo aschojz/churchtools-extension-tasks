@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup, DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
-import { computed, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAllProjectTasks } from './composables/useAllProjectTasks';
 import { usePlugin } from './composables/usePlugin';
 import { dataIssues } from './domain/storedData';
 import { authState, colorKey, loadCurrentUser } from './platform';
-import DialogProject from './project/DialogProject.vue';
 import { activeProjectDialog, closeProjectDialog, createOrEditProject } from './project/projectHelper';
 import useProjects from './project/useProjects';
 import { ICONS } from './utils/utils';
+
+const DialogProject = defineAsyncComponent(() => import('./project/DialogProject.vue'));
 
 const route = useRoute();
 const router = useRouter();

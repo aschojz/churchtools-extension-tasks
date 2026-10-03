@@ -1,13 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
-import Project from './project/Project.vue';
-import Board from './project/views/Board.vue';
-import ListView from './project/views/ListView.vue';
-import MyTasksList from './project/views/MyTasksList.vue';
-import TagBoard from './project/views/TagBoard.vue';
-import TaskBoard from './project/views/TaskBoard.vue';
-import TrashView from './project/views/TrashView.vue';
-import Overview from './views/Overview.vue';
+
+const Project = () => import('./project/Project.vue');
+const Board = () => import('./project/views/Board.vue');
+const ListView = () => import('./project/views/ListView.vue');
+const MyTasksList = () => import('./project/views/MyTasksList.vue');
+const TagBoard = () => import('./project/views/TagBoard.vue');
+const TaskBoard = () => import('./project/views/TaskBoard.vue');
+const TrashView = () => import('./project/views/TrashView.vue');
+const Overview = () => import('./views/Overview.vue');
 
 const routes: RouteRecordRaw[] = [
     {

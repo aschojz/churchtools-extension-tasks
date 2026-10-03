@@ -333,6 +333,9 @@ dem CCM-Store-Paket verifiziert werden.
 
 #### PERF-01 · P1 · Globale Suche lädt alle Aufgaben
 
+**Status:** Behoben. Projektübergreifende Aufgabenabfragen sind deaktiviert,
+bis die globale Suche tatsächlich geöffnet wird.
+
 **Beobachtung:** Die App initialisiert die projektübergreifende Aufgabensuche
 bereits im Wurzel-Layout. Dafür wird pro Projekt eine Values-Abfrage ausgeführt,
 auch wenn die Suche nicht geöffnet ist.
@@ -345,6 +348,10 @@ debouncen, Ergebnisse paginieren und mittelfristig einen serverseitigen
 Suchindex oder eine gezielte Such-API verwenden.
 
 #### PERF-02 · P1 · Composable-Baum pro Aufgabenkarte
+
+**Status:** Behoben. Die Projektansicht stellt normalisierte Task-, Tag-,
+Personen- und Eltern-Lookups einmal bereit; Karten verwenden diesen gemeinsamen
+Kontext. Personen werden projektweise gebündelt geladen.
 
 **Beobachtung:** Jede Aufgabenkarte initialisiert eigene Task-, Listen-, Tag-
 und Personen-Composables. Vue Query teilt zwar HTTP-Caches, trotzdem entstehen
@@ -360,6 +367,11 @@ Listen Virtualisierung ergänzen.
 
 #### PERF-03 · P2 · Personensuche ohne Request-Kontrolle
 
+**Status:** Weitgehend behoben. Eingaben werden 250 ms entprellt und eine
+Sequenznummer verhindert, dass verspätete Antworten neuere Ergebnisse
+überschreiben. Ein echter Request-Abbruch bleibt von Client-Unterstützung
+abhängig.
+
 **Beobachtung:** Die Suche besitzt kein Debouncing, kein Abort-Signal und keine
 Absicherung gegen verspätete Antworten.
 
@@ -368,6 +380,11 @@ kann ein neueres überschreiben.
 
 **Empfehlung:** 200–300 ms debouncen, laufende Requests abbrechen, Query-Key
 über den Suchtext führen und Lade-, Leer- und Fehlerzustände unterscheiden.
+
+**Zusätzliche Build-Optimierung:** Alle Routen sowie der Projekteditor werden
+lazy geladen. Der Produktionsbuild verteilt die Oberfläche auf kleine
+Ansichts-Chunks; die frühere Warnung für ein einzelnes JavaScript-Bundle über
+500 kB ist beseitigt.
 
 #### ARCH-01 · P1 · Implizite Font-Awesome-Abhängigkeit
 
