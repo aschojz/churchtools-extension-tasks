@@ -1,6 +1,5 @@
 import js from '@eslint/js';
 import vueConfigPrettier from '@vue/eslint-config-prettier';
-import vueConfigTypescript from '@vue/eslint-config-typescript';
 import pluginVue from 'eslint-plugin-vue';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
@@ -11,7 +10,11 @@ export default defineConfig([
     { files: ['**/*.{js,mjs,cjs,ts,vue}'], languageOptions: { globals: globals.browser } },
     tseslint.configs.recommended,
     pluginVue.configs['flat/essential'],
-    ...vueConfigTypescript(),
+    {
+        files: ['**/*.vue'],
+        languageOptions: { parserOptions: { parser: tseslint.parser } },
+    },
+    { files: ['**/*.{ts,vue}'], rules: { 'no-undef': 'off' } },
     vueConfigPrettier,
     globalIgnores(['dist/', 'releases/', 'src/assets/', 'src/utils/ct-types.d.ts']),
     { files: ['scripts/**', '*.config.*'], languageOptions: { globals: globals.node } },

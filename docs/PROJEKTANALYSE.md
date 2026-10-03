@@ -488,15 +488,13 @@ Erfassung weiter beschleunigen.
 #### TEST-01 · P1 · Kritische Pfade ohne Testabdeckung
 
 **Gut abgedeckt:** Kernoperationen der Aufgabenlogik, CCM-Invalidierung,
-UUID-Fallback, Rückabwicklung eines fehlerhaften Drag-and-drop-Schreibens sowie
-Schemavalidierung, Migration und Isolation beschädigter Einträge.
+UUID-Fallback, Rückabwicklung eines fehlerhaften Drag-and-drop-Schreibens,
+Schemavalidierung, Migration, Konflikterkennung, Kompensationslogik,
+URL-Validierung und Benutzerfehler.
 
 **Fehlend:**
 
-- konkurrierende Änderungen und Konfliktbehandlung
-- partielle Fehler mehrstufiger Kommandos
 - Dialoge und Formularvalidierung
-- Rechte-, Login- und Nutzerfehler
 - Router- und Deep-Link-Verhalten
 - globale Suche und Request-Fan-out
 - Tastaturbedienung und zugängliche Namen
@@ -507,6 +505,12 @@ sollten Erstellen, Bearbeiten, Verschieben, Konflikt, Löschen/Wiederherstellen
 und erneutes Laden abdecken.
 
 #### STORE-01 · P1 · CCM-Store-Prozess nicht verifiziert
+
+**Status:** Das Paketformat wurde mit dem aktuellen offiziellen
+`churchtools/extension-boilerplate` abgeglichen. Das ZIP besitzt wie gefordert
+genau `dist/` als Wurzel. Der Paketierer prüft Extension-Key, alle aus
+`index.html` referenzierten Assets, JavaScript/CSS und nach dem Packen die
+Archivstruktur. Diese Prüfung läuft auch in CI auf Node 22 und 24.
 
 **Beobachtung:** Das Paket-Skript erstellt im Wesentlichen ein ZIP aus `dist`.
 Ein überprüfter Manifest-, Signatur-, Mindestversions- und Upgrade-Prozess ist
@@ -520,11 +524,21 @@ eine Testmatrix für Neuinstallation, Update mit Bestandsdaten, Assets unter
 Unterpfaden, Cache-Busting und Deinstallation anlegen. Das erzeugte ZIP sollte
 in CI strukturell validiert und als Release-Artefakt bereitgestellt werden.
 
+**Offen:** Neuinstallation und Update mit realen Bestandsdaten müssen weiterhin
+in einer dedizierten ChurchTools-Testinstanz ausgeführt werden; dafür gibt es
+keine öffentliche automatisierbare Store-Sandbox.
+
 #### DEP-01 · P1 · Dependency-Pflege
 
-**Beobachtung:** Es bestehen Audit-Findings und kein automatisierter
-Update-Prozess. Ein vollständiger Outdated-Report war während dieses Audits
-nicht abrufbar.
+**Status:** Aktualisiert am 3. Oktober 2026. Vite 8, Vitest 5, Pinia 4,
+Vue Router 5, ESLint 10, jsdom 30 sowie alle verfügbaren kompatiblen Patchstände
+sind eingespielt. `npm audit` meldet null Findings. Dependabot prüft wöchentlich
+und gruppiert Patch-/Minor-Updates; CI läuft mit Node 22 und 24.
+
+**Bewusste Holds:** TypeScript 7 ist durch den Peer-Bereich von
+`typescript-eslint` (`<6.1`) noch nicht kompatibel. `@types/node` bleibt auf 24,
+weil Node 22/24 die unterstützten Laufzeiten sind. `vuedraggable` 4 bleibt die
+Vue-3-Linie; der als „latest“ gemeldete 2.x-Tag ist kein Upgrade.
 
 **Empfehlung:**
 

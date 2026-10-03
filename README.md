@@ -47,8 +47,11 @@ npm run deploy
 
 `check` führt Typecheck, Lint, Regressionstests und Production-Build aus. `build`
 bricht bei Typfehlern ab. `deploy` erstellt lediglich ein lokales ZIP in `releases/`;
-es lädt nichts hoch. Das ZIP enthält `dist/`. Installation, Update und Berechtigungen
-müssen vor einem Release in einer ChurchTools-Testinstanz geprüft werden.
+es lädt nichts hoch. Vor dem Verpacken werden Extension-Key, referenzierte Assets
+und die vom offiziellen Boilerplate erwartete einzelne `dist/`-Wurzel geprüft.
+`npm run package:verify` prüft einen vorhandenen Build ohne ein ZIP anzulegen.
+Installation, Update und Berechtigungen müssen vor einem Release in einer
+ChurchTools-Testinstanz geprüft werden.
 
 ## Daten und Architektur
 

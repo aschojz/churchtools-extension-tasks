@@ -1,76 +1,82 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-// Read package.json for project info
-const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
-const projectName = packageJson.name;
-const version = packageJson.version;
-
-// Get git commit hash (short)
-let gitHash = '';
-try {
-    gitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-    if (execSync('git status --porcelain', { encoding: 'utf8' }).trim()) {
-        gitHash += '-dirty';
+export function verifyDist(distDir) {
+    const indexPath = path.join(distDir, 'index.html');
+    if (!fs.existsSync(indexPath)) throw new Error('dist/index.html fehlt.');
+    const html = fs.readFileSync(indexPath, 'utf8');
+    const urls = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(match => match[1]);
+    const extensionUrls = urls.filter(url => url.startsWith('/ccm/'));
+    if (!extensionUrls.length) throw new Error('index.html enthält keine /ccm/<key>/ Asset-Pfade.');
+    const keys = new Set(extensionUrls.map(url => url.split('/')[2]).filter(Boolean));
+    if (keys.size !== 1) throw new Error('index.html verwendet mehrere Extension-Keys.');
+    const key = [...keys][0];
+    for (const url of extensionUrls) {
+        const prefix = `/ccm/${key}/`;
+        const relativePath = decodeURIComponent(url.slice(prefix.length));
+        if (!relativePath || relativePath.includes('..') || !fs.existsSync(path.join(distDir, relativePath)))
+            throw new Error(`Referenziertes Build-Asset fehlt: ${url}`);
     }
-} catch {
-    console.warn('Warning: Could not get git hash, using timestamp');
-    gitHash = Date.now().toString(36);
+    const files = fs.readdirSync(path.join(distDir, 'assets'));
+    if (!files.some(file => file.endsWith('.js')) || !files.some(file => file.endsWith('.css')))
+        throw new Error('Der Build benötigt mindestens ein JavaScript- und ein CSS-Asset.');
+    return { key, assetCount: files.length };
 }
 
-// Create releases directory
-const releasesDir = path.join(rootDir, 'releases');
-if (!fs.existsSync(releasesDir)) {
+function packageExtension() {
+    const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
+    const distDir = path.join(rootDir, 'dist');
+    if (!fs.existsSync(distDir)) throw new Error('dist fehlt. Zuerst npm run build ausführen.');
+    const verified = verifyDist(distDir);
+    if (process.argv.includes('--verify-only')) {
+        console.log(`✅ Build für /ccm/${verified.key}/ geprüft (${verified.assetCount} Assets).`);
+        return;
+    }
+
+    let gitHash;
+    try {
+        gitHash = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: rootDir, encoding: 'utf8' }).trim();
+        if (execFileSync('git', ['status', '--porcelain'], { cwd: rootDir, encoding: 'utf8' }).trim())
+            gitHash += '-dirty';
+    } catch {
+        console.warn('Warning: Could not get git hash, using timestamp');
+        gitHash = Date.now().toString(36);
+    }
+
+    const releasesDir = path.join(rootDir, 'releases');
     fs.mkdirSync(releasesDir, { recursive: true });
-}
-
-// Define archive name
-const archiveName = `${projectName}-v${version}-${gitHash}.zip`;
-const archivePath = path.join(releasesDir, archiveName);
-
-console.log('📦 Creating ChurchTools extension package...');
-console.log(`   Project: ${projectName}`);
-console.log(`   Version: ${version}`);
-console.log(`   Git Hash: ${gitHash}`);
-console.log(`   Archive: ${archiveName}`);
-
-// Check if dist directory exists
-const distDir = path.join(rootDir, 'dist');
-if (!fs.existsSync(distDir)) {
-    console.error('❌ Error: dist directory not found. Run "npm run build" first.');
-    process.exit(1);
-}
-
-try {
-    // Always start a fresh archive so removed assets cannot survive a rebuild.
+    const archiveName = `${packageJson.name}-v${packageJson.version}-${gitHash}.zip`;
+    const archivePath = path.join(releasesDir, archiveName);
     if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath);
-    // Create ZIP archive using system zip command
-    const zipCommand = `cd "${rootDir}" && zip -r "${archivePath}" dist/ -x "*.map" "*.DS_Store"`;
-    execSync(zipCommand, { stdio: 'inherit' });
 
-    console.log('✅ Package created successfully!');
-    console.log(`📁 Location: ${archivePath}`);
-    console.log('');
-    console.log('🚀 Next steps:');
-    console.log('   1. Upload the ZIP file to your ChurchTools instance');
-    console.log('   2. Go to Admin → Extensions → Upload Extension');
-    console.log('   3. Select the ZIP file and install');
-    console.log('');
+    console.log('📦 Creating ChurchTools extension package...');
+    console.log(`   Extension route: /ccm/${verified.key}/`);
+    console.log(`   Archive: ${archiveName}`);
+    execFileSync('zip', ['-r', archivePath, 'dist/', '-x', '*.map', '*.DS_Store'], {
+        cwd: rootDir,
+        stdio: 'inherit',
+    });
+    const entries = execFileSync('unzip', ['-Z1', archivePath], { encoding: 'utf8' }).trim().split('\n');
+    if (!entries.includes('dist/index.html') || entries.some(entry => !entry.startsWith('dist/')))
+        throw new Error(
+            'Das Archiv entspricht nicht dem ChurchTools-Format: dist/ muss der einzige Wurzelordner sein.',
+        );
 
-    // Show file size
-    const stats = fs.statSync(archivePath);
-    const fileSizeInBytes = stats.size;
-    const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
-    console.log(`📊 Package size: ${fileSizeInMB} MB`);
-} catch (error) {
-    console.error('❌ Error creating package:', error.message);
-    process.exit(1);
+    const fileSizeInMB = (fs.statSync(archivePath).size / (1024 * 1024)).toFixed(2);
+    console.log(`✅ Package geprüft: ${archivePath} (${fileSizeInMB} MB)`);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+    try {
+        packageExtension();
+    } catch (error) {
+        console.error(`❌ ${error instanceof Error ? error.message : String(error)}`);
+        process.exitCode = 1;
+    }
 }

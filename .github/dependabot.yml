@@ -1,0 +1,15 @@
+version: 2
+updates:
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: weekly
+          day: monday
+      groups:
+          production-patches:
+              dependency-type: production
+              update-types: [patch, minor]
+          development-patches:
+              dependency-type: development
+              update-types: [patch, minor]
+      open-pull-requests-limit: 5

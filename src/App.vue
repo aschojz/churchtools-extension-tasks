@@ -152,14 +152,14 @@ const newTaskRoute = computed(() =>
                         />
                     </template>
 
-                    <template #footer="{ collapsed }">
+                    <template #footer>
                         <div class="flex w-full flex-col gap-1">
                             <UButton
                                 block
                                 color="neutral"
                                 href="https://github.com/aschojz/churchtools-extension-tasks/issues"
                                 icon="i-lucide-message-circle-warning"
-                                :label="collapsed ? undefined : 'Feedback geben'"
+                                :label="sidebarCollapsed ? undefined : 'Feedback geben'"
                                 target="_blank"
                                 variant="ghost"
                             />
