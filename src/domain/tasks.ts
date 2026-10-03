@@ -14,6 +14,18 @@ export function normalizeTaskUrl(value: string | undefined): string | undefined 
     return url.toString();
 }
 
+export function appendComment(
+    activities: ActivityEntry[],
+    value: string,
+    personId: number,
+    date = new Date(),
+): ActivityEntry[] {
+    const comment = value.trim();
+    if (!comment) throw new Error('Bitte einen Kommentar eingeben.');
+    if (!Number.isSafeInteger(personId) || personId <= 0) throw new Error('Der aktuelle Benutzer ist nicht verfügbar.');
+    return [...activities, { personId, date: date.toISOString(), type: 'comment', value: comment }];
+}
+
 export function taskDraft(task: Partial<Task> = {}): Task {
     const draft: Task = cloneDeep({
         type: 'task',

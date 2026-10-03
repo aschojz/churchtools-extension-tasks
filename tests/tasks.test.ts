@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+    appendComment,
     descendantIds,
     dueDateBucket,
     normalizeTaskUrl,
@@ -18,6 +19,19 @@ const task = (id: number, overrides: Partial<TransformedTask> = {}): Transformed
 });
 
 describe('task integrity', () => {
+    it('appends trimmed comments without mutating the activity history', () => {
+        const source: ActivityEntry[] = [{ personId: 1, date: '2026-01-01T00:00:00.000Z', type: 'create' }];
+        const next = appendComment(source, '  Hallo Welt  ', 7, new Date('2026-10-03T10:00:00.000Z'));
+        expect(source).toHaveLength(1);
+        expect(next.at(-1)).toEqual({
+            personId: 7,
+            date: '2026-10-03T10:00:00.000Z',
+            type: 'comment',
+            value: 'Hallo Welt',
+        });
+        expect(() => appendComment(source, '   ', 7)).toThrow('Kommentar');
+        expect(() => appendComment(source, 'Text', 0)).toThrow('Benutzer');
+    });
     it('normalizes web URLs and rejects unsafe protocols', () => {
         expect(normalizeTaskUrl(' https://example.org/path ')).toBe('https://example.org/path');
         expect(normalizeTaskUrl('')).toBeUndefined();

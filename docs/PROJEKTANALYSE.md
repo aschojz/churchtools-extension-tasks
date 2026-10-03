@@ -271,6 +271,11 @@ fehlen ebenfalls.
 
 #### DATA-05 · P2 · Unsicherer Kommentarablauf
 
+**Status:** Im bestehenden Aufgabenmodell behoben. Kommentare werden getrimmt,
+Leerwerte blockiert und der aktuelle Benutzer validiert. Die Eingabe bleibt bis
+zum erfolgreichen Update erhalten, zeigt einen Ladezustand und meldet Fehler
+direkt am Feld.
+
 **Beobachtung:** Das Kommentarfeld wird nach dem Emit geleert. Der aufrufende
 Dialog wartet den Schreibvorgang nicht konsistent ab. Leerraum-Kommentare
 können gespeichert werden und jeder Kommentar schreibt das vollständige
@@ -279,6 +284,9 @@ Aufgabenobjekt.
 **Empfehlung:** Text trimmen, leere Kommentare blockieren, Speichern abwarten,
 Fehler am Eingabefeld zeigen und erst nach Erfolg leeren. Kommentare sollten
 langfristig eigene Entitäten oder Append-only-Ereignisse sein.
+
+**Offen:** Kommentare sind weiterhin Teil des vollständigen Aufgabenobjekts.
+Eine append-only API würde Konfliktfläche und Payload-Größe weiter reduzieren.
 
 ### 6.2 Sicherheit und Berechtigungen
 

@@ -3,7 +3,8 @@ import { computed, ref } from 'vue';
 import { failWithCompensation } from '../../application/compensation';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
-import { uiColor } from '../../platform';
+import { appendComment } from '../../domain/tasks';
+import { requireCurrentUser, uiColor } from '../../platform';
 import TaskItem from '../TaskItem.vue';
 import Activities from './Activities.vue';
 
@@ -18,11 +19,15 @@ const subTasks = computed(() =>
 
 const { updateTask, createTask, deleteTask, tasksMap } = useTasks(pId);
 
-const onComment = (activities: ActivityEntry[]) => {
+const saveComment = async (value: string) => {
     if (!task.value) {
-        return;
+        throw new Error('Die Aufgabe ist nicht mehr verfügbar.');
     }
-    updateTask({ ...task.value, activity: activities });
+    const user = requireCurrentUser();
+    await updateTask({
+        ...task.value,
+        activity: appendComment(Array.isArray(task.value.activity) ? task.value.activity : [], value, user.id),
+    });
 };
 const childName = ref('');
 const childSaving = ref(false);
@@ -99,7 +104,7 @@ const createChild = async () => {
             </section>
 
             <section class="task-view-section">
-                <Activities :activities="task?.activity ?? []" @comment="onComment" />
+                <Activities :activities="task?.activity ?? []" :save-comment="saveComment" />
             </section>
         </main>
 

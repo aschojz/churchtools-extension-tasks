@@ -2,19 +2,16 @@
 import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
-import { formatDateTime, notNullish, personDisplay, useCurrentUser } from '../../platform';
+import { formatDateTime, notNullish, personDisplay } from '../../platform';
 import { txx } from '../../utils/utils';
 
 const props = withDefaults(
     defineProps<{
         activities: ActivityEntry[];
+        saveComment: (value: string) => Promise<void>;
     }>(),
     { activities: () => [] },
 );
-const emit = defineEmits<{
-    (event: 'comment', payload: ActivityEntry[]): void;
-}>();
-
 const filter = computed(() => ({
     ids: Array.from(new Set(props.activities.map(a => (a.personId > 0 ? a.personId : null)))).filter(notNullish),
 }));
@@ -29,18 +26,22 @@ const transformedActivities = computed(() => {
     return sortBy(array, 'date').reverse();
 });
 
-const currentUser = useCurrentUser();
 const newComment = ref('');
-const onComment = () => {
-    const activity = [...props.activities];
-    activity.push({
-        personId: currentUser.id,
-        date: new Date().toISOString(),
-        type: 'comment',
-        value: newComment.value,
-    });
-    emit('comment', activity);
-    newComment.value = '';
+const commentSaving = ref(false);
+const commentError = ref('');
+const onComment = async () => {
+    const value = newComment.value.trim();
+    if (!value || commentSaving.value) return;
+    commentSaving.value = true;
+    commentError.value = '';
+    try {
+        await props.saveComment(value);
+        newComment.value = '';
+    } catch (error) {
+        commentError.value = error instanceof Error ? error.message : 'Kommentar konnte nicht gespeichert werden.';
+    } finally {
+        commentSaving.value = false;
+    }
 };
 const onCancelComment = () => (newComment.value = '');
 const formatActivity = (value: unknown) => {
@@ -63,6 +64,7 @@ const formatActivity = (value: unknown) => {
         <div class="group flex flex-col gap-2">
             <UTextarea
                 v-model="newComment"
+                :disabled="commentSaving"
                 placeholder="Kommentar hinzufügen"
                 :rows="1"
                 @keydown.enter.meta.stop="onComment"
@@ -71,13 +73,15 @@ const formatActivity = (value: unknown) => {
             <div class="flex gap-2">
                 <UButton
                     color="neutral"
-                    :disabled="!newComment"
+                    :disabled="!newComment.trim()"
                     label="Kommentieren"
+                    :loading="commentSaving"
                     size="sm"
                     variant="outline"
                     @click="onComment"
                 />
             </div>
+            <p v-if="commentError" class="text-red-600" role="alert">{{ commentError }}</p>
         </div>
         <div class="flex flex-col gap-3">
             <div v-for="(entry, index) in transformedActivities" :key="index">
