@@ -24,19 +24,21 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
 
     const superParent = computed(() => findParent(task.value) && getSuperParent(task.value));
 
-    const hasSubTasks = computed(
-        () => !!(task.value?.subTasks ?? []).map(st => tasksMap.value[st]).filter(st => st).length,
-    );
+    const subTaskIds = computed(() => (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []));
+    const assignedPersonIds = computed(() => (Array.isArray(task.value?.assignedTo) ? task.value.assignedTo : []));
+    const tagIds = computed(() => (Array.isArray(task.value?.tags) ? task.value.tags : []));
 
-    const filter = computed(() => ({ ids: task.value?.assignedTo ?? [] }));
+    const hasSubTasks = computed(() => !!subTaskIds.value.map(st => tasksMap.value[st]).filter(st => st).length);
+
+    const filter = computed(() => ({ ids: assignedPersonIds.value }));
     const { data } = usePersonsQueryAllPages(filter, { enabled: () => !!filter.value.ids.length });
     const personMap = computed(() => Object.fromEntries((data.value ?? []).map(p => [p.id, personDisplay(p)])));
 
-    const assignees = computed(() => (task.value?.assignedTo ?? [])?.map(id => personMap.value[id]).filter(notNullish));
+    const assignees = computed(() => assignedPersonIds.value.map(id => personMap.value[id]).filter(notNullish));
 
     const { tags } = useTags(pId);
     const sortedTags = computed(() => {
-        const tt = (task.value?.tags ?? [])?.map(t => tags.value[t]).filter(t => !!t);
+        const tt = tagIds.value.map(t => tags.value[t]).filter(t => !!t);
         return sortBy(tt, 'name');
     });
 

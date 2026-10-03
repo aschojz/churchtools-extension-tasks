@@ -71,7 +71,7 @@ const viewNavigation: NavigationMenuItem[] = [
                 <UNavigationMenu highlight :items="viewNavigation" orientation="horizontal" variant="link" />
             </div>
         </div>
-        <div class="max-w-full grow overflow-x-auto p-4 lg:p-6">
+        <div class="task-board-scroll max-w-full grow overflow-x-auto p-4 lg:p-6">
             <div class="flex h-full gap-4">
                 <slot></slot>
             </div>

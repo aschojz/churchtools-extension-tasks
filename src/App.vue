@@ -25,22 +25,11 @@ const projectId = computed(() => {
 const currentProject = computed(() => projects.value.find(project => project.id === projectId.value));
 const pageTitle = computed(() => currentProject.value?.name ?? 'Aufgaben');
 
-const projectViews = computed<NavigationMenuItem[]>(() => {
-    if (!currentProject.value) return [];
-    const params = { projectId: currentProject.value.id };
-    return [
-        { label: 'Meine Aufgaben', icon: 'i-lucide-user-check', to: { name: 'my-tasks', params } },
-        { label: 'Board', icon: 'i-lucide-columns-3', to: { name: 'project-board', params } },
-        { label: 'Liste', icon: 'i-lucide-list', to: { name: 'project-list', params } },
-        { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags', params } },
-        { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks', params } },
-    ];
-});
-
 const mainNavigation = computed<NavigationMenuItem[]>(() => [
     { label: 'Übersicht', icon: 'i-lucide-layout-dashboard', to: { name: 'overview' } },
     { type: 'label', label: 'Projekte' },
     ...projects.value.map(project => ({
+        active: project.id === projectId.value,
         label: project.name,
         icon: 'i-lucide-folder',
         to: { name: 'my-tasks', params: { projectId: project.id } },
@@ -145,16 +134,6 @@ const newTaskRoute = computed(() =>
                             orientation="vertical"
                             tooltip
                         />
-                        <template v-if="currentProject">
-                            <USeparator v-if="!collapsed" :label="currentProject.name" />
-                            <UNavigationMenu
-                                :collapsed="collapsed"
-                                highlight
-                                :items="projectViews"
-                                orientation="vertical"
-                                tooltip
-                            />
-                        </template>
                     </template>
 
                     <template #footer="{ collapsed }">
@@ -198,12 +177,6 @@ const newTaskRoute = computed(() =>
                                 </div>
                             </template>
                             <template #right>
-                                <UDashboardSearchButton
-                                    class="hidden sm:inline-flex"
-                                    :kbds="[]"
-                                    label="Suchen"
-                                    @click="searchOpen = true"
-                                />
                                 <UDropdownMenu v-if="currentProject" :items="projectMenu">
                                     <UButton color="neutral" icon="i-lucide-ellipsis" square variant="ghost" />
                                 </UDropdownMenu>

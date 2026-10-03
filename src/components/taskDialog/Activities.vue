@@ -58,7 +58,7 @@ const formatActivity = (value: unknown) => {
 <template>
     <div class="flex flex-col gap-4">
         <div>
-            <div class="text-lg font-bold">Aktivitäten</div>
+            <div class="task-view-heading">Aktivitäten</div>
         </div>
         <div class="group flex flex-col gap-2">
             <UTextarea

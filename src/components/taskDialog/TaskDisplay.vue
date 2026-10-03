@@ -10,8 +10,10 @@ const props = defineProps<{ taskId: number; projectId: number }>();
 const tId = computed(() => props.taskId);
 const pId = computed(() => props.projectId);
 
-const { task, sortedTags, assignees } = useTask(pId, tId);
-const subTasks = computed(() => (task.value?.subTasks ?? []).map(st => tasksMap.value[st]).filter(st => st));
+const { task, sortedTags, assignees, dueDate, toDayMonth } = useTask(pId, tId);
+const subTasks = computed(() =>
+    (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []).map(st => tasksMap.value[st]).filter(st => st),
+);
 
 const { updateTask, createTask, tasksMap } = useTasks(pId);
 
@@ -47,36 +49,58 @@ const createChild = async () => {
 };
 </script>
 <template>
-    <div class="task-display-layout grid grid-cols-4 gap-3">
-        <div class="col-span-3 flex flex-col gap-8">
-            <div class="whitespace-pre-line">{{ task?.description }}</div>
-            <div class="border-basic-divider border-b"></div>
-            <div class="flex flex-col gap-4">
-                <div>
-                    <div class="text-lg font-bold">Unteraufgaben</div>
+    <div class="task-view-layout">
+        <main class="task-view-main">
+            <section v-if="task?.description" class="task-view-description">
+                {{ task.description }}
+            </section>
+
+            <section class="task-view-section">
+                <div class="task-view-section-header">
+                    <h3 class="task-view-heading">Unteraufgaben</h3>
+                    <UBadge color="neutral" :label="String(subTasks.length)" variant="subtle" />
                 </div>
-                <div class="flex flex-col gap-2">
+                <div v-if="subTasks.length" class="flex flex-col gap-2">
                     <TaskItem v-for="subtask in subTasks" :key="subtask.id" :item="subtask" :project-id="projectId" />
                 </div>
+                <p v-else class="task-view-empty">Noch keine Unteraufgaben</p>
+                <div class="flex items-end gap-2">
+                    <UFormField class="flex-1" label="Neue Unteraufgabe">
+                        <UInput
+                            v-model="childName"
+                            class="w-full"
+                            placeholder="Titel der Unteraufgabe …"
+                            @keydown.enter="createChild"
+                        />
+                    </UFormField>
+                    <UButton
+                        :disabled="childSaving || !childName.trim()"
+                        icon="i-lucide-plus"
+                        label="Anlegen"
+                        :loading="childSaving"
+                        @click="createChild"
+                    />
+                </div>
+                <UAlert v-if="childError" color="error" :title="childError" variant="subtle" />
+            </section>
+
+            <section class="task-view-section">
+                <Activities :activities="task?.activity ?? []" @comment="onComment" />
+            </section>
+        </main>
+
+        <aside class="task-view-meta">
+            <div class="task-editor-meta-heading">
+                <UIcon name="i-lucide-info" />
+                <span>Details</span>
             </div>
-            <div class="flex gap-2">
-                <UFormField class="flex-1" label="Neue Unteraufgabe"
-                    ><UInput v-model="childName" class="w-full" @keydown.enter="createChild"
-                /></UFormField>
-                <UButton
-                    :disabled="childSaving || !childName.trim()"
-                    label="Anlegen"
-                    :loading="childSaving"
-                    @click="createChild"
-                />
+            <div v-if="dueDate" class="task-view-meta-row">
+                <span>Fällig am</span>
+                <UBadge color="neutral" icon="i-lucide-calendar" :label="toDayMonth(dueDate)" variant="subtle" />
             </div>
-            <p v-if="childError" role="alert">{{ childError }}</p>
-            <Activities v-if="task?.activity" :activities="task?.activity" @comment="onComment" />
-        </div>
-        <div class="flex flex-col gap-4">
-            <div v-if="sortedTags.length">
-                <div class="text-basic-secondary">Tags:</div>
-                <div class="flex gap-2">
+            <div v-if="sortedTags.length" class="task-view-meta-group">
+                <span>Tags</span>
+                <div class="flex flex-wrap gap-2">
                     <UBadge
                         v-for="tag in sortedTags"
                         :key="tag.id"
@@ -87,15 +111,28 @@ const createChild = async () => {
                     />
                 </div>
             </div>
-            <div v-if="assignees.length">
-                <div class="text-basic-secondary">Assignee:</div>
+            <div v-if="assignees.length" class="task-view-meta-group">
+                <span>Verantwortliche</span>
                 <div class="flex flex-col gap-2">
                     <div v-for="assignee in assignees" :key="assignee.domainIdentifier" class="flex items-center gap-2">
                         <UAvatar :alt="assignee.title" size="sm" :src="assignee.imageUrl" />
-                        <span class="font-bold">{{ assignee.title }}</span>
+                        <strong>{{ assignee.title }}</strong>
                     </div>
                 </div>
             </div>
-        </div>
+            <UButton
+                v-if="task?.url"
+                block
+                color="neutral"
+                :href="task.url"
+                icon="i-lucide-external-link"
+                label="Verknüpfung öffnen"
+                target="_blank"
+                variant="outline"
+            />
+            <p v-if="!dueDate && !sortedTags.length && !assignees.length && !task?.url" class="task-view-empty">
+                Keine weiteren Details
+            </p>
+        </aside>
     </div>
 </template>
