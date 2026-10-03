@@ -5,17 +5,20 @@ import { defineComponent, ref } from 'vue';
 import {
     ccmKeys,
     decodeData,
+    fetchCustomModuleDataValues,
     useCustomModuleDataCategoryMutations,
     useCustomModuleDataValuesMutations,
     useCustomModuleDataValuesQuery,
 } from '../src/data/ccm';
 import { queryClient } from '../src/data/queryClient';
+import { dataIssues } from '../src/domain/storedData';
 const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), deleteApi: vi.fn() }));
 vi.mock('@churchtools/churchtools-client', () => ({ churchtoolsClient: api }));
 
 beforeEach(() => {
     (queryClient as QueryClient).clear();
     vi.resetAllMocks();
+    dataIssues.value = [];
 });
 describe('CCM repository', () => {
     it('rejects malformed JSON and gives API metadata precedence', () => {
@@ -46,6 +49,29 @@ describe('CCM repository', () => {
         expect(api.post).not.toHaveBeenCalled();
         expect(api.put).not.toHaveBeenCalled();
         wrapper.unmount();
+    });
+    it('isolates malformed values while keeping valid migrated entries', async () => {
+        api.get.mockResolvedValue([
+            { id: 1, dataCategoryId: 3, value: '{broken' },
+            {
+                id: 2,
+                dataCategoryId: 3,
+                value: JSON.stringify({ type: 'task', name: 'Valid', fullfilled: false, sortKey: 1 }),
+            },
+        ]);
+        await expect(fetchCustomModuleDataValues<Task>(7, 3)).resolves.toEqual([
+            expect.objectContaining({ id: 2, schemaVersion: 1, type: 'task', name: 'Valid' }),
+        ]);
+        expect(dataIssues.value).toEqual([expect.objectContaining({ entity: 'value', id: 1, categoryId: 3 })]);
+        api.get.mockResolvedValue([
+            {
+                id: 2,
+                dataCategoryId: 3,
+                value: JSON.stringify({ type: 'task', name: 'Valid', fullfilled: false, sortKey: 1 }),
+            },
+        ]);
+        await fetchCustomModuleDataValues<Task>(7, 3);
+        expect(dataIssues.value).toEqual([]);
     });
     it('serializes a value and invalidates the original category even after navigation', async () => {
         const module = ref(7),
@@ -78,6 +104,28 @@ describe('CCM repository', () => {
             value: '{"name":"Edited"}',
         });
         expect(invalidate).toHaveBeenCalledWith({ queryKey: ccmKeys.values(7, 1) });
+        wrapper.unmount();
+    });
+    it('adds the current schema version to task writes', async () => {
+        api.post.mockResolvedValue({ id: 9, dataCategoryId: 1 });
+        let commands!: ReturnType<typeof useCustomModuleDataValuesMutations<Task>>;
+        const wrapper = mount(
+            defineComponent({
+                setup() {
+                    commands = useCustomModuleDataValuesMutations<Task>(7, 1);
+                    return () => null;
+                },
+            }),
+        );
+        await commands.createCustomDataValue({
+            dataCategoryId: 1,
+            type: 'task',
+            name: 'Versioned',
+            fullfilled: false,
+            sortKey: 1,
+        });
+        const body = api.post.mock.calls[0][1] as { value: string };
+        expect(JSON.parse(body.value)).toMatchObject({ schemaVersion: 1, type: 'task', name: 'Versioned' });
         wrapper.unmount();
     });
     it('rejects mutations before module loading and explicitly deletes categories', async () => {

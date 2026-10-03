@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAllProjectTasks } from './composables/useAllProjectTasks';
 import { usePlugin } from './composables/usePlugin';
+import { dataIssues } from './domain/storedData';
 import { colorKey } from './platform';
 import DialogProject from './project/DialogProject.vue';
 import { activeProjectDialog, closeProjectDialog, createOrEditProject } from './project/projectHelper';
@@ -23,6 +24,17 @@ const projectId = computed(() => {
 });
 const currentProject = computed(() => projects.value.find(project => project.id === projectId.value));
 const pageTitle = computed(() => currentProject.value?.name ?? 'Aufgaben');
+const dataIssueDescription = computed(() => {
+    const issues = dataIssues.value
+        .slice(0, 3)
+        .map(issue =>
+            issue.entity === 'project'
+                ? `Projekt ${issue.id}: ${issue.message}`
+                : `Eintrag ${issue.id} in Projekt ${issue.categoryId}: ${issue.message}`,
+        );
+    const more = dataIssues.value.length > issues.length ? ` Weitere: ${dataIssues.value.length - issues.length}.` : '';
+    return `${issues.join(' · ')}${more}`;
+});
 
 const mainNavigation = computed<NavigationMenuItem[]>(() => [
     { label: 'Übersicht', icon: 'i-lucide-layout-dashboard', to: { name: 'overview' } },
@@ -213,7 +225,18 @@ const newTaskRoute = computed(() =>
                                 <UButton color="error" label="Erneut versuchen" variant="soft" @click="refetch()" />
                             </template>
                         </UAlert>
-                        <main v-else class="app-content"><RouterView /></main>
+                        <div v-else class="flex h-full min-h-0 flex-col">
+                            <UAlert
+                                v-if="dataIssues.length"
+                                class="m-4 mb-0 shrink-0"
+                                color="warning"
+                                :description="dataIssueDescription"
+                                icon="i-lucide-database-zap"
+                                :title="`${dataIssues.length} gespeicherte Einträge konnten nicht geladen werden.`"
+                                variant="subtle"
+                            />
+                            <main class="app-content"><RouterView /></main>
+                        </div>
                     </template>
                 </UDashboardPanel>
             </UDashboardGroup>

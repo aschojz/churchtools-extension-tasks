@@ -1,4 +1,5 @@
 interface Project {
+    schemaVersion?: number;
     name: string;
     description?: string;
     color?: import('../src/platform').CtColor;
@@ -9,6 +10,7 @@ interface Project {
     customModuleId: number;
 }
 interface TaskList {
+    schemaVersion?: number;
     type: 'list';
     name: string;
     sortKey: number;
@@ -18,6 +20,7 @@ interface TaskList {
     isDefault?: boolean;
 }
 interface Task {
+    schemaVersion?: number;
     type: 'task';
     fullfilled: boolean;
     name: string;
@@ -35,6 +38,7 @@ interface Task {
     comments?: ActivityEntry[];
 }
 interface Tag {
+    schemaVersion?: number;
     type: 'tag';
     name: string;
     color: import('../src/platform').CtColor;

@@ -6,6 +6,7 @@ import {
     useCustomModuleDataCategoryMutations,
     useCustomModuleDataValuesMutations,
 } from '../data/ccm';
+import { CURRENT_SCHEMA_VERSION } from '../domain/storedData';
 import { CtColor } from '../platform';
 import { createProjectShorty, ICONS, txx } from '../utils/utils';
 
@@ -23,6 +24,7 @@ export default function useProjects() {
         const id = moduleId.value;
         if (!id) throw new Error('Modul ist noch nicht geladen.');
         const created = await createDataCategory({
+            schemaVersion: CURRENT_SCHEMA_VERSION,
             color: CtColor.BASIC,
             icon: ICONS.DEFAULT_PROJECT,
             ...project,
@@ -41,7 +43,11 @@ export default function useProjects() {
         toast.add({ title: 'Projekt wurde erstellt.', color: 'success' });
     };
     const updateProject = async (project: Project) => {
-        await updateDataCategory({ ...project, description: project.description ?? '' });
+        await updateDataCategory({
+            ...project,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            description: project.description ?? '',
+        });
         toast.add({ title: 'Projekt wurde gespeichert.', color: 'success' });
     };
 

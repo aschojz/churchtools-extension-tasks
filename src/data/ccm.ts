@@ -1,6 +1,15 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import {
+    clearDataIssue,
+    clearDataIssuesForCategory,
+    clearProjectDataIssues,
+    parseStoredProject,
+    parseStoredValue,
+    recordDataIssue,
+    withCurrentSchemaVersion,
+} from '../domain/storedData';
 import { queryClient } from './queryClient';
 
 type Id = MaybeRefOrGetter<number | undefined>;
@@ -55,7 +64,24 @@ export function useCustomModuleDataCategoriesQuery<T extends object>(moduleId: I
             enabled: () => validId(toValue(moduleId)),
             queryFn: async () => {
                 const rows = await churchtoolsClient.get<Category[]>(categoryPath(moduleId));
-                return rows.map(({ data, ...metadata }) => decodeData<T & Category>(data, metadata));
+                clearProjectDataIssues();
+                return rows.flatMap(({ data, ...metadata }) => {
+                    clearDataIssue('project', metadata.id);
+                    try {
+                        const decoded = decodeData<T & Category>(data, metadata);
+                        return [
+                            (metadata.shorty.startsWith('project') ? parseStoredProject(decoded) : decoded) as T &
+                                Category,
+                        ];
+                    } catch (error) {
+                        recordDataIssue({
+                            entity: 'project',
+                            id: metadata.id,
+                            message: error instanceof Error ? error.message : 'Projekt konnte nicht gelesen werden.',
+                        });
+                        return [];
+                    }
+                });
             },
         },
         queryClient,
@@ -76,7 +102,22 @@ export function useCustomModuleDataValuesQuery<T extends object>(moduleId: Id, c
 
 export async function fetchCustomModuleDataValues<T extends object>(moduleId: number, categoryId: number) {
     const rows = await churchtoolsClient.get<Value[]>(valuePath(moduleId, categoryId));
-    return rows.map(({ value, ...metadata }) => decodeData<T & Omit<Value, 'value'>>(value, metadata));
+    clearDataIssuesForCategory(categoryId);
+    return rows.flatMap(({ value, ...metadata }) => {
+        clearDataIssue('value', metadata.id);
+        try {
+            const decoded = decodeData<T & Omit<Value, 'value'>>(value, metadata);
+            return [parseStoredValue(decoded) as unknown as T & Omit<Value, 'value'>];
+        } catch (error) {
+            recordDataIssue({
+                entity: 'value',
+                id: metadata.id,
+                categoryId,
+                message: error instanceof Error ? error.message : 'Eintrag konnte nicht gelesen werden.',
+            });
+            return [];
+        }
+    });
 }
 
 export function useCustomModuleDataValuesMutations<T extends object>(moduleId: Id, categoryId: Id) {
@@ -93,7 +134,8 @@ export function useCustomModuleDataValuesMutations<T extends object>(moduleId: I
                 const module = requireId(moduleId);
                 const category = requireId(payload.dataCategoryId ?? categoryId);
                 const path = valuePath(module, category);
-                const { id, dataCategoryId, ...value } = payload;
+                const { id, dataCategoryId, ...unversionedValue } = payload;
+                const value = withCurrentSchemaVersion(unversionedValue);
                 void dataCategoryId;
                 if (kind !== 'create') requireId(id);
                 const result =

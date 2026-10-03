@@ -41,18 +41,19 @@ auf.
 Die im Anschluss an den Audit beauftragten Performance- und UI/UX-Punkte wurden
 in einem ersten Stabilisierungsschritt bearbeitet:
 
-| Finding | Status                   | Umsetzung                                                                                                                                                                              |
-| ------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                   |
-| PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                |
-| PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                   |
-| UX-01   | **Umgesetzt**            | Einklappen sowie die Anzeige erledigter Aufgaben und Unteraufgaben werden lokal pro Projekt und Liste gespeichert.                                                                     |
-| UX-02   | **Umgesetzt**            | Suchtexte werden pro Projekt getrennt gehalten.                                                                                                                                        |
-| UI-02   | **Umgesetzt**            | Listenansichten besitzen eine kompakte Zeilendarstellung.                                                                                                                              |
-| UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                      |
-| UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                   |
-| A11Y-01 | **Teilweise umgesetzt**  | Aufgabenkarten, Statusschalter und zentrale Icon-Aktionen sind benannt und per Tastatur erreichbar. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                         |
-| UI-01   | **Teilweise umgesetzt**  | Globale Reset-Regeln und Tailwind Preflight wurden entfernt bzw. auf den Extension-Root begrenzt. Die generierten unpräfixierten Utility-Klassen bleiben als Integrationsrisiko offen. |
+| Finding | Status                   | Umsetzung                                                                                                                                                                                                                                       |
+| ------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen ein Laufzeitschema und werden von Version 0 auf Version 1 migriert. Defekte Einzelwerte werden isoliert und sichtbar gemeldet. Automatische Schreibmigrationen erfolgen erst beim nächsten regulären Speichern. |
+| PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                                                                            |
+| PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                                                                         |
+| PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                                                                            |
+| UX-01   | **Umgesetzt**            | Einklappen sowie die Anzeige erledigter Aufgaben und Unteraufgaben werden lokal pro Projekt und Liste gespeichert.                                                                                                                              |
+| UX-02   | **Umgesetzt**            | Suchtexte werden pro Projekt getrennt gehalten.                                                                                                                                                                                                 |
+| UI-02   | **Umgesetzt**            | Listenansichten besitzen eine kompakte Zeilendarstellung.                                                                                                                                                                                       |
+| UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                                                                               |
+| UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                                                                            |
+| A11Y-01 | **Teilweise umgesetzt**  | Aufgabenkarten, Statusschalter und zentrale Icon-Aktionen sind benannt und per Tastatur erreichbar. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                                  |
+| UI-01   | **Teilweise umgesetzt**  | Globale Reset-Regeln und Tailwind Preflight wurden entfernt bzw. auf den Extension-Root begrenzt. Die generierten unpräfixierten Utility-Klassen bleiben als Integrationsrisiko offen.                                                          |
 
 Beim Browser-Smoke-Test wurde außerdem ein älterer CCM-Wert mit einem ungültigen
 `tags`-Feld gefunden. Array-Felder werden in Karten, Lookups und Editor-Drafts
@@ -65,7 +66,7 @@ vollständige Schemavalidierung und Migration.
 
 - TypeScript-Prüfung erfolgreich
 - ESLint-Prüfung erfolgreich
-- 5 Testdateien mit 20 Tests erfolgreich
+- 6 Testdateien mit 26 Tests erfolgreich
 - Produktions-Build erfolgreich
 - Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
   Konsolenwarnungen oder Konsolenfehler geladen
@@ -75,10 +76,10 @@ vollständige Schemavalidierung und Migration.
 
 ### 3.2 Build- und Bundle-Befunde
 
-- Das größte JavaScript-Bundle umfasst ungefähr 1,28 MB minifiziert bzw.
-  387 KB gzip-komprimiert.
+- Das größte JavaScript-Bundle umfasst ungefähr 1,30 MB minifiziert bzw.
+  391 KB gzip-komprimiert.
 - Vite meldet ein Chunk-Limit von mehr als 500 KB.
-- Das CSS umfasst ungefähr 117 KB minifiziert bzw. 18 KB gzip-komprimiert.
+- Das CSS umfasst ungefähr 111 KB minifiziert bzw. 16 KB gzip-komprimiert.
 - Die Routen werden derzeit nicht sichtbar in eigene, lazy geladene Chunks
   aufgeteilt.
 
@@ -189,27 +190,25 @@ unbemerkt verlieren.
 
 #### DATA-02 · P0 · Fehlende Laufzeitvalidierung und Migrationen
 
-**Beobachtung:** Beim Lesen wird nur geprüft, ob JSON ein Objekt ist. Danach
-erfolgt ein TypeScript-Cast. Arrays, Feldtypen, Datumswerte und Diskriminatoren
-werden nicht validiert. Eine `schemaVersion` fehlt.
+**Status:** Weitgehend umgesetzt. Version 1, die Migration von unversionierten
+Werten und die Isolation defekter Einträge sind implementiert. Ein administrativer
+Migrationslauf für das sofortige Zurückschreiben aller Altwerte bleibt offen.
 
-**Auswirkung:** Manuell veränderte, alte oder teilweise geschriebene Werte
-können Laufzeitfehler wie `map is not a function` auslösen. Eine einzelne
-fehlerhafte Entität kann eine vollständige Projektabfrage blockieren.
+**Umsetzung:** Projekte, Aufgaben, Listen und Tags werden beim Lesen durch ein
+zentrales Laufzeitschema geführt. Unversionierte Daten gelten als Version 0 und
+werden über eine reine Migration nach Version 1 überführt. Optionale beschädigte
+Felder werden normalisiert. Unbrauchbare Entitäten werden isoliert und mit ihrer
+CCM-ID in der Oberfläche gemeldet, ohne die übrige Abfrage zu blockieren. Neue
+und regulär bearbeitete Werte werden mit `schemaVersion: 1` gespeichert.
 
-**Empfehlung:**
+**Offen:** Die Migration arbeitet bewusst lazy und schreibt Altwerte nicht allein
+durch das Lesen zurück. Ein administrativer Migrationslauf mit Vorschau wäre für
+große Installationen sinnvoll. Jede zukünftige Schemaänderung benötigt eine
+weitere explizite Migration und passende Bestandsdatentests.
 
-- Ein Laufzeitschema für jede persistierte Entität einführen, beispielsweise
-  mit Zod oder Valibot.
-- `schemaVersion` verpflichtend speichern.
-- Migrationen als reine Funktionen von Version N nach N+1 implementieren.
-- Ungültige Werte isolieren, protokollieren und in einer reparierbaren
-  Diagnoseansicht anzeigen.
-- Parser und Migrationen mit alten, minimalen, maximalen und beschädigten
-  Beispieldaten testen.
-
-**Akzeptanz:** Kein ungültiger CCM-Wert kann die gesamte Anwendung zum Absturz
-bringen; unterstützte Altstände werden automatisch migriert.
+**Akzeptanz:** Für Version 1 erfüllt. Beschädigte Testwerte blockieren keine
+Projektabfrage; unterstützte Altstände werden automatisch migriert und
+zukünftige unbekannte Versionen kontrolliert abgewiesen.
 
 #### DATA-03 · P1 · Nicht atomare Mehrfachoperationen
 
@@ -433,11 +432,11 @@ Erfassung weiter beschleunigen.
 #### TEST-01 · P1 · Kritische Pfade ohne Testabdeckung
 
 **Gut abgedeckt:** Kernoperationen der Aufgabenlogik, CCM-Invalidierung,
-UUID-Fallback und Rückabwicklung eines fehlerhaften Drag-and-drop-Schreibens.
+UUID-Fallback, Rückabwicklung eines fehlerhaften Drag-and-drop-Schreibens sowie
+Schemavalidierung, Migration und Isolation beschädigter Einträge.
 
 **Fehlend:**
 
-- Parser, Schemavalidierung und Migrationen
 - konkurrierende Änderungen und Konfliktbehandlung
 - partielle Fehler mehrstufiger Kommandos
 - Dialoge und Formularvalidierung
