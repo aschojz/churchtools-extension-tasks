@@ -61,7 +61,16 @@ const onSave = async () => {
             resetRoute();
         } else if (isEdit.value && internTask.value && task.value) {
             const diff = getObjectDiff(internTask.value, task.value);
-            await updateTask({ ...internTask.value, id: task.value.id, dataCategoryId: props.projectId }, diff);
+            await updateTask(
+                {
+                    ...internTask.value,
+                    id: task.value.id,
+                    dataCategoryId: props.projectId,
+                    revision: task.value.revision,
+                    updatedAt: task.value.updatedAt,
+                },
+                diff,
+            );
             isEdit.value = false;
         } else if (!showEditor.value) {
             await toggleTask();

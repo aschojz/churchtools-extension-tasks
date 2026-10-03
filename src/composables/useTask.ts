@@ -56,7 +56,9 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
         await updateCustomDataValue(payload);
     };
     const deleteTask = () =>
-        tId.value ? deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value }) : undefined;
+        tId.value
+            ? deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value, revision: task.value?.revision })
+            : undefined;
 
     const comments = computed(() =>
         (Array.isArray(task.value?.activity) ? task.value.activity : []).filter(a => a.type === 'comment'),

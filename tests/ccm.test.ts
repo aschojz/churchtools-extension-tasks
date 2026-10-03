@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, ref } from 'vue';
 import {
     ccmKeys,
+    DataConflictError,
     decodeData,
     fetchCustomModuleDataValues,
     useCustomModuleDataCategoryMutations,
@@ -77,6 +78,9 @@ describe('CCM repository', () => {
         const module = ref(7),
             category = ref(1);
         let finish!: (v: object) => void;
+        api.get.mockResolvedValue([
+            { id: 11, dataCategoryId: 1, value: JSON.stringify({ name: 'Before', revision: 0 }) },
+        ]);
         api.put.mockImplementation(
             () =>
                 new Promise(resolve => {
@@ -101,7 +105,12 @@ describe('CCM repository', () => {
         expect(api.put).toHaveBeenCalledWith('/custommodules/7/customdatacategories/1/customdatavalues/11', {
             id: 11,
             dataCategoryId: 1,
-            value: '{"name":"Edited"}',
+            value: expect.any(String),
+        });
+        expect(JSON.parse(api.put.mock.calls[0][1].value)).toMatchObject({
+            name: 'Edited',
+            revision: 1,
+            schemaVersion: 1,
         });
         expect(invalidate).toHaveBeenCalledWith({ queryKey: ccmKeys.values(7, 1) });
         wrapper.unmount();
@@ -125,7 +134,38 @@ describe('CCM repository', () => {
             sortKey: 1,
         });
         const body = api.post.mock.calls[0][1] as { value: string };
-        expect(JSON.parse(body.value)).toMatchObject({ schemaVersion: 1, type: 'task', name: 'Versioned' });
+        expect(JSON.parse(body.value)).toMatchObject({
+            schemaVersion: 1,
+            revision: 1,
+            type: 'task',
+            name: 'Versioned',
+        });
+        expect(JSON.parse(body.value).updatedAt).toEqual(expect.any(String));
+        wrapper.unmount();
+    });
+    it('rejects a stale update, refreshes the cache and does not overwrite server data', async () => {
+        api.get.mockResolvedValue([
+            {
+                id: 11,
+                dataCategoryId: 1,
+                value: JSON.stringify({ name: 'Changed elsewhere', revision: 3 }),
+            },
+        ]);
+        let commands!: ReturnType<typeof useCustomModuleDataValuesMutations<{ name: string; revision?: number }>>;
+        const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+        const wrapper = mount(
+            defineComponent({
+                setup() {
+                    commands = useCustomModuleDataValuesMutations<{ name: string; revision?: number }>(7, 1);
+                    return () => null;
+                },
+            }),
+        );
+        await expect(
+            commands.updateCustomDataValue({ id: 11, dataCategoryId: 1, name: 'My edit', revision: 2 }),
+        ).rejects.toBeInstanceOf(DataConflictError);
+        expect(api.put).not.toHaveBeenCalled();
+        expect(invalidate).toHaveBeenCalledWith({ queryKey: ccmKeys.values(7, 1) });
         wrapper.unmount();
     });
     it('rejects mutations before module loading and explicitly deletes categories', async () => {

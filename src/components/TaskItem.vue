@@ -106,8 +106,11 @@ const runAction = async (action: () => Promise<unknown>) => {
     actionError.value = '';
     try {
         await action();
-    } catch {
-        actionError.value = 'Aktion fehlgeschlagen. Bitte den aktuellen Aufgabenstand prüfen.';
+    } catch (caught) {
+        actionError.value =
+            caught instanceof Error
+                ? caught.message
+                : 'Aktion fehlgeschlagen. Bitte den aktuellen Aufgabenstand prüfen.';
     }
 };
 const deleteRecursive = async (task: TransformedTask) => {

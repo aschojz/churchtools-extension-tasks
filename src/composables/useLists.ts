@@ -22,7 +22,8 @@ export function useLists(projectId: MaybeRefOrGetter<number>) {
 
     const updateList = (list: TransformedList) =>
         updateCustomDataValue({ ...list, dataCategoryId: pId.value, type: 'list' });
-    const deleteList = (listId: number) => deleteCustomDataValue({ id: listId, dataCategoryId: pId.value });
+    const deleteList = (listId: number) =>
+        deleteCustomDataValue({ id: listId, dataCategoryId: pId.value, revision: getListById(listId)?.revision });
 
     const getListById = (id: number) => lists.value.find(l => l.id === id);
 

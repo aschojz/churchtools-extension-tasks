@@ -24,11 +24,18 @@ const onSave = async () => {
     saving.value = true;
     try {
         const value = { ...draft.value, name: draft.value.name.trim() };
-        if (props.tag) await updateTag({ ...value, id: props.tag.id, dataCategoryId: props.projectId });
+        if (props.tag)
+            await updateTag({
+                ...value,
+                id: props.tag.id,
+                dataCategoryId: props.projectId,
+                revision: props.tag.revision,
+                updatedAt: props.tag.updatedAt,
+            });
         else await createTag(value);
         emit('close');
-    } catch {
-        error.value = 'Tag konnte nicht gespeichert werden.';
+    } catch (caught) {
+        error.value = caught instanceof Error ? caught.message : 'Tag konnte nicht gespeichert werden.';
     } finally {
         saving.value = false;
     }

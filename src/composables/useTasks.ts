@@ -35,6 +35,8 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         const payload = {
             ...taskDraft(task),
             id: task.id,
+            revision: task.revision,
+            updatedAt: task.updatedAt,
             activity,
             name: task.name.trim(),
             type: 'task' as const,
@@ -43,7 +45,11 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         await updateCustomDataValue(payload);
     };
     const deleteTask = async (taskId: number, categoryId = pId.value) => {
-        return await deleteCustomDataValue({ id: taskId, dataCategoryId: categoryId });
+        return await deleteCustomDataValue({
+            id: taskId,
+            dataCategoryId: categoryId,
+            revision: tasksMap.value[taskId]?.revision,
+        });
     };
 
     const store = taskStore();

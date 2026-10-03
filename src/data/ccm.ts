@@ -8,7 +8,9 @@ import {
     parseStoredProject,
     parseStoredValue,
     recordDataIssue,
-    withCurrentSchemaVersion,
+    revisionOf,
+    withCreateMetadata,
+    withUpdateMetadata,
 } from '../domain/storedData';
 import { queryClient } from './queryClient';
 
@@ -36,6 +38,15 @@ export const ccmKeys = {
     categories: (id: number | undefined) => ['tasks-ccm', id, 'categories'] as const,
     values: (id: number | undefined, category: number | undefined) => ['tasks-ccm', id, 'values', category] as const,
 };
+
+export class DataConflictError extends Error {
+    constructor(public readonly entityId: number) {
+        super(
+            'Dieser Eintrag wurde zwischenzeitlich geändert. Die aktuelle Version wurde neu geladen. Bitte prüfe deine Änderungen und versuche es erneut.',
+        );
+        this.name = 'DataConflictError';
+    }
+}
 
 export function decodeData<T extends object>(json: string | undefined, metadata: object): T {
     const data: unknown = json ? JSON.parse(json) : {};
@@ -120,6 +131,21 @@ export async function fetchCustomModuleDataValues<T extends object>(moduleId: nu
     });
 }
 
+async function fetchCurrentValue(moduleId: number, categoryId: number, id: number) {
+    const rows = await churchtoolsClient.get<Value[]>(valuePath(moduleId, categoryId));
+    const row = rows.find(value => value.id === id);
+    if (!row) throw new DataConflictError(id);
+    return decodeData<object>(row.value, { id: row.id, dataCategoryId: row.dataCategoryId });
+}
+
+async function assertCurrentRevision(moduleId: number, categoryId: number, id: number, expectedRevision: number) {
+    const current = await fetchCurrentValue(moduleId, categoryId, id);
+    if (revisionOf(current) !== expectedRevision) {
+        await queryClient.invalidateQueries({ queryKey: ccmKeys.values(moduleId, categoryId) });
+        throw new DataConflictError(id);
+    }
+}
+
 export function useCustomModuleDataValuesMutations<T extends object>(moduleId: Id, categoryId: Id) {
     // Capture IDs before the asynchronous request; route changes must not invalidate the new project instead.
     const mutation = useMutation(
@@ -135,9 +161,14 @@ export function useCustomModuleDataValuesMutations<T extends object>(moduleId: I
                 const category = requireId(payload.dataCategoryId ?? categoryId);
                 const path = valuePath(module, category);
                 const { id, dataCategoryId, ...unversionedValue } = payload;
-                const value = withCurrentSchemaVersion(unversionedValue);
+                const expectedRevision = revisionOf(unversionedValue);
                 void dataCategoryId;
                 if (kind !== 'create') requireId(id);
+                if (kind !== 'create') await assertCurrentRevision(module, category, id!, expectedRevision);
+                const value =
+                    kind === 'create'
+                        ? withCreateMetadata(unversionedValue)
+                        : withUpdateMetadata(unversionedValue, expectedRevision);
                 const result =
                     kind === 'delete'
                         ? await churchtoolsClient.deleteApi(`${path}/${id}`)
@@ -162,7 +193,7 @@ export function useCustomModuleDataValuesMutations<T extends object>(moduleId: I
             mutation.mutateAsync({ kind: 'create', payload }),
         updateCustomDataValue: (payload: T & { id: number; dataCategoryId: number }) =>
             mutation.mutateAsync({ kind: 'update', payload }),
-        deleteCustomDataValue: (payload: { id: number; dataCategoryId: number }) =>
+        deleteCustomDataValue: (payload: { id: number; dataCategoryId: number; revision?: number }) =>
             mutation.mutateAsync({ kind: 'delete', payload: payload as T & typeof payload }),
     };
 }
@@ -172,12 +203,22 @@ export function useCustomModuleDataCategoryMutations<T extends object>(moduleId:
         const module = requireId(moduleId);
         const { id, name, shorty, description, ...data } = payload;
         if (!name.trim()) throw new Error('Bitte einen Projektnamen eingeben.');
+        const expectedRevision = revisionOf(data);
+        if (id) {
+            const categories = await churchtoolsClient.get<Category[]>(categoryPath(module));
+            const current = categories.find(category => category.id === id);
+            if (!current || revisionOf(decodeData<object>(current.data, { id: current.id })) !== expectedRevision) {
+                await queryClient.invalidateQueries({ queryKey: ccmKeys.categories(module) });
+                throw new DataConflictError(id);
+            }
+        }
+        const persistedData = id ? withUpdateMetadata(data, expectedRevision) : withCreateMetadata(data);
         const body = {
             name: name.trim(),
             shorty,
             description: description ?? '',
             customModuleId: module,
-            data: JSON.stringify(data),
+            data: JSON.stringify(persistedData),
         };
         const path = categoryPath(module);
         const result = id

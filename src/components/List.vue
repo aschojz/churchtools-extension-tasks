@@ -52,8 +52,8 @@ const deleteSelectedList = async (list: TransformedList) => {
     saveError.value = '';
     try {
         await deleteList(list.id);
-    } catch {
-        saveError.value = 'Liste konnte nicht gelöscht werden. Bitte erneut versuchen.';
+    } catch (caught) {
+        saveError.value = caught instanceof Error ? caught.message : 'Liste konnte nicht gelöscht werden.';
     }
 };
 const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
@@ -62,8 +62,9 @@ const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
     saveError.value = '';
     try {
         for (const task of reorderTasks(internItems.value, props.list.id)) await updateTask(task);
-    } catch {
-        saveError.value = 'Verschieben fehlgeschlagen. Bitte erneut versuchen.';
+    } catch (caught) {
+        saveError.value =
+            caught instanceof Error ? `Verschieben fehlgeschlagen: ${caught.message}` : 'Verschieben fehlgeschlagen.';
         initItems(props.items);
     } finally {
         isSaving.value = false;

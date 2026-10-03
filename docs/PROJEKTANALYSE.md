@@ -164,6 +164,11 @@ Dependency-Pflege fehlen.
 
 #### DATA-01 · P0 · Verlorene Änderungen bei paralleler Bearbeitung
 
+**Status:** Clientseitig weitgehend abgesichert. Neue Objekte erhalten eine
+Revision und einen Änderungszeitpunkt. Vor dem Ändern oder Löschen lädt das
+Repository den aktuellen CCM-Stand und bricht bei einer abweichenden Revision
+mit einer sichtbaren Konfliktmeldung ab. Das gilt auch für Projekte.
+
 **Beobachtung:** Aufgaben, Listen, Tags und Projekte werden als vollständige
 JSON-Objekte gelesen, lokal verändert und anschließend komplett in einen
 CCM-Wert zurückgeschrieben. Es gibt keine Revision, keinen ETag und keinen
@@ -184,6 +189,11 @@ kann der spätere Schreibvorgang Felder des ersten Schreibvorgangs mit seinem
 5. Bis echte atomare Serveroperationen verfügbar sind, sollte die Anwendung
    vor jedem Schreibvorgang den aktuellen Stand nachladen und Konflikte
    erkennen.
+
+**Verbleibende Grenze:** Die CCM-API stellt derzeit keinen dokumentierten
+Compare-and-swap- oder `If-Match`-Schreibvorgang bereit. Zwischen Vorprüfung und
+PUT bleibt deshalb ein kleines Race-Fenster. Eine vollständige Garantie ist erst
+mit serverseitiger bedingter Aktualisierung möglich.
 
 **Akzeptanz:** Ein automatisierter Test mit zwei Clients kann keine Änderung
 unbemerkt verlieren.

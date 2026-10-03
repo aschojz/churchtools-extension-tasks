@@ -64,6 +64,31 @@ describe('stored data schemas and migrations', () => {
         });
     });
 
+    it('normalizes persistence metadata on legacy and current values', () => {
+        expect(
+            parseStoredValue({
+                id: 4,
+                dataCategoryId: 2,
+                type: 'task',
+                name: 'Legacy',
+                fullfilled: false,
+                sortKey: 1,
+            }),
+        ).toMatchObject({ revision: 0 });
+        expect(
+            parseStoredValue({
+                id: 5,
+                dataCategoryId: 2,
+                type: 'task',
+                name: 'Current',
+                fullfilled: false,
+                sortKey: 1,
+                revision: 7,
+                updatedAt: '2026-10-03T10:00:00.000Z',
+            }),
+        ).toMatchObject({ revision: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    });
+
     it('rejects unsupported future versions and unusable values', () => {
         expect(() =>
             parseStoredValue({

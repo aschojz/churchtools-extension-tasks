@@ -29,6 +29,10 @@ const optionalDate = (value: unknown) => {
 };
 const optionalBoolean = (value: unknown) => (typeof value === 'boolean' ? value : undefined);
 const optionalNumber = (value: unknown) => (typeof value === 'number' && Number.isFinite(value) ? value : undefined);
+const storedRevision = (value: unknown) =>
+    typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : 0;
+const storedUpdatedAt = (value: unknown) =>
+    typeof value === 'string' && Number.isFinite(Date.parse(value)) ? value : undefined;
 const positiveInteger = (value: unknown) =>
     typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : undefined;
 const numberArray = (value: unknown) =>
@@ -85,6 +89,10 @@ const validColor = (value: unknown) => {
     const key = colorKey(value);
     return (Object.values(CtColor) as string[]).includes(key) ? (key as CtColor) : CtColor.BASIC;
 };
+const persistenceMetadata = (data: Record<string, unknown>) => ({
+    revision: storedRevision(data.revision),
+    ...(storedUpdatedAt(data.updatedAt) ? { updatedAt: storedUpdatedAt(data.updatedAt) } : {}),
+});
 
 export function parseStoredValue(value: unknown): TransformedTask | TransformedList | TransformedTag {
     const data = migrateStoredData(value);
@@ -106,6 +114,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
         const subTasks = numberArray(data.subTasks);
         return {
             schemaVersion: CURRENT_SCHEMA_VERSION,
+            ...persistenceMetadata(data),
             type: 'task',
             id,
             dataCategoryId,
@@ -127,6 +136,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
     if (data.type === 'list') {
         return {
             schemaVersion: CURRENT_SCHEMA_VERSION,
+            ...persistenceMetadata(data),
             type: 'list',
             id,
             dataCategoryId,
@@ -147,6 +157,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
     if (data.type === 'tag') {
         return {
             schemaVersion: CURRENT_SCHEMA_VERSION,
+            ...persistenceMetadata(data),
             type: 'tag',
             id,
             dataCategoryId,
@@ -165,6 +176,7 @@ export function parseStoredProject(value: unknown): Project {
     if (!id || !customModuleId) throw new Error('Projekt-ID oder Modulzuordnung fehlt.');
     return {
         schemaVersion: CURRENT_SCHEMA_VERSION,
+        ...persistenceMetadata(data),
         id,
         customModuleId,
         name: requiredString(data.name, 'Projektname'),
@@ -181,6 +193,33 @@ export function withCurrentSchemaVersion<T extends object>(value: T): T {
     return record.type === 'task' || record.type === 'list' || record.type === 'tag'
         ? ({ ...value, schemaVersion: CURRENT_SCHEMA_VERSION } as T)
         : value;
+}
+
+export function revisionOf(value: object): number {
+    return storedRevision((value as Record<string, unknown>).revision);
+}
+
+export function withCreateMetadata<T extends object>(
+    value: T,
+): T & { schemaVersion: number; revision: number; updatedAt: string } {
+    return {
+        ...withCurrentSchemaVersion(value),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        revision: 1,
+        updatedAt: new Date().toISOString(),
+    };
+}
+
+export function withUpdateMetadata<T extends object>(
+    value: T,
+    expectedRevision: number,
+): T & { schemaVersion: number; revision: number; updatedAt: string } {
+    return {
+        ...withCurrentSchemaVersion(value),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        revision: expectedRevision + 1,
+        updatedAt: new Date().toISOString(),
+    };
 }
 
 export function clearDataIssue(entity: DataIssue['entity'], id: number) {

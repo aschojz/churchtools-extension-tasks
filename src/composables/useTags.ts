@@ -27,7 +27,8 @@ export function useTags(projectId: MaybeRefOrGetter<number>) {
 
     const updateTag = (tag: TransformedTag) =>
         updateCustomDataValue({ ...tag, dataCategoryId: pId.value, type: 'tag' });
-    const deleteTag = (id: number) => deleteCustomDataValue({ id, dataCategoryId: pId.value });
+    const deleteTag = (id: number) =>
+        deleteCustomDataValue({ id, dataCategoryId: pId.value, revision: tags.value[id]?.revision });
 
     return { tags, tagsArray, createTag, updateTag, deleteTag };
 }

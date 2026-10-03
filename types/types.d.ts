@@ -1,5 +1,7 @@
 interface Project {
     schemaVersion?: number;
+    revision?: number;
+    updatedAt?: string;
     name: string;
     description?: string;
     color?: import('../src/platform').CtColor;
@@ -11,6 +13,8 @@ interface Project {
 }
 interface TaskList {
     schemaVersion?: number;
+    revision?: number;
+    updatedAt?: string;
     type: 'list';
     name: string;
     sortKey: number;
@@ -21,6 +25,8 @@ interface TaskList {
 }
 interface Task {
     schemaVersion?: number;
+    revision?: number;
+    updatedAt?: string;
     type: 'task';
     fullfilled: boolean;
     name: string;
@@ -39,6 +45,8 @@ interface Task {
 }
 interface Tag {
     schemaVersion?: number;
+    revision?: number;
+    updatedAt?: string;
     type: 'tag';
     name: string;
     color: import('../src/platform').CtColor;

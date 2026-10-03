@@ -35,8 +35,8 @@ const onSave = async () => {
         if (isTransformedList(payload)) await updateList(payload);
         else await createList(payload);
         emit('close');
-    } catch {
-        error.value = 'Liste konnte nicht gespeichert werden.';
+    } catch (caught) {
+        error.value = caught instanceof Error ? caught.message : 'Liste konnte nicht gespeichert werden.';
     } finally {
         saving.value = false;
     }
