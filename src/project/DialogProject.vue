@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Project } from '../domain/types';
 import { ref } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
 import { colorOptions } from '../platform';

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Project } from '../domain/types';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProjectTasks';

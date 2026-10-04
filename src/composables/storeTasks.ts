@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import type { BoardColumn, TaskPriority } from '../domain/types';
 
 type ListPreferences = {
     isCollapsed?: boolean;

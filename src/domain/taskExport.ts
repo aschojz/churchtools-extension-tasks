@@ -1,4 +1,5 @@
 import { recurrenceLabel, taskDraft, taskPriority, taskStartDate } from './tasks';
+import type { Task, TaskPriority, TaskRecurrence, TransformedTask } from './types';
 
 type TaskExportContext = {
     dueDate: (task: TransformedTask) => Date | undefined;

@@ -15,6 +15,7 @@ import {
     taskDueDate,
     taskProgress,
 } from '../domain/tasks';
+import type { Task, TransformedList, TransformedTask } from '../domain/types';
 import { requireCurrentUser, useCurrentUser } from '../platform';
 import { taskStore } from './storeTasks';
 import { useLists } from './useLists';

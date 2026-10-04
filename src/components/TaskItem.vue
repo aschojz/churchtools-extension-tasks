@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TransformedTag, TransformedTask } from '../domain/types';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';

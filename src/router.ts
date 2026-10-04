@@ -1,5 +1,6 @@
 import type { RouteRecordRaw, RouterHistory } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
+import type { Project } from './domain/types';
 
 const Project = () => import('./project/Project.vue');
 const Board = () => import('./project/views/Board.vue');

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Tag, TransformedTag } from '../domain/types';
 import { computed, ref, toRef } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
 import { useTags } from '../composables/useTags';

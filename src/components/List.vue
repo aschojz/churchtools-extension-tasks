@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { BoardColumn, TransformedList, TransformedTask } from '../domain/types';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { sortBy } from 'lodash-es';
 import { computed, onMounted, ref, watch } from 'vue';

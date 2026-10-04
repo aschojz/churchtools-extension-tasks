@@ -1,5 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
+import type { TaskList, TransformedList } from '../domain/types';
 import { requireCurrentUser } from '../platform';
 import { usePlugin } from './usePlugin';
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TransformedTask } from '../../domain/types';
 import { computed } from 'vue';
 import List from '../../components/List.vue';
 import ProgressRing from '../../components/ProgressRing.vue';

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TransformedTask } from '../../domain/types';
 import { computed, ref } from 'vue';
 import { reportOperationalError } from '../../application/operationalErrors';
 import { useTasks } from '../../composables/useTasks';

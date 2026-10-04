@@ -19,6 +19,7 @@
 - Schutz exportierter CSV-Zellen vor Formelausführung in Tabellenprogrammen
 - Migrationsvorschau für erkannte Altwerte im Systemstatus
 - korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
+- explizite Domänenimporte statt globaler TypeScript-Typ-Aliase
 
 ## 0.3.0 · 04.10.2026
 

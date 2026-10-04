@@ -1,4 +1,5 @@
 import { reactive } from 'vue';
+import type { Project } from '../domain/types';
 
 export const activeProjectDialog = reactive<{ open: boolean; project?: Project }>({ open: false });
 export function createOrEditProject(project: Project | undefined = undefined) {

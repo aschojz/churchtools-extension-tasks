@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TransformedTask } from '../../domain/types';
 import { computed } from 'vue';
 import { useTasks } from '../../composables/useTasks';
 import { sortTasks, taskPriority, taskStartDate } from '../../domain/tasks';

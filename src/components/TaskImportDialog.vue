@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Task } from '../domain/types';
 import { computed, ref, toRef } from 'vue';
 import { failWithCompensation } from '../application/compensation';
 import { reportOperationalError } from '../application/operationalErrors';

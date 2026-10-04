@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ActivityEntry } from '../../domain/types';
 import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
 import { reportOperationalError } from '../../application/operationalErrors';

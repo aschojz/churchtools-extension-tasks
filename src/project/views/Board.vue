@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TransformedTask } from '../../domain/types';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import List from '../../components/List.vue';

@@ -1,5 +1,6 @@
 import { cloneDeep, pick } from 'lodash-es';
 import { ref } from 'vue';
+import type { Task, TaskPriority } from '../domain/types';
 
 export type TaskTemplate = {
     id: string;

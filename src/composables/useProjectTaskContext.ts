@@ -1,5 +1,6 @@
 import { computed, inject, provide, type ComputedRef, type InjectionKey, type MaybeRefOrGetter } from 'vue';
 import { taskProgress } from '../domain/tasks';
+import type { TransformedTag, TransformedTask } from '../domain/types';
 import { CtColor, notNullish, personDisplay, type PersonDisplay } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
 import { useTags } from './useTags';

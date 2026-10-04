@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TransformedList } from '../domain/types';
 import { onMounted, ref, toRef } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
 import { useTasks } from '../composables/useTasks';

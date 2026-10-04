@@ -3,6 +3,7 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { ccmKeys, fetchCustomModuleDataValues } from '../data/ccm';
 import { queryClient } from '../data/queryClient';
 import { taskDueDate } from '../domain/tasks';
+import type { Project, Task, TransformedTask } from '../domain/types';
 import useProjects from '../project/useProjects';
 import { usePlugin } from './usePlugin';
 

@@ -40,6 +40,8 @@ Stand: 04.10.2026 · Version 0.4.0
 
 - ChurchTools Styleguide und Utils sind entfernt. Als ChurchTools-Abhängigkeit
   bleibt ausschließlich `@churchtools/churchtools-client`.
+- Komponenten und Composables importieren ihr Domänenmodell explizit; globale
+  TypeScript-Typ-Aliase werden nicht mehr benötigt.
 - Nuxt UI stellt Dashboard, Sidebar, Navbar, Suche, Formulare, Dialoge und Menüs.
   Tailwind-Utilities sind unter `#tasks` gescopt; die Höhe richtet sich nach dem
   tatsächlichen Einbaupunkt im Host.

@@ -8,6 +8,7 @@ import {
     useCustomModuleDataValuesMutations,
 } from '../data/ccm';
 import { CURRENT_SCHEMA_VERSION } from '../domain/storedData';
+import type { Project, TaskList } from '../domain/types';
 import { CtColor, requireCurrentUser } from '../platform';
 import { createProjectShorty, ICONS } from '../utils/utils';
 

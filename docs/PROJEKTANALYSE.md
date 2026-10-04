@@ -48,6 +48,7 @@ in einem ersten Stabilisierungsschritt bearbeitet:
 | UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                                                                  |
 | A11Y-01 | **Weitgehend umgesetzt** | Aufgabentitel, Statusschalter und zentrale Icon-Aktionen verwenden semantische, benannte Bedienelemente. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                   |
 | UI-01   | **Weitgehend umgesetzt** | Tailwind Preflight ist deaktiviert, Utility-Selektoren werden unter `#tasks` erzeugt und das Dashboard berechnet seine Höhe aus dem tatsächlichen Einbaupunkt. Portal-Styles bleiben gezielt auf die aktive Extension-Seite begrenzt. |
+| ARCH-02 | **Weitgehend umgesetzt** | Sämtliche Produktionsmodule importieren Domänentypen explizit; die übergangsweisen globalen Typ-Aliase sind entfernt. Das historische Persistenzfeld `fullfilled` bleibt bis zu einer kompatiblen Migration bestehen.          |
 
 Beim Browser-Smoke-Test wurde außerdem ein älterer CCM-Wert mit einem ungültigen
 `tags`-Feld gefunden. Array-Felder werden in Karten, Lookups und Editor-Drafts
@@ -389,13 +390,13 @@ Host-Abhängigkeit entfernen.
 
 #### ARCH-02 · P2 · Typ- und Zustandsbereinigung
 
-**Status:** Teilweise umgesetzt. Das kanonische Domänenmodell liegt jetzt als
+**Status:** Weitgehend umgesetzt. Das kanonische Domänenmodell liegt als
 explizit importierbares Modul unter `src/domain/types.ts`. Aktivitätseinträge
 sind eine diskriminierte Union und verwenden kein `any` mehr. Unbenutzte
-globale Ansichtsflags wurden entfernt. Übergangsweise bestehen globale
-Typ-Aliase für ältere Vue-Komponenten; diese können schrittweise durch direkte
-Type-Imports ersetzt werden. Das historische Persistenzfeld `fullfilled` bleibt
-aus Kompatibilitätsgründen bis zu einer späteren Schemamigration erhalten.
+globale Ansichtsflags und die übergangsweisen globalen Typ-Aliase wurden entfernt;
+alle Produktionsmodule verwenden direkte Type-Imports. Das historische
+Persistenzfeld `fullfilled` bleibt aus Kompatibilitätsgründen bis zu einer
+späteren Schemamigration erhalten.
 
 **Beobachtung:** Domänentypen liegen global im Ambient Scope, `ActivityEntry`
 enthält `any`, Board-Komponenten benötigen Casts und das persistierte Feld

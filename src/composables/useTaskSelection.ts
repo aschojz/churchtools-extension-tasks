@@ -13,6 +13,7 @@ import {
 import { failWithCompensation } from '../application/compensation';
 import { reportOperationalError } from '../application/operationalErrors';
 import { TASK_PRIORITIES, taskDiff } from '../domain/tasks';
+import type { TransformedTask } from '../domain/types';
 import { useProjectTaskContext } from './useProjectTaskContext';
 
 type TaskSelectionContext = {
