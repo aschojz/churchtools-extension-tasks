@@ -11,6 +11,7 @@
 - Schnellerfassung per Taste `N`
 - datensparsamer Systemstatus mit Version, Commit und Schema
 - Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
+- CSV-Export der gefilterten Projektauswertung
 
 ### Stabilität und Architektur
 

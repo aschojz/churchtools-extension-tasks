@@ -640,7 +640,7 @@ müssen die aktive Locale verwenden.
 - feinere Projektrollen und Sichtbarkeiten
 - Monatskalender für fällige Aufgaben (**umgesetzt**); Timeline bleibt offen
 - Kapazitäts-, Durchsatz- und Fälligkeitsauswertungen
-- Export und Import in dokumentierten Formaten
+- CSV-Export der gefilterten Projektauswertung (**umgesetzt**); Import bleibt offen
 
 ## 8. Empfohlene Zielarchitektur
 

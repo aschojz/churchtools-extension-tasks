@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { downloadTextFile } from '../../application/download';
+import { useLists } from '../../composables/useLists';
 import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
+import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
 import { dueDateBucket } from '../../domain/tasks';
+import { tasksToCsv } from '../../domain/taskExport';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
 const projectId = computed(() => Number(props.projectId));
 const { tasks, showTask, calculateDueDate } = useTasks(projectId);
 const { people } = useProjectTaskContext();
+const { getListById } = useLists(projectId);
+const { tags } = useTags(projectId);
 const visibleTasks = computed(() => tasks.value.filter(showTask));
 const openTasks = computed(() => visibleTasks.value.filter(task => !task.fullfilled));
 const completedTasks = computed(() => visibleTasks.value.filter(task => task.fullfilled));
@@ -42,6 +48,19 @@ const workload = computed(() => {
         .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'de'));
 });
 const maxWorkload = computed(() => Math.max(1, ...workload.value.map(person => person.count)));
+const exportTasks = () => {
+    const csv = tasksToCsv(visibleTasks.value, {
+        dueDate: calculateDueDate,
+        listName: id => (id ? (getListById(id)?.name ?? `Liste ${id}`) : ''),
+        personName: id => people.value[id]?.title ?? `Person ${id}`,
+        tagName: id => tags.value[id]?.name ?? `Tag ${id}`,
+    });
+    downloadTextFile(
+        `aufgaben-projekt-${projectId.value}-${new Date().toISOString().slice(0, 10)}.csv`,
+        `\uFEFF${csv}`,
+        'text/csv;charset=utf-8',
+    );
+};
 const metrics = computed(() => [
     { label: 'Offen', value: openTasks.value.length, icon: 'i-lucide-circle', colorClass: 'text-gray-500' },
     {
@@ -73,7 +92,16 @@ const metrics = computed(() => [
 
 <template>
     <ViewWrapper :project-id="projectId">
-        <template #actions><span /></template>
+        <template #actions>
+            <UButton
+                color="neutral"
+                :disabled="!visibleTasks.length"
+                icon="i-lucide-download"
+                label="CSV exportieren"
+                variant="outline"
+                @click="exportTasks"
+            />
+        </template>
         <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-6">
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 <UCard v-for="metric in metrics" :key="metric.label" variant="subtle">
