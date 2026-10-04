@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useTaskTemplates } from '../src/composables/useTaskTemplates';
+import { parseTaskTemplateStorage, useTaskTemplates } from '../src/composables/useTaskTemplates';
 import { taskDraft } from '../src/domain/tasks';
 
 describe('personal task templates', () => {
@@ -32,5 +32,18 @@ describe('personal task templates', () => {
         expect(templates()[0]?.task).not.toHaveProperty('activity');
         expect(templates()[0]?.task).not.toHaveProperty('fullfilled');
         expect(templates()[0]?.task).not.toHaveProperty('deletedAt');
+    });
+
+    it('isolates malformed local storage entries', () => {
+        expect(
+            parseTaskTemplateStorage({
+                3: [
+                    { id: 'valid', name: ' Sicher ', task: { priority: 'urgent', tags: [2, 'bad'], activity: [] } },
+                    { id: 4, name: 'Invalid', task: {} },
+                ],
+                invalid: 'broken',
+            }),
+        ).toEqual({ 3: [{ id: 'valid', name: 'Sicher', task: { priority: 'urgent', tags: [2] } }] });
+        expect(parseTaskTemplateStorage('broken')).toEqual({});
     });
 });

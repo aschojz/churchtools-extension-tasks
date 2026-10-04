@@ -2,7 +2,7 @@ import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { queryClient } from '../data/queryClient';
-import { type Person } from '../platform';
+import { type Person, type PersonDisplay } from '../platform';
 
 export function usePersonsQueryAllPages(
     filter: MaybeRefOrGetter<{ ids: number[] }>,
@@ -17,4 +17,16 @@ export function usePersonsQueryAllPages(
         },
         queryClient,
     );
+}
+
+export async function searchPersons(query: string) {
+    const normalized = query.trim();
+    if (normalized.length < 2) return [];
+    const result = await churchtoolsClient.get<PersonDisplay[]>(
+        `/search?query=${encodeURIComponent(normalized)}&domainTypes[]=person`,
+    );
+    return result.flatMap(person => {
+        const id = Number(person.domainIdentifier);
+        return Number.isSafeInteger(id) && id > 0 ? [{ id, label: person.title }] : [];
+    });
 }

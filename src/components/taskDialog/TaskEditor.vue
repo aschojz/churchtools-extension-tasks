@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { computed, ref, watch } from 'vue';
 import { useLists } from '../../composables/useLists';
-import { usePersonsQueryAllPages } from '../../composables/usePersons';
+import { searchPersons, usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
 import { useTaskTemplates } from '../../composables/useTaskTemplates';
 import { useTasks } from '../../composables/useTasks';
 import { TASK_PRIORITIES, taskDraft } from '../../domain/tasks';
-import { type PersonDisplay, personDisplay } from '../../platform';
+import { personDisplay } from '../../platform';
 import DialogTag from '../DialogTag.vue';
 
 const props = defineProps<{ taskId?: number; projectId: number }>();
@@ -85,12 +84,6 @@ const assignees = computed(() =>
         nameTranslated: `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim(),
     })),
 );
-const onSearchForPerson = async (query: string) => {
-    const result = await churchtoolsClient.get<PersonDisplay[]>(
-        `/search?query=${encodeURIComponent(query)}&domainTypes[]=person`,
-    );
-    return result.map(r => ({ ...r, id: Number(r.domainIdentifier), nameTranslated: r.title }));
-};
 const personSearch = ref('');
 const personOptions = ref<Array<{ id: number; label: string }>>([]);
 const personSearchLoading = ref(false);
@@ -118,10 +111,10 @@ watch(personSearch, (query, _previous, onCleanup) => {
     personSearchLoading.value = true;
     const timer = window.setTimeout(async () => {
         try {
-            const results = await onSearchForPerson(normalizedQuery);
+            const results = await searchPersons(normalizedQuery);
             if (sequence !== personSearchSequence) return;
             const merged = new Map(selectedPersonOptions().map(person => [person.id, person]));
-            for (const person of results) merged.set(person.id, { id: person.id, label: person.nameTranslated });
+            for (const person of results) merged.set(person.id, person);
             personOptions.value = [...merged.values()];
         } catch {
             if (sequence === personSearchSequence) {
