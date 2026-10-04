@@ -225,6 +225,9 @@ watch(personSearch, (query, _previous, onCleanup) => {
             <UFormField label="Fällig am">
                 <UInput v-model="internTask.dueDate" class="w-full" type="date" />
             </UFormField>
+            <UFormField label="Startet am">
+                <UInput v-model="internTask.startDate" class="w-full" type="date" />
+            </UFormField>
             <UFormField label="Priorität">
                 <USelect
                     v-model="internTask.priority"

@@ -59,7 +59,7 @@ nun defensiv normalisiert und durch das zentrale Laufzeitschema geprüft.
 
 - TypeScript-Prüfung erfolgreich
 - ESLint-Prüfung erfolgreich
-- 17 Testdateien mit 70 Tests erfolgreich
+- 17 Testdateien mit 74 Tests erfolgreich
 - Produktions-Build erfolgreich
 - Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
   Konsolenwarnungen oder Konsolenfehler geladen
@@ -633,7 +633,7 @@ müssen die aktive Locale verwenden.
 - Persönliche Aufgabenvorlagen (**umgesetzt**); Projektvorlagen bleiben offen
 - Papierkorb mit Wiederherstellung
 - Abhängigkeiten und Blocker zwischen Aufgaben (**umgesetzt mit Schema 4**)
-- Startdatum und optionaler Zeitraum
+- Startdatum mit Darstellung in Karten, Kalender, Timeline und Export (**umgesetzt mit Schema 5**)
 - Anhänge und ChurchTools-Dateibezüge
 - Erwähnungen, Abonnements und Benachrichtigungen
 - Bezüge zu ChurchTools-Personen, Gruppen, Kalenderterminen oder Songs

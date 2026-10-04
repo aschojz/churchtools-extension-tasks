@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useTasks } from '../../composables/useTasks';
-import { sortTasks, taskPriority } from '../../domain/tasks';
+import { sortTasks, taskPriority, taskStartDate } from '../../domain/tasks';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
 const projectId = computed(() => Number(props.projectId));
 const { tasks, showTask, calculateDueDate } = useTasks(projectId);
+const planningDate = (task: TransformedTask) => calculateDueDate(task) ?? taskStartDate(task);
 
 const groups = computed(() => {
     const dated = sortTasks(
-        tasks.value.filter(task => showTask(task) && calculateDueDate(task)),
+        tasks.value.filter(task => showTask(task) && planningDate(task)),
         'dueDate',
-        calculateDueDate,
+        planningDate,
     );
     const result = new Map<string, { label: string; tasks: TransformedTask[] }>();
     for (const task of dated) {
-        const date = calculateDueDate(task)!;
+        const date = planningDate(task)!;
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const group = result.get(key) ?? {
             label: date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
@@ -26,7 +27,7 @@ const groups = computed(() => {
         result.set(key, group);
     }
     const withoutDate = tasks.value
-        .filter(task => showTask(task) && !calculateDueDate(task))
+        .filter(task => showTask(task) && !planningDate(task))
         .sort((left, right) => left.name.localeCompare(right.name, 'de'));
     return [
         ...[...result.entries()].map(([key, group]) => ({ key, ...group })),
@@ -35,7 +36,7 @@ const groups = computed(() => {
 });
 
 const dateLabel = (task: TransformedTask) => {
-    const date = calculateDueDate(task);
+    const date = planningDate(task);
     return date ? date.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' }) : '–';
 };
 </script>

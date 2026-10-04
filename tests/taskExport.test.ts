@@ -23,8 +23,8 @@ describe('task CSV export', () => {
             tagName: () => 'Wichtig',
         });
 
-        expect(csv).toContain('"Titel";"Status";"Priorität"');
+        expect(csv).toContain('"Titel";"Status";"Priorität";"Start";"Fällig"');
         expect(csv).toContain('"Text; mit ""Zitat"""');
-        expect(csv).toContain('"Erledigt";"Dringend";"4.10.2026";"Planung";"Alex Beispiel";"Wichtig"');
+        expect(csv).toContain('"Erledigt";"Dringend";"";"4.10.2026";"Planung";"Alex Beispiel";"Wichtig"');
     });
 });

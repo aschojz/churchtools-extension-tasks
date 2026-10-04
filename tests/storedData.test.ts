@@ -119,6 +119,29 @@ describe('stored data schemas and migrations', () => {
         ).toMatchObject({ schemaVersion: CURRENT_SCHEMA_VERSION, blockedBy: [4] });
     });
 
+    it('migrates version 4 tasks and validates start dates', () => {
+        expect(
+            parseStoredValue({
+                schemaVersion: 4,
+                id: 11,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Zeitraum',
+                startDate: '2026-10-04',
+            }),
+        ).toMatchObject({ schemaVersion: CURRENT_SCHEMA_VERSION, startDate: '2026-10-04' });
+        expect(
+            parseStoredValue({
+                schemaVersion: 4,
+                id: 12,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Ungültig',
+                startDate: '2026-02-31',
+            }),
+        ).not.toHaveProperty('startDate');
+    });
+
     it('normalizes persistence metadata on legacy and current values', () => {
         expect(
             parseStoredValue({

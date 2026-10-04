@@ -12,6 +12,7 @@ import {
     taskDraft,
     taskDueDate,
     taskProgress,
+    taskStartDate,
 } from '../src/domain/tasks';
 
 const task = (id: number, overrides: Partial<TransformedTask> = {}): TransformedTask => ({
@@ -86,6 +87,10 @@ describe('task integrity', () => {
         const child = task(2, { dueDateRelative: 0 });
         expect(taskDueDate(child, t => (t.id === 2 ? parent : undefined))).toEqual(new Date('2026-03-30T00:00:00'));
         expect(parent.dueDate).toBe('2026-03-30');
+    });
+    it('parses optional task start dates in local time', () => {
+        expect(taskStartDate(task(1, { startDate: '2026-10-04' }))).toEqual(new Date(2026, 9, 4));
+        expect(taskStartDate(task(2, { startDate: 'invalid' }))).toBeUndefined();
     });
     it('uses calendar days around daylight saving and guards cyclic dates', () => {
         const parent = task(1, { dueDate: '2026-03-30' });

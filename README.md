@@ -11,7 +11,7 @@ Unteraufgaben, Blocker, Vorlagen, Archiv und Papierkorb.
   Liste und Tag
 - Sortierung nach Fälligkeit, Priorität, Titel, Änderung oder manueller Reihenfolge
 - Mehrfachauswahl für gemeinsame Status- und Prioritätsänderungen
-- Kommentare, Aktivitätsverlauf, absolute und relative Fälligkeiten und sichere Links
+- Kommentare, Aktivitätsverlauf, Startdaten, absolute und relative Fälligkeiten und sichere Links
 - Archiv für erledigte Aufgaben und wiederherstellbarer Papierkorb
 - globale Suche und Schnellerfassung per Taste `N`
 - Systemstatus mit Version, Commit, Datenschema und datensparsamer Fehlerdiagnose

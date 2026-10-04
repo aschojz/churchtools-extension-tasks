@@ -43,6 +43,7 @@ export interface Task extends PersistenceMetadata {
     description?: string;
     url?: string;
     dueDate?: string;
+    startDate?: string;
     dueDateRelative?: number;
     activity?: ActivityEntry[];
     sortKey: number;

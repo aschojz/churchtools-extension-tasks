@@ -23,8 +23,8 @@ Stand: 04.10.2026 · Version 0.4.0
 
 - Alle gespeicherten Entitäten werden gegen Laufzeitschemas geprüft. Defekte
   Einzelwerte werden isoliert und im Systemstatus gemeldet.
-- Schema 4 migriert unversionierte Daten, normalisiert das historische
-  `fulfilled`-Feld, ergänzt Prioritäten, Archivmetadaten und Aufgabenblocker.
+- Schema 5 migriert unversionierte Daten, normalisiert das historische
+  `fulfilled`-Feld und ergänzt Prioritäten, Archivmetadaten, Aufgabenblocker sowie Startdaten.
 - Revision und Änderungszeitpunkt schützen clientseitig vor unbemerktem
   Überschreiben. Ohne serverseitiges Compare-and-swap bleibt ein kleines
   Zeitfenster zwischen Prüfung und Schreiben.
@@ -53,7 +53,7 @@ Stand: 04.10.2026 · Version 0.4.0
 
 ## Verifikation
 
-- `npm run check`: TypeScript, ESLint, 70 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
+- `npm run check`: TypeScript, ESLint, 74 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
 - `npm run package:verify`: Extension-Key, HTML-Assets, JavaScript, CSS und
   Archivstruktur erfolgreich geprüft.
 - Browser-Smoke-Tests im eingebetteten ChurchTools-Rahmen prüfen Dashboard,

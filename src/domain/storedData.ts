@@ -3,7 +3,7 @@ import { colorKey, CtColor } from '../platform';
 import { normalizeTaskUrl } from './tasks';
 import type { ActivityEntry, Project, TaskPriority, TransformedList, TransformedTag, TransformedTask } from './types';
 
-export const CURRENT_SCHEMA_VERSION = 4;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 export type DataIssue = {
     entity: 'project' | 'value';
@@ -98,6 +98,11 @@ export function migrateStoredData(value: unknown): Record<string, unknown> {
             version = 4;
             continue;
         }
+        if (version === 4) {
+            data = { ...data, schemaVersion: 5 };
+            version = 5;
+            continue;
+        }
         throw new Error(`Für Schemaversion ${version} ist keine Migration vorhanden.`);
     }
     return data;
@@ -147,6 +152,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
             url = undefined;
         }
         const dueDate = optionalDate(data.dueDate);
+        const startDate = optionalDate(data.startDate);
         const dueDateRelative = optionalNumber(data.dueDateRelative);
         const allDay = optionalBoolean(data.allDay);
         const activity = activityEntries(data.activity);
@@ -172,6 +178,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
             ...(description === undefined ? {} : { description }),
             ...(url === undefined ? {} : { url }),
             ...(dueDate === undefined ? {} : { dueDate }),
+            ...(startDate === undefined ? {} : { startDate }),
             ...(dueDateRelative === undefined ? {} : { dueDateRelative }),
             ...(allDay === undefined ? {} : { allDay }),
             ...(activity === undefined ? {} : { activity }),

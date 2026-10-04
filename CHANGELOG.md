@@ -9,10 +9,11 @@
 - Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
 - persönliche Aufgabenvorlagen pro Projekt
 - CSV-Export der gefilterten Projektauswertung
+- optionale Startdaten in Karten, Kalender, Timeline und Export
 
 ### Betrieb und Daten
 
-- Schema 4 für Aufgabenabhängigkeiten mit getesteter Migration
+- Schema 5 für Aufgabenabhängigkeiten und Startdaten mit getesteten Migrationen
 - Migrationsvorschau für erkannte Altwerte im Systemstatus
 - korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
 

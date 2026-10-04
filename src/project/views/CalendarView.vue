@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useTasks } from '../../composables/useTasks';
+import { taskStartDate } from '../../domain/tasks';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
 const projectId = computed(() => Number(props.projectId));
 const { tasks, showTask, calculateDueDate } = useTasks(projectId);
+const planningDate = (task: TransformedTask) => calculateDueDate(task) ?? taskStartDate(task);
 const month = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 const monthLabel = computed(() => month.value.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }));
 const dayKey = (date: Date) =>
@@ -25,9 +27,9 @@ const days = computed(() => {
 const tasksByDay = computed(() => {
     const result: Record<string, TransformedTask[]> = {};
     for (const task of tasks.value.filter(showTask)) {
-        const due = calculateDueDate(task);
-        if (!due) continue;
-        (result[dayKey(due)] ??= []).push(task);
+        const date = planningDate(task);
+        if (!date) continue;
+        (result[dayKey(date)] ??= []).push(task);
     }
     for (const entries of Object.values(result)) entries.sort((a, b) => a.name.localeCompare(b.name, 'de'));
     return result;

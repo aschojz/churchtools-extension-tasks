@@ -4,7 +4,7 @@ import { failWithCompensation } from '../../application/compensation';
 import { reportOperationalError } from '../../application/operationalErrors';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
-import { appendComment, incompleteTaskBlockers } from '../../domain/tasks';
+import { appendComment, incompleteTaskBlockers, taskStartDate } from '../../domain/tasks';
 import { requireCurrentUser, uiColor } from '../../platform';
 import TaskItem from '../TaskItem.vue';
 import Activities from './Activities.vue';
@@ -14,6 +14,7 @@ const tId = computed(() => props.taskId);
 const pId = computed(() => props.projectId);
 
 const { task, sortedTags, assignees, dueDate, toDayMonth } = useTask(pId, tId);
+const startDate = computed(() => taskStartDate(task.value));
 const subTasks = computed(() =>
     (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []).map(st => tasksMap.value[st]).filter(st => st),
 );
@@ -133,6 +134,15 @@ const createChild = async () => {
                 <span>Fällig am</span>
                 <UBadge color="neutral" icon="i-lucide-calendar" :label="toDayMonth(dueDate)" variant="subtle" />
             </div>
+            <div v-if="startDate" class="task-view-meta-row">
+                <span>Startet am</span>
+                <UBadge
+                    color="neutral"
+                    icon="i-lucide-calendar-range"
+                    :label="toDayMonth(startDate)"
+                    variant="subtle"
+                />
+            </div>
             <div v-if="sortedTags.length" class="task-view-meta-group">
                 <span>Tags</span>
                 <div class="flex flex-wrap gap-2">
@@ -183,7 +193,9 @@ const createChild = async () => {
                 variant="outline"
             />
             <p
-                v-if="!dueDate && !sortedTags.length && !assignees.length && !blockers.length && !task?.url"
+                v-if="
+                    !dueDate && !startDate && !sortedTags.length && !assignees.length && !blockers.length && !task?.url
+                "
                 class="task-view-empty"
             >
                 Keine weiteren Details

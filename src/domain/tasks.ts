@@ -76,6 +76,7 @@ export function taskDraft(task: Partial<Task> = {}): Task {
             'sortKey',
             'url',
             'dueDate',
+            'startDate',
             'dueDateRelative',
             'allDay',
             'activity',
@@ -155,6 +156,10 @@ export function taskDueDate(
         }
     }
     const date = task.dueDate ? new Date(`${task.dueDate.slice(0, 10)}T00:00:00`) : undefined;
+    return date && Number.isFinite(date.getTime()) ? date : undefined;
+}
+export function taskStartDate(task: TransformedTask | undefined): Date | undefined {
+    const date = task?.startDate ? new Date(`${task.startDate.slice(0, 10)}T00:00:00`) : undefined;
     return date && Number.isFinite(date.getTime()) ? date : undefined;
 }
 export function reorderTasks(items: TransformedTask[], listId: number) {
