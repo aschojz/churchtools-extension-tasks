@@ -119,7 +119,13 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .dashboard-brand strong {
     color: var(--ink) !important;
+    -webkit-text-fill-color: var(--ink);
     font-size: 17px;
+}
+.dashboard-brand strong::selection {
+    color: var(--ink);
+    background: var(--accent-soft);
+    -webkit-text-fill-color: var(--ink);
 }
 .dashboard-sidebar-label {
     margin: 10px 10px 6px;
