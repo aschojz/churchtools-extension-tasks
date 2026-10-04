@@ -8,7 +8,7 @@ type ListPreferences = {
 };
 export type TaskStatusFilter = 'default' | 'open' | 'completed' | 'all';
 export type TaskPriorityFilter = 'all' | Exclude<TaskPriority, 'none'>;
-export type TaskDueFilter = 'all' | 'overdue' | 'today' | 'upcoming' | 'none';
+export type TaskDueFilter = 'all' | 'overdue' | 'today' | 'upcoming' | 'week' | 'none';
 export type TaskAssigneeFilter = 'all' | 'mine' | 'unassigned' | number;
 export type TaskListFilter = 'all' | number;
 export type TaskTagFilter = 'all' | 'none' | number;
@@ -53,7 +53,7 @@ export const parseListPreferences = (value: unknown): Record<string, ListPrefere
 };
 const statusFilters: TaskStatusFilter[] = ['default', 'open', 'completed', 'all'];
 const priorityFilters: TaskPriorityFilter[] = ['all', 'low', 'medium', 'high', 'urgent'];
-const dueFilters: TaskDueFilter[] = ['all', 'overdue', 'today', 'upcoming', 'none'];
+const dueFilters: TaskDueFilter[] = ['all', 'overdue', 'today', 'upcoming', 'week', 'none'];
 const assigneeFilters = ['all', 'mine', 'unassigned'] as const;
 const taskSorts: TaskSort[] = ['manual', 'dueDate', 'priority', 'name', 'updatedAt'];
 const positiveIdOr = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T | number =>

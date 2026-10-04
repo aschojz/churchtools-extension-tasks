@@ -43,7 +43,7 @@ const copyDiagnostics = async () => {
         :open="true"
         title="Systemstatus"
         :ui="{
-            body: 'tasks-modal-body p-5 sm:p-5',
+            body: 'diagnostics-modal-body',
             content: 'tasks-modal-content max-w-2xl',
             footer: 'tasks-modal-footer',
             header: 'tasks-modal-header',

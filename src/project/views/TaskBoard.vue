@@ -2,7 +2,9 @@
 import { computed } from 'vue';
 import List from '../../components/List.vue';
 import ProgressRing from '../../components/ProgressRing.vue';
+import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
+import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useTasks } from '../../composables/useTasks';
 import ViewWrapper from './ViewWrapper.vue';
 
@@ -36,9 +38,19 @@ const boardlists = computed(() => {
         }));
     return li;
 });
+const visibleTasks = computed<TransformedTask[]>(() => [
+    ...new Map(
+        Object.values(tasksByParent.value)
+            .flat()
+            .filter((task): task is TransformedTask => !!task)
+            .map(task => [task.id, task]),
+    ).values(),
+]);
+provideTaskSelection(visibleTasks);
 </script>
 <template>
     <ViewWrapper :project-id="projectId">
+        <template #extra-actions><TaskSelectionActions /></template>
         <template v-for="list in boardlists" :key="list.id">
             <List
                 :is-draggable="false"

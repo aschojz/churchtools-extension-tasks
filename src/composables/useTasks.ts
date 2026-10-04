@@ -7,6 +7,7 @@ import {
     assertTaskDependenciesValid,
     descendantIds,
     dueDateBucket,
+    isDueWithinDays,
     normalizeTaskUrl,
     taskDiff,
     taskDraft,
@@ -265,7 +266,10 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
             (filters.status === 'completed' && task.fullfilled) ||
             (filters.status === 'default' && (showCompleted || !task.fullfilled));
         const matchesPriority = filters.priority === 'all' || task.priority === filters.priority;
-        const matchesDue = filters.due === 'all' || dueDateBucket(calculateDueDate(task)) === filters.due;
+        const taskDue = calculateDueDate(task);
+        const matchesDue =
+            filters.due === 'all' ||
+            (filters.due === 'week' ? isDueWithinDays(taskDue, 7) : dueDateBucket(taskDue) === filters.due);
         const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [];
         const matchesAssignee =
             filters.assignee === 'all' ||

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui';
-import { computed, ref } from 'vue';
+import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
 import DialogTask from '../../components/taskDialog/DialogTask.vue';
@@ -17,7 +17,7 @@ import {
 import { useLists } from '../../composables/useLists';
 import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
 import { useTags } from '../../composables/useTags';
-import { firstOrSelf } from '../../platform';
+import { authState, firstOrSelf } from '../../platform';
 
 const props = defineProps<{ projectId: number }>();
 
@@ -105,6 +105,7 @@ const dueOptions = [
     { id: 'all', label: 'Fälligkeit: Alle' },
     { id: 'overdue', label: 'Fälligkeit: Überfällig' },
     { id: 'today', label: 'Fälligkeit: Heute' },
+    { id: 'week', label: 'Fälligkeit: Nächste 7 Tage' },
     { id: 'upcoming', label: 'Fälligkeit: Demnächst' },
     { id: 'none', label: 'Fälligkeit: Ohne Termin' },
 ];
@@ -145,6 +146,10 @@ const sortOptions = [
     { id: 'updatedAt', label: 'Sortierung: Zuletzt geändert' },
 ];
 const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
+const newTaskRoute = computed(() => ({
+    name: typeof route.name === 'string' ? route.name : 'project-board',
+    params: { projectId: props.projectId, taskId: 'new' },
+}));
 const viewNavigation: NavigationMenuItem[] = [
     { label: 'Meine Aufgaben', icon: 'i-lucide-user-check', to: { name: 'my-tasks' } },
     { label: 'Board', icon: 'i-lucide-columns-3', to: { name: 'project-board' } },
@@ -157,6 +162,42 @@ const viewNavigation: NavigationMenuItem[] = [
     { label: 'Archiv', icon: 'i-lucide-archive', to: { name: 'project-archive' } },
     { label: 'Papierkorb', icon: 'i-lucide-trash-2', to: { name: 'project-trash' } },
 ];
+const tabBar = ref<HTMLElement>();
+const tabBarWidth = ref(1200);
+let tabResizeObserver: ResizeObserver | undefined;
+onMounted(() => {
+    if (!tabBar.value) return;
+    const updateWidth = () => {
+        tabBarWidth.value = tabBar.value?.clientWidth ?? 1200;
+    };
+    updateWidth();
+    tabResizeObserver = new ResizeObserver(updateWidth);
+    tabResizeObserver.observe(tabBar.value);
+});
+onBeforeUnmount(() => tabResizeObserver?.disconnect());
+const routeNameOf = (item: NavigationMenuItem) =>
+    typeof item.to === 'object' && item.to && 'name' in item.to ? String(item.to.name) : '';
+const orderedNavigation = computed(() => {
+    const active = viewNavigation.find(item => routeNameOf(item) === route.name);
+    return active ? [active, ...viewNavigation.filter(item => item !== active)] : viewNavigation;
+});
+const tabLayout = computed(() => {
+    const items = orderedNavigation.value;
+    const widths = items.map(item => String(item.label ?? '').length * 8 + 64);
+    if (widths.reduce((sum, width) => sum + width, 0) <= tabBarWidth.value) return { visible: items, overflow: [] };
+    const available = Math.max(150, tabBarWidth.value - 96);
+    let used = 0;
+    let count = 0;
+    for (const width of widths) {
+        if (count > 0 && used + width > available) break;
+        used += width;
+        count += 1;
+    }
+    return { visible: items.slice(0, count), overflow: items.slice(count) };
+});
+const overflowMenu = computed<DropdownMenuItem[][]>(() => [
+    tabLayout.value.overflow.map(item => ({ label: String(item.label), icon: item.icon, to: item.to })),
+]);
 </script>
 <template>
     <div
@@ -164,16 +205,16 @@ const viewNavigation: NavigationMenuItem[] = [
         :class="{ 'fixed top-0 left-0 z-[2000] h-screen w-screen bg-gray-100': fullscreen }"
     >
         <div class="project-view-header shrink-0 border-b">
-            <UDashboardToolbar v-if="taskControlsVisible">
+            <UDashboardToolbar v-if="taskControlsVisible" :ui="{ left: 'min-w-0 flex-1' }">
                 <template #left>
-                    <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex w-full flex-wrap items-center gap-2">
                         <UInput
                             v-model="projectSearch"
                             class="w-64 max-w-full"
                             icon="i-lucide-search"
                             placeholder="Aufgaben filtern …"
                         />
-                        <UPopover>
+                        <UPopover class="ml-auto">
                             <UButton
                                 color="neutral"
                                 icon="i-lucide-list-filter"
@@ -316,10 +357,27 @@ const viewNavigation: NavigationMenuItem[] = [
                             @click="onFullscreen"
                         />
                     </slot>
+                    <UButton
+                        aria-keyshortcuts="N"
+                        :disabled="authState.status !== 'authenticated'"
+                        icon="i-lucide-plus"
+                        label="Neu"
+                        :to="newTaskRoute"
+                    />
                 </template>
             </UDashboardToolbar>
-            <div class="overflow-x-auto px-4 sm:px-6">
-                <UNavigationMenu highlight :items="viewNavigation" orientation="horizontal" variant="link" />
+            <div ref="tabBar" class="flex min-w-0 items-center px-4 sm:px-6">
+                <UNavigationMenu
+                    class="flex-none"
+                    highlight
+                    :items="tabLayout.visible"
+                    orientation="horizontal"
+                    :ui="{ item: 'shrink-0', link: 'whitespace-nowrap' }"
+                    variant="link"
+                />
+                <UDropdownMenu v-if="tabLayout.overflow.length" :items="overflowMenu">
+                    <UButton color="neutral" icon="i-lucide-ellipsis" label="Mehr" size="sm" variant="ghost" />
+                </UDropdownMenu>
             </div>
         </div>
         <div class="task-board-scroll min-h-0 max-w-full flex-1 overflow-auto p-4 lg:p-6">

@@ -114,7 +114,7 @@ describe('personal task view state', () => {
     it('sanitizes malformed persisted filters and views', () => {
         expect(
             parseProjectViewStorage({
-                filters: { 3: { status: 'broken', assignee: -2, list: 8 } },
+                filters: { 3: { status: 'broken', due: 'week', assignee: -2, list: 8 } },
                 sorting: { '3:project-list': 'priority', invalid: 'broken' },
                 savedViews: {
                     3: [
@@ -133,7 +133,7 @@ describe('personal task view state', () => {
                 3: {
                     status: 'default',
                     priority: 'all',
-                    due: 'all',
+                    due: 'week',
                     assignee: 'all',
                     list: 8,
                     tag: 'all',

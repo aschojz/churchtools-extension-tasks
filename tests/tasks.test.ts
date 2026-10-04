@@ -5,6 +5,7 @@ import {
     assertTaskDependenciesValid,
     descendantIds,
     dueDateBucket,
+    isDueWithinDays,
     normalizeTaskUrl,
     reorderTasks,
     sortTasks,
@@ -126,6 +127,8 @@ describe('task integrity', () => {
         expect(dueDateBucket(new Date(2026, 8, 27, 0, 0), now)).toBe('today');
         expect(dueDateBucket(new Date(2026, 8, 28, 0, 0), now)).toBe('upcoming');
         expect(dueDateBucket(undefined, now)).toBe('none');
+        expect(isDueWithinDays(new Date(2026, 9, 4), 7, new Date(2026, 8, 27, 23, 30))).toBe(true);
+        expect(isDueWithinDays(new Date(2026, 9, 5), 7, new Date(2026, 8, 27, 23, 30))).toBe(false);
     });
     it('sorts by priority, title and missing due dates predictably', () => {
         const low = task(1, { name: 'Zebra', priority: 'low', dueDate: '2026-10-12' });

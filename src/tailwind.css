@@ -28,6 +28,12 @@
 body:has(#tasks) {
     --ui-primary: #292826;
     --ui-text-inverted: #fff;
+    --ui-bg-muted: #f7f5f2;
+    --ui-bg-elevated: #f1eee9;
+    --ui-bg-accented: #e9e4dd;
+    --ui-border-muted: #e7e2db;
+    --ui-border: #ddd7cf;
+    --ui-border-accented: #cbc3b9;
     --ui-radius: 0.55rem;
     --ui-container: 90rem;
 }
@@ -112,6 +118,59 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .dashboard-brand strong {
     font-size: 17px;
+}
+.dashboard-sidebar-label {
+    margin: 10px 10px 6px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.dashboard-project-nav {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    border-radius: var(--ui-radius);
+    color: #615d58;
+}
+.dashboard-project-nav:hover,
+.dashboard-project-nav.active {
+    color: #292826;
+    background: var(--ui-bg-elevated);
+}
+.dashboard-project-link {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+}
+.dashboard-project-menu {
+    margin-right: 4px;
+    opacity: 0;
+    transition: opacity 120ms ease;
+}
+.dashboard-project-nav:hover .dashboard-project-menu,
+.dashboard-project-menu:focus-visible {
+    opacity: 1;
+}
+.tasks-sidebar-footer > a,
+.tasks-sidebar-footer > button {
+    justify-content: flex-start;
+    border: 0 !important;
+    border-radius: var(--ui-radius) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.tasks-sidebar-footer.is-collapsed > a,
+.tasks-sidebar-footer.is-collapsed > button {
+    justify-content: center;
+}
+.tasks-sidebar-footer > a:hover,
+.tasks-sidebar-footer > button:hover {
+    background: var(--ui-bg-elevated) !important;
 }
 .app-content {
     display: flex;
@@ -234,6 +293,32 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     outline-offset: 2px;
     border-radius: 3px;
 }
+.task-selection-checkbox [data-slot='base'] {
+    border-radius: 6px !important;
+}
+.insight-metric {
+    min-width: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+}
+.insight-metric > * {
+    height: 100%;
+    transition:
+        border-color 140ms ease,
+        box-shadow 140ms ease,
+        transform 140ms ease;
+}
+.insight-metric:hover > *,
+.insight-metric:focus-visible > * {
+    border-color: #cfc6bb;
+    box-shadow: 0 5px 18px rgb(48 40 32 / 8%);
+    transform: translateY(-1px);
+}
+.insight-metric:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
 .task-item-row {
     min-height: 54px;
     margin-top: -1px;
@@ -309,6 +394,10 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .tasks-modal-body {
     padding: 0 !important;
+    background: #f8f7f5;
+}
+.diagnostics-modal-body {
+    padding: 24px !important;
     background: #f8f7f5;
 }
 .tasks-modal-footer {

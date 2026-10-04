@@ -2,7 +2,9 @@
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import List from '../../components/List.vue';
+import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
+import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useLists } from '../../composables/useLists';
 import { useTasks } from '../../composables/useTasks';
 import ViewWrapper from './ViewWrapper.vue';
@@ -33,9 +35,12 @@ const tasksByList = computed(() => {
     });
     return items;
 });
+const visibleTasks = computed(() => transformedTasks.value.filter(showTask));
+provideTaskSelection(visibleTasks);
 </script>
 <template>
     <ViewWrapper :project-id="projectId">
+        <template #extra-actions><TaskSelectionActions /></template>
         <List
             v-for="list in boardlists"
             :key="list.id"

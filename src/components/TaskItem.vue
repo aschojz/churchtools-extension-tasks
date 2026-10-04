@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { failWithCompensation } from '../application/compensation';
 import { reportOperationalError } from '../application/operationalErrors';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
+import { useTaskSelection } from '../composables/useTaskSelection';
 import { incompleteTaskBlockers, taskPriority, taskStartDate } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
@@ -44,6 +45,7 @@ const dueDate = computed(() => calculateDueDate(task.value));
 const startDate = computed(() => taskStartDate(task.value));
 const priority = computed(() => taskPriority(task.value.priority));
 const openBlockers = computed(() => incompleteTaskBlockers(task.value, tasksMap.value));
+const selection = useTaskSelection();
 const comments = computed(() =>
     (Array.isArray(task.value.activity) ? task.value.activity : []).filter(entry => entry.type === 'comment'),
 );
@@ -196,21 +198,6 @@ const breadcrumbs = computed(() => {
         </div>
         <div class="flex items-start justify-end gap-4">
             <div class="flex flex-grow items-start gap-2">
-                <ProgressRing
-                    v-if="hasSubTasks"
-                    class="progress-icon relative text-[20px] text-gray-500"
-                    :percent="percentFullfilled"
-                />
-                <UButton
-                    v-else
-                    :aria-label="task.fullfilled ? 'Als unerledigt markieren' : 'Als erledigt markieren'"
-                    color="neutral"
-                    :icon="task.fullfilled ? 'i-lucide-square-check-big' : 'i-lucide-square'"
-                    size="sm"
-                    square
-                    variant="ghost"
-                    @click.stop="runAction(() => toggleTask(task))"
-                />
                 <button
                     class="task-title-button appearance-none border-0 bg-transparent p-0 text-left font-bold"
                     type="button"
@@ -228,6 +215,30 @@ const breadcrumbs = computed(() => {
                     :src="assignee.imageUrl"
                 />
             </div>
+            <ProgressRing
+                v-if="hasSubTasks"
+                class="progress-icon relative shrink-0 text-[20px] text-gray-500"
+                :percent="percentFullfilled"
+            />
+            <UCheckbox
+                v-if="selection?.enabled.value"
+                :aria-label="`${task.name} auswählen`"
+                class="task-selection-checkbox mt-1 shrink-0"
+                :model-value="selection.selectedIds.value.has(task.id)"
+                :ui="{ base: 'rounded-[4px]' }"
+                @click.stop
+                @update:model-value="(value: boolean | 'indeterminate') => selection?.toggleTask(task.id, value)"
+            />
+            <UButton
+                v-else-if="!hasSubTasks"
+                :aria-label="task.fullfilled ? 'Als unerledigt markieren' : 'Als erledigt markieren'"
+                color="neutral"
+                :icon="task.fullfilled ? 'i-lucide-square-check-big' : 'i-lucide-square'"
+                size="sm"
+                square
+                variant="ghost"
+                @click.stop="runAction(() => toggleTask(task))"
+            />
             <UDropdownMenu :items="contextMenu"
                 ><UButton
                     aria-label="Aufgabenaktionen"

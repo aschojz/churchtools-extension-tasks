@@ -192,3 +192,11 @@ export function dueDateBucket(dueDate: Date | undefined, now = new Date()): DueD
     if (due === today) return 'today';
     return 'upcoming';
 }
+
+export function isDueWithinDays(dueDate: Date | undefined, days: number, now = new Date()) {
+    if (!dueDate || !Number.isFinite(dueDate.getTime())) return false;
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + days).getTime();
+    const due = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()).getTime();
+    return due >= today && due <= limit;
+}

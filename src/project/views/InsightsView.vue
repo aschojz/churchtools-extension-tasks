@@ -1,34 +1,30 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { downloadTextFile } from '../../application/download';
 import { useLists } from '../../composables/useLists';
 import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
-import { dueDateBucket } from '../../domain/tasks';
+import { taskStore, type ProjectFilters } from '../../composables/storeTasks';
+import { dueDateBucket, isDueWithinDays } from '../../domain/tasks';
 import { tasksToCsv } from '../../domain/taskExport';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
 const projectId = computed(() => Number(props.projectId));
-const { tasks, showTask, calculateDueDate } = useTasks(projectId);
+const { tasks, calculateDueDate } = useTasks(projectId);
 const { people } = useProjectTaskContext();
 const { getListById } = useLists(projectId);
 const { tags } = useTags(projectId);
-const visibleTasks = computed(() => tasks.value.filter(showTask));
+const visibleTasks = computed(() => tasks.value);
 const openTasks = computed(() => visibleTasks.value.filter(task => !task.fullfilled));
 const completedTasks = computed(() => visibleTasks.value.filter(task => task.fullfilled));
 const overdueTasks = computed(() =>
     openTasks.value.filter(task => dueDateBucket(calculateDueDate(task)) === 'overdue'),
 );
 const dueSoonTasks = computed(() => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const inSevenDays = today + 7 * 24 * 60 * 60 * 1000;
-    return openTasks.value.filter(task => {
-        const due = calculateDueDate(task)?.getTime();
-        return due !== undefined && due >= today && due <= inSevenDays;
-    });
+    return openTasks.value.filter(task => isDueWithinDays(calculateDueDate(task), 7));
 });
 const unassignedTasks = computed(() =>
     openTasks.value.filter(task => !Array.isArray(task.assignedTo) || task.assignedTo.length === 0),
@@ -61,31 +57,48 @@ const exportTasks = () => {
         'text/csv;charset=utf-8',
     );
 };
+const router = useRouter();
+const store = taskStore();
+const openTaskList = async (filters: Partial<ProjectFilters>) => {
+    store.resetProjectFilters(projectId.value);
+    store.updateProjectFilters(projectId.value, filters);
+    await router.push({ name: 'project-list', params: { projectId: projectId.value } });
+};
 const metrics = computed(() => [
-    { label: 'Offen', value: openTasks.value.length, icon: 'i-lucide-circle', colorClass: 'text-gray-500' },
+    {
+        label: 'Offen',
+        value: openTasks.value.length,
+        icon: 'i-lucide-circle',
+        colorClass: 'text-gray-500',
+        filters: { status: 'open' } as Partial<ProjectFilters>,
+    },
     {
         label: 'Erledigt',
         value: completedTasks.value.length,
         icon: 'i-lucide-circle-check',
         colorClass: 'text-green-600',
+        filters: { status: 'completed' } as Partial<ProjectFilters>,
     },
     {
         label: 'Überfällig',
         value: overdueTasks.value.length,
         icon: 'i-lucide-triangle-alert',
         colorClass: 'text-red-600',
+        filters: { status: 'open', due: 'overdue' } as Partial<ProjectFilters>,
     },
     {
         label: 'Nächste 7 Tage',
         value: dueSoonTasks.value.length,
         icon: 'i-lucide-calendar-clock',
-        colorClass: 'text-blue-600',
+        colorClass: 'text-orange-600',
+        filters: { status: 'open', due: 'week' } as Partial<ProjectFilters>,
     },
     {
         label: 'Ohne Person',
         value: unassignedTasks.value.length,
         icon: 'i-lucide-user-round-x',
         colorClass: 'text-amber-600',
+        filters: { status: 'open', assignee: 'unassigned' } as Partial<ProjectFilters>,
     },
 ]);
 </script>
@@ -102,17 +115,25 @@ const metrics = computed(() => [
                 @click="exportTasks"
             />
         </template>
-        <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-6">
+        <div class="flex w-full flex-col gap-6 pb-6">
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                <UCard v-for="metric in metrics" :key="metric.label" variant="subtle">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <p class="text-sm text-gray-500">{{ metric.label }}</p>
-                            <strong class="text-2xl">{{ metric.value }}</strong>
+                <button
+                    v-for="metric in metrics"
+                    :key="metric.label"
+                    class="insight-metric text-left"
+                    type="button"
+                    @click="openTaskList(metric.filters)"
+                >
+                    <UCard variant="subtle">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm text-gray-500">{{ metric.label }}</p>
+                                <strong class="text-2xl">{{ metric.value }}</strong>
+                            </div>
+                            <UIcon class="size-6" :class="metric.colorClass" :name="metric.icon" />
                         </div>
-                        <UIcon class="size-6" :class="metric.colorClass" :name="metric.icon" />
-                    </div>
-                </UCard>
+                    </UCard>
+                </button>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">

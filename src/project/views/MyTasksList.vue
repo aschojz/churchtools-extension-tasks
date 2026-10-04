@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import TaskItem from '../../components/TaskItem.vue';
+import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
+import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useTasks } from '../../composables/useTasks';
 import { sortTasks } from '../../domain/tasks';
 import { useCurrentUser } from '../../platform';
@@ -21,9 +23,11 @@ const filteredTasks = computed(() => {
     );
     return sortTasks(filtered, store.sortForView(projectId.value, 'my-tasks'), calculateDueDate);
 });
+provideTaskSelection(filteredTasks);
 </script>
 <template>
     <ViewWrapper :project-id="projectId">
+        <template #extra-actions><TaskSelectionActions /></template>
         <div v-if="filteredTasks.length" class="flex w-full flex-col">
             <TaskItem
                 v-for="task in filteredTasks"

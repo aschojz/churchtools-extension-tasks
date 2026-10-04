@@ -5,7 +5,9 @@ import { failWithCompensation } from '../../application/compensation';
 import { reportOperationalError } from '../../application/operationalErrors';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
+import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
+import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
 import { CtColor, uiColor } from '../../platform';
@@ -85,6 +87,8 @@ const tasksByTag = computed(() => {
     });
     return tagLists;
 });
+const visibleTasks = computed(() => tasks.value.filter(showTask));
+provideTaskSelection(visibleTasks);
 
 const boardlists = computed(() => {
     const li = tagsArray.value.map(tag => ({ ...tag, type: 'tag' as const }));
@@ -104,6 +108,7 @@ const boardlists = computed(() => {
 <template>
     <ViewWrapper :project-id="projectId">
         <template #extra-actions>
+            <TaskSelectionActions />
             <UButton
                 color="neutral"
                 icon="i-lucide-tag"
