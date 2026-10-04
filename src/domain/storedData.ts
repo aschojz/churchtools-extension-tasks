@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { colorKey, CtColor } from '../platform';
 import { normalizeTaskUrl } from './tasks';
+import type { ActivityEntry, Project, TaskPriority, TransformedList, TransformedTag, TransformedTask } from './types';
 
 export const CURRENT_SCHEMA_VERSION = 2;
 
@@ -81,20 +82,18 @@ export function migrateStoredData(value: unknown): Record<string, unknown> {
 const sortKey = (value: unknown, id: number) => optionalNumber(value) ?? id * 10_000;
 const activityEntries = (value: unknown): ActivityEntry[] | undefined => {
     if (!Array.isArray(value)) return undefined;
-    const allowedTypes = new Set<ActivityEntry['type']>(['create', 'fullfilled', 'comment', 'update']);
-    return value.flatMap(entry => {
+    return value.flatMap<ActivityEntry>((entry): ActivityEntry[] => {
         if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
         const item = entry as Record<string, unknown>;
-        if (typeof item.type !== 'string' || !allowedTypes.has(item.type as ActivityEntry['type'])) return [];
         if (typeof item.date !== 'string' || !Number.isFinite(Date.parse(item.date))) return [];
-        return [
-            {
-                personId: positiveInteger(item.personId) ?? 0,
-                date: item.date,
-                type: item.type as ActivityEntry['type'],
-                ...(item.value === undefined ? {} : { value: item.value }),
-            },
-        ];
+        const base = { personId: positiveInteger(item.personId) ?? 0, date: item.date };
+        if (item.type === 'create') return [{ ...base, type: 'create' as const }];
+        if (item.type === 'fullfilled' && typeof item.value === 'boolean')
+            return [{ ...base, type: 'fullfilled' as const, value: item.value }];
+        if (item.type === 'comment' && typeof item.value === 'string')
+            return [{ ...base, type: 'comment' as const, value: item.value }];
+        if (item.type === 'update') return [{ ...base, type: 'update' as const, value: item.value }];
+        return [];
     });
 };
 const validColor = (value: unknown) => {

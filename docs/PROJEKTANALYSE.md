@@ -407,6 +407,14 @@ Host-Abhängigkeit entfernen.
 
 #### ARCH-02 · P2 · Typ- und Zustandsbereinigung
 
+**Status:** Teilweise umgesetzt. Das kanonische Domänenmodell liegt jetzt als
+explizit importierbares Modul unter `src/domain/types.ts`. Aktivitätseinträge
+sind eine diskriminierte Union und verwenden kein `any` mehr. Unbenutzte
+globale Ansichtsflags wurden entfernt. Übergangsweise bestehen globale
+Typ-Aliase für ältere Vue-Komponenten; diese können schrittweise durch direkte
+Type-Imports ersetzt werden. Das historische Persistenzfeld `fullfilled` bleibt
+aus Kompatibilitätsgründen bis zu einer späteren Schemamigration erhalten.
+
 **Beobachtung:** Domänentypen liegen global im Ambient Scope, `ActivityEntry`
 enthält `any`, Board-Komponenten benötigen Casts und das persistierte Feld
 `fullfilled` ist falsch geschrieben. Daneben existieren nicht oder nur teilweise

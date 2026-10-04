@@ -1,5 +1,6 @@
 import { cloneDeep, isEqual, pick } from 'lodash-es';
 import type { TaskSort } from '../composables/storeTasks';
+import type { ActivityEntry, Task, TaskPriority, TransformedTask } from './types';
 
 export const TASK_PRIORITIES: Array<{
     id: TaskPriority;

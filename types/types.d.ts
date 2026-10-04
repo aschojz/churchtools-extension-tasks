@@ -1,74 +1,12 @@
-interface Project {
-    schemaVersion?: number;
-    revision?: number;
-    updatedAt?: string;
-    name: string;
-    description?: string;
-    color?: import('../src/platform').CtColor;
-    icon?: FAIcon;
-    id: number;
-    shorty: string;
-    securityLevelId: number;
-    customModuleId: number;
-}
-interface TaskList {
-    schemaVersion?: number;
-    revision?: number;
-    updatedAt?: string;
-    type: 'list';
-    name: string;
-    sortKey: number;
-    isCollapsed?: boolean;
-    showSubTasks?: boolean;
-    showCompleted?: boolean;
-    isDefault?: boolean;
-}
-interface Task {
-    schemaVersion?: number;
-    revision?: number;
-    updatedAt?: string;
-    type: 'task';
-    fullfilled: boolean;
-    priority: TaskPriority;
-    name: string;
-    description?: string;
-    url?: string;
-    dueDate?: string;
-    dueDateRelative?: number;
-    allDay?: boolean;
-    activity?: ActivityEntry[];
-    sortKey: number;
-    list?: number;
-    tags?: number[];
-    assignedTo?: number[];
-    subTasks?: number[];
-    comments?: ActivityEntry[];
-    deletedAt?: string;
-    deletedBy?: number;
-}
-type TaskPriority = 'none' | 'low' | 'medium' | 'high' | 'urgent';
-interface Tag {
-    schemaVersion?: number;
-    revision?: number;
-    updatedAt?: string;
-    type: 'tag';
-    name: string;
-    color: import('../src/platform').CtColor;
-    sortKey: number;
-}
-interface ActivityEntry {
-    personId: number;
-    date: string;
-    type: 'create' | 'fullfilled' | 'comment' | 'update';
-    value?: any;
-}
-
-type TransformedTag = Tag & { id: number; dataCategoryId: number };
-type TransformedTask = Task & { id: number; dataCategoryId: number };
-type TransformedList = TaskList & {
-    id: number;
-    dataCategoryId: number;
-    items?: TransformedTask[];
-};
-
-type BoardColumn = TransformedList | { type: 'tag' | 'parent'; id: number; name: string; isCollapsed?: false };
+// Transitional global aliases keep existing Vue templates concise while the
+// canonical domain model lives in an importable module.
+type Project = import('../src/domain/types').Project;
+type TaskList = import('../src/domain/types').TaskList;
+type Task = import('../src/domain/types').Task;
+type Tag = import('../src/domain/types').Tag;
+type TaskPriority = import('../src/domain/types').TaskPriority;
+type ActivityEntry = import('../src/domain/types').ActivityEntry;
+type TransformedTag = import('../src/domain/types').TransformedTag;
+type TransformedTask = import('../src/domain/types').TransformedTask;
+type TransformedList = import('../src/domain/types').TransformedList;
+type BoardColumn = import('../src/domain/types').BoardColumn;
