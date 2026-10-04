@@ -16,13 +16,11 @@ export default defineConfig([
     },
     { files: ['**/*.{ts,vue}'], rules: { 'no-undef': 'off' } },
     vueConfigPrettier,
-    globalIgnores(['dist/', 'releases/', 'src/assets/', 'src/utils/ct-types.d.ts']),
+    globalIgnores(['dist/', 'releases/']),
     { files: ['scripts/**', '*.config.*'], languageOptions: { globals: globals.node } },
     {
         rules: {
             'vue/multi-word-component-names': 'off',
-            'vue/no-explicit-any': 'off',
-            '@typescript-eslint/no-explicit-any': 'off',
             'vue/attributes-order': ['error', { alphabetical: true }],
         },
     },

@@ -373,12 +373,12 @@ Ansichts-Chunks; die frühere Warnung für ein einzelnes JavaScript-Bundle über
 **Status:** Behoben. Das Font-Awesome-Paket und seine Webfonts werden jetzt in
 allen Modi in den Extension-Build aufgenommen. Dynamisch gespeicherte
 Projekticons bleiben kompatibel, ohne CSS oder Fonts des ChurchTools-Hosts zu
-benötigen.
+benötigen. Die zuvor ungenutzten lokalen Font- und CSS-Kopien wurden entfernt.
 
 **Beobachtung:** Font-Awesome-CSS wird nur in der Entwicklung importiert. Der
-Produktions-Build verwendet weiterhin Font-Awesome-Klassennamen und verlässt
-sich damit auf das ChurchTools-Hostsystem. Lokale Font-Awesome-Dateien unter
-`src/assets/fontawesome` sind vorhanden, werden aber nicht genutzt.
+Produktions-Build verwendete weiterhin Font-Awesome-Klassennamen und verließ
+sich damit auf das ChurchTools-Hostsystem. Zusätzliche lokale Font-Awesome-
+Kopien lagen ungenutzt im Quellbaum.
 
 **Auswirkung:** Die Extension ist nicht vollständig eigenständig. Änderungen
 am Host können Icons verschwinden lassen oder verändern.
