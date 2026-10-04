@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { taskStore } from '../src/composables/storeTasks';
+import { parseProjectViewStorage, taskStore } from '../src/composables/storeTasks';
 
 const list: TransformedList = {
     id: 7,
@@ -109,5 +109,54 @@ describe('personal task view state', () => {
 
         setActivePinia(createPinia());
         expect(taskStore().savedViewsForProject(3)).toHaveLength(1);
+    });
+
+    it('sanitizes malformed persisted filters and views', () => {
+        expect(
+            parseProjectViewStorage({
+                filters: { 3: { status: 'broken', assignee: -2, list: 8 } },
+                sorting: { '3:project-list': 'priority', invalid: 'broken' },
+                savedViews: {
+                    3: [
+                        {
+                            id: 'safe',
+                            name: ' Sicher ',
+                            filters: { status: 'open', tag: 'none' },
+                            sort: 'name',
+                        },
+                        { id: 4, name: 'Broken', filters: {}, sort: 'name' },
+                    ],
+                },
+            }),
+        ).toEqual({
+            filters: {
+                3: {
+                    status: 'default',
+                    priority: 'all',
+                    due: 'all',
+                    assignee: 'all',
+                    list: 8,
+                    tag: 'all',
+                },
+            },
+            sorting: { '3:project-list': 'priority' },
+            savedViews: {
+                3: [
+                    {
+                        id: 'safe',
+                        name: 'Sicher',
+                        filters: {
+                            status: 'open',
+                            priority: 'all',
+                            due: 'all',
+                            assignee: 'all',
+                            list: 'all',
+                            tag: 'none',
+                        },
+                        sort: 'name',
+                    },
+                ],
+            },
+        });
     });
 });

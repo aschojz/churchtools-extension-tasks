@@ -35,6 +35,76 @@ type StoredProjectViews = {
     sorting?: Record<string, TaskSort>;
     savedViews?: Record<number, SavedProjectView[]>;
 };
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    !!value && typeof value === 'object' && !Array.isArray(value);
+const statusFilters: TaskStatusFilter[] = ['default', 'open', 'completed', 'all'];
+const priorityFilters: TaskPriorityFilter[] = ['all', 'low', 'medium', 'high', 'urgent'];
+const dueFilters: TaskDueFilter[] = ['all', 'overdue', 'today', 'upcoming', 'none'];
+const assigneeFilters = ['all', 'mine', 'unassigned'] as const;
+const taskSorts: TaskSort[] = ['manual', 'dueDate', 'priority', 'name', 'updatedAt'];
+const positiveIdOr = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T | number =>
+    typeof value === 'number' && Number.isSafeInteger(value) && value > 0
+        ? value
+        : allowed.includes(value as T)
+          ? (value as T)
+          : fallback;
+const parseFilters = (value: unknown): ProjectFilters => {
+    const record = isRecord(value) ? value : {};
+    return {
+        status: statusFilters.includes(record.status as TaskStatusFilter)
+            ? (record.status as TaskStatusFilter)
+            : 'default',
+        priority: priorityFilters.includes(record.priority as TaskPriorityFilter)
+            ? (record.priority as TaskPriorityFilter)
+            : 'all',
+        due: dueFilters.includes(record.due as TaskDueFilter) ? (record.due as TaskDueFilter) : 'all',
+        assignee: positiveIdOr(record.assignee, assigneeFilters, 'all') as TaskAssigneeFilter,
+        list: positiveIdOr(record.list, ['all'], 'all') as TaskListFilter,
+        tag: positiveIdOr(record.tag, ['all', 'none'], 'all') as TaskTagFilter,
+    };
+};
+export const parseProjectViewStorage = (value: unknown): StoredProjectViews => {
+    if (!isRecord(value)) return {};
+    const filters = isRecord(value.filters)
+        ? Object.fromEntries(
+              Object.entries(value.filters).flatMap(([projectId, filter]) =>
+                  Number.isSafeInteger(Number(projectId)) && Number(projectId) > 0
+                      ? [[Number(projectId), parseFilters(filter)]]
+                      : [],
+              ),
+          )
+        : {};
+    const sorting = isRecord(value.sorting)
+        ? Object.fromEntries(
+              Object.entries(value.sorting).filter((entry): entry is [string, TaskSort] =>
+                  taskSorts.includes(entry[1] as TaskSort),
+              ),
+          )
+        : {};
+    const savedViews = isRecord(value.savedViews)
+        ? Object.fromEntries(
+              Object.entries(value.savedViews).flatMap(([projectId, entries]) => {
+                  if (!Number.isSafeInteger(Number(projectId)) || Number(projectId) <= 0 || !Array.isArray(entries))
+                      return [];
+                  const views = entries.flatMap<SavedProjectView>(entry => {
+                      if (
+                          !isRecord(entry) ||
+                          typeof entry.id !== 'string' ||
+                          typeof entry.name !== 'string' ||
+                          !taskSorts.includes(entry.sort as TaskSort)
+                      )
+                          return [];
+                      const name = entry.name.trim();
+                      return name
+                          ? [{ id: entry.id, name, filters: parseFilters(entry.filters), sort: entry.sort as TaskSort }]
+                          : [];
+                  });
+                  return views.length ? [[Number(projectId), views]] : [];
+              }),
+          )
+        : {};
+    return { filters, sorting, savedViews };
+};
 const loadPreferences = (): Record<string, ListPreferences> => {
     try {
         const value = localStorage.getItem(STORAGE_KEY);
@@ -46,7 +116,7 @@ const loadPreferences = (): Record<string, ListPreferences> => {
 const loadProjectViews = (): StoredProjectViews => {
     try {
         const value = localStorage.getItem(PROJECT_VIEW_STORAGE_KEY);
-        return value ? (JSON.parse(value) as StoredProjectViews) : {};
+        return value ? parseProjectViewStorage(JSON.parse(value)) : {};
     } catch {
         return {};
     }
