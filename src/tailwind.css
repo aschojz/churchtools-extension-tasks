@@ -329,14 +329,14 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     box-shadow: none !important;
     transform: none !important;
 }
-.task-item-row:first-child {
+.task-list > .task-item-row:first-child {
     margin-top: 0;
     border-radius: 10px 10px 0 0 !important;
 }
-.task-item-row:last-child {
+.task-list > .task-item-row:last-child {
     border-radius: 0 0 10px 10px !important;
 }
-.task-item-row:only-child {
+.task-list > .task-item-row:only-child {
     border-radius: 10px !important;
 }
 .overview-task-item {

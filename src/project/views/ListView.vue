@@ -35,8 +35,15 @@ const selection = provideTaskSelection(filteredTasks);
                 :title="selection.error.value"
                 variant="subtle"
             />
-            <div v-for="task in filteredTasks" :key="task.id">
-                <TaskItem class="min-w-0 flex-1" density="row" :item="task" :project-id="projectId" />
+            <div class="task-list">
+                <TaskItem
+                    v-for="task in filteredTasks"
+                    :key="task.id"
+                    class="min-w-0 flex-1"
+                    density="row"
+                    :item="task"
+                    :project-id="projectId"
+                />
             </div>
         </div>
         <UEmpty v-else class="w-full" icon="i-lucide-list-checks" title="Keine Aufgaben gefunden" />
