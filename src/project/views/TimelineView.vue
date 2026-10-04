@@ -50,20 +50,20 @@ const dateLabel = (task: TransformedTask) => {
                 <h2 :id="`timeline-${group.key}`" class="mb-3 text-lg font-semibold capitalize">
                     {{ group.label }}
                 </h2>
-                <div class="relative ml-7 border-l border-gray-200 pl-7">
+                <div class="timeline-track relative ml-7 border-l pl-7">
                     <RouterLink
                         v-for="task in group.tasks"
                         :key="task.id"
-                        class="group relative mb-3 flex min-h-16 items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 transition hover:border-gray-300 hover:shadow-sm"
+                        class="timeline-item group relative mb-3 flex min-h-16 items-center gap-4 rounded-xl border px-4 py-3 transition hover:shadow-sm"
                         :to="{ name: 'project-timeline', params: { projectId, taskId: task.id } }"
                     >
                         <span
-                            class="absolute top-1/2 -left-[2.05rem] size-3 -translate-y-1/2 rounded-full border-2 border-white bg-gray-400 ring-1 ring-gray-300"
+                            class="timeline-dot absolute top-1/2 -left-[2.05rem] size-3 -translate-y-1/2 rounded-full border-2 ring-1"
                         ></span>
-                        <time class="w-16 shrink-0 text-sm font-medium text-gray-500">
+                        <time class="timeline-date w-16 shrink-0 text-sm font-medium">
                             {{ dateLabel(task) }}
                         </time>
-                        <span class="group-hover:text-primary-700 min-w-0 flex-1 font-medium text-gray-900">
+                        <span class="timeline-title min-w-0 flex-1 font-medium">
                             {{ task.name }}
                         </span>
                         <UBadge
@@ -74,7 +74,7 @@ const dateLabel = (task: TransformedTask) => {
                             size="sm"
                             variant="subtle"
                         />
-                        <UIcon class="shrink-0 text-gray-400" name="i-lucide-chevron-right" />
+                        <UIcon class="timeline-chevron shrink-0" name="i-lucide-chevron-right" />
                     </RouterLink>
                 </div>
             </section>
@@ -88,3 +88,30 @@ const dateLabel = (task: TransformedTask) => {
         />
     </ViewWrapper>
 </template>
+<style scoped>
+.timeline-track {
+    border-color: var(--line);
+}
+.timeline-item {
+    border-color: var(--line);
+    background: var(--surface);
+}
+.timeline-item:hover {
+    border-color: #cbc5bd;
+}
+.timeline-dot {
+    border-color: var(--surface);
+    background: #8b8781;
+    --tw-ring-color: #d9d4cd;
+}
+.timeline-date,
+.timeline-chevron {
+    color: var(--muted);
+}
+.timeline-title {
+    color: var(--ink);
+}
+.timeline-item:hover .timeline-title {
+    color: #9d4919;
+}
+</style>

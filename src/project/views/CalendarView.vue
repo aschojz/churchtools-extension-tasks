@@ -68,23 +68,23 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
         </template>
         <section :aria-label="`Kalender ${monthLabel}`" class="flex min-w-[760px] flex-1 flex-col gap-3">
             <h2 class="text-xl font-semibold capitalize">{{ monthLabel }}</h2>
-            <div class="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200">
+            <div class="calendar-grid grid grid-cols-7 gap-px overflow-hidden rounded-xl border">
                 <div
                     v-for="weekday in weekdays"
                     :key="weekday"
-                    class="bg-gray-50 px-2 py-2 text-center text-xs font-semibold text-gray-500"
+                    class="calendar-weekday px-2 py-2 text-center text-xs font-semibold"
                 >
                     {{ weekday }}
                 </div>
                 <div
                     v-for="day in days"
                     :key="day.key"
-                    class="min-h-28 bg-white p-2"
-                    :class="{ 'bg-gray-50 text-gray-400': !day.currentMonth }"
+                    class="calendar-day min-h-28 p-2"
+                    :class="{ 'is-outside': !day.currentMonth }"
                 >
                     <time
                         class="mb-2 grid size-6 place-items-center rounded-full text-xs font-semibold"
-                        :class="{ 'bg-gray-900 text-white': day.key === todayKey }"
+                        :class="{ 'is-today': day.key === todayKey }"
                         :datetime="day.key"
                     >
                         {{ day.date.getDate() }}
@@ -105,3 +105,25 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
         </section>
     </ViewWrapper>
 </template>
+<style scoped>
+.calendar-grid {
+    border-color: var(--line);
+    background: var(--line);
+}
+.calendar-weekday {
+    color: var(--muted);
+    background: var(--ui-bg-muted);
+}
+.calendar-day {
+    color: var(--ink);
+    background: var(--surface);
+}
+.calendar-day.is-outside {
+    color: #9a9690;
+    background: #faf9f7;
+}
+.calendar-day time.is-today {
+    color: #fff;
+    background: var(--ink);
+}
+</style>
