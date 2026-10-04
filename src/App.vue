@@ -29,16 +29,34 @@ const updateAvailableHeight = () => {
     const top = Math.max(0, appRoot.value.getBoundingClientRect().top);
     availableHeight.value = `${Math.max(320, window.innerHeight - top)}px`;
 };
+const handleGlobalShortcut = (event: KeyboardEvent) => {
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.key.toLowerCase() !== 'n')
+        return;
+    const target = event.target;
+    if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
+    )
+        return;
+    if (route.params.taskId) return;
+    event.preventDefault();
+    if (newTaskRoute.value && authState.status === 'authenticated') void router.push(newTaskRoute.value);
+    else if (!currentProject.value && authState.status === 'authenticated') createOrEditProject();
+};
 
 let layoutObserver: ResizeObserver | undefined;
 onMounted(() => {
     updateAvailableHeight();
     window.addEventListener('resize', updateAvailableHeight, { passive: true });
+    window.addEventListener('keydown', handleGlobalShortcut);
     layoutObserver = new ResizeObserver(updateAvailableHeight);
     layoutObserver.observe(document.documentElement);
 });
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateAvailableHeight);
+    window.removeEventListener('keydown', handleGlobalShortcut);
     layoutObserver?.disconnect();
 });
 const { tasks: allTasks } = useAllProjectTasks({ enabled: searchOpen });
@@ -236,18 +254,24 @@ const newTaskRoute = computed(() =>
                                 </UDropdownMenu>
                                 <UButton
                                     v-if="currentProject"
+                                    aria-keyshortcuts="N"
                                     :disabled="authState.status !== 'authenticated'"
                                     icon="i-lucide-plus"
                                     label="Neue Aufgabe"
                                     :to="newTaskRoute"
-                                />
+                                >
+                                    <template #trailing><UKbd>N</UKbd></template>
+                                </UButton>
                                 <UButton
                                     v-else
+                                    aria-keyshortcuts="N"
                                     :disabled="authState.status !== 'authenticated'"
                                     icon="i-lucide-plus"
                                     label="Neues Projekt"
                                     @click="createOrEditProject()"
-                                />
+                                >
+                                    <template #trailing><UKbd>N</UKbd></template>
+                                </UButton>
                             </template>
                         </UDashboardNavbar>
                     </template>

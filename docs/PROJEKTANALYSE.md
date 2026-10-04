@@ -637,7 +637,7 @@ müssen die aktive Locale verwenden.
 - Sortierung nach Fälligkeit, Priorität, Titel und Änderungsdatum (**umgesetzt und lokal pro Ansicht gespeichert**)
 - persönliche, gespeicherte Ansichten
 - Mehrfachauswahl und Bulk-Aktionen
-- schnelle Aufgabenerfassung mit Tastatur
+- schnelle Aufgaben- und Projekterfassung mit der Taste `N` (**umgesetzt**)
 - Archiv für abgeschlossene Aufgaben
 - echte kompakte Tabellen-/Listenansicht
 - bessere Überfällig-, Heute- und Demnächst-Ansichten
