@@ -4,11 +4,14 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import {
     clearDataIssue,
     clearDataIssuesForCategory,
+    clearMigrationCandidates,
     clearProjectDataIssues,
     parseStoredProject,
     parseStoredValue,
     recordDataIssue,
+    recordMigrationCandidate,
     revisionOf,
+    storedSchemaVersion,
     withCreateMetadata,
     withUpdateMetadata,
 } from '../domain/storedData';
@@ -76,10 +79,16 @@ export function useCustomModuleDataCategoriesQuery<T extends object>(moduleId: I
             queryFn: async () => {
                 const rows = await churchtoolsClient.get<Category[]>(categoryPath(moduleId));
                 clearProjectDataIssues();
+                clearMigrationCandidates('project');
                 return rows.flatMap(({ data, ...metadata }) => {
                     clearDataIssue('project', metadata.id);
                     try {
                         const decoded = decodeData<T & Category>(data, metadata);
+                        recordMigrationCandidate({
+                            entity: 'project',
+                            id: metadata.id,
+                            fromVersion: storedSchemaVersion(decoded),
+                        });
                         return [
                             (metadata.shorty.startsWith('project') ? parseStoredProject(decoded) : decoded) as T &
                                 Category,
@@ -114,10 +123,17 @@ export function useCustomModuleDataValuesQuery<T extends object>(moduleId: Id, c
 export async function fetchCustomModuleDataValues<T extends object>(moduleId: number, categoryId: number) {
     const rows = await churchtoolsClient.get<Value[]>(valuePath(moduleId, categoryId));
     clearDataIssuesForCategory(categoryId);
+    clearMigrationCandidates('value', categoryId);
     return rows.flatMap(({ value, ...metadata }) => {
         clearDataIssue('value', metadata.id);
         try {
             const decoded = decodeData<T & Omit<Value, 'value'>>(value, metadata);
+            recordMigrationCandidate({
+                entity: 'value',
+                id: metadata.id,
+                categoryId,
+                fromVersion: storedSchemaVersion(decoded),
+            });
             return [parseStoredValue(decoded) as unknown as T & Omit<Value, 'value'>];
         } catch (error) {
             recordDataIssue({

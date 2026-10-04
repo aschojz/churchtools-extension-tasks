@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { operationalErrors } from '../application/operationalErrors';
 import { usePlugin } from '../composables/usePlugin';
 import { createDiagnosticSnapshot } from '../domain/diagnostics';
-import { dataIssues } from '../domain/storedData';
+import { dataIssues, migrationCandidates } from '../domain/storedData';
 import { authState } from '../platform';
 
 const emit = defineEmits<{ (event: 'close'): void }>();
@@ -17,6 +17,7 @@ const snapshot = computed(() =>
         authentication: authState.status,
         dataIssues: dataIssues.value,
         operationalErrors: operationalErrors.value,
+        migrationCandidates: migrationCandidates.value,
     }),
 );
 const diagnosticText = computed(() => JSON.stringify(snapshot.value, null, 2));
@@ -72,6 +73,8 @@ const copyDiagnostics = async () => {
                         <dd>{{ snapshot.dataIssues.length }}</dd>
                         <dt class="text-muted">Letzte Fehler</dt>
                         <dd>{{ snapshot.operationalErrors.length }}</dd>
+                        <dt class="text-muted">Alte Datenstände</dt>
+                        <dd>{{ snapshot.migrationCandidates.length }}</dd>
                     </dl>
                 </UCard>
             </div>
@@ -108,6 +111,16 @@ const copyDiagnostics = async () => {
                     variant="subtle"
                 />
             </div>
+
+            <UAlert
+                v-if="snapshot.migrationCandidates.length"
+                class="mt-4"
+                color="info"
+                :description="`${snapshot.migrationCandidates.length} Datensätze werden beim nächsten regulären Speichern auf Schema ${snapshot.application.schemaVersion} aktualisiert. Die Diagnose enthält nur technische IDs und Versionsstände.`"
+                icon="i-lucide-database-backup"
+                title="Migrationsvorschau"
+                variant="subtle"
+            />
 
             <UAlert
                 v-if="copyState === 'error'"

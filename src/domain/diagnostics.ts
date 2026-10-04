@@ -1,5 +1,5 @@
 import type { OperationalError } from '../application/operationalErrors';
-import type { DataIssue } from './storedData';
+import type { DataIssue, MigrationCandidate } from './storedData';
 import { CURRENT_SCHEMA_VERSION } from './storedData';
 
 export type DiagnosticSnapshot = {
@@ -7,6 +7,7 @@ export type DiagnosticSnapshot = {
     runtime: { moduleId?: number; authentication: 'loading' | 'authenticated' | 'error' };
     dataIssues: Array<Pick<DataIssue, 'entity' | 'id' | 'categoryId' | 'message'>>;
     operationalErrors: OperationalError[];
+    migrationCandidates: MigrationCandidate[];
 };
 
 export function createDiagnosticSnapshot(input: {
@@ -16,6 +17,7 @@ export function createDiagnosticSnapshot(input: {
     authentication: DiagnosticSnapshot['runtime']['authentication'];
     dataIssues: DataIssue[];
     operationalErrors: OperationalError[];
+    migrationCandidates: MigrationCandidate[];
 }): DiagnosticSnapshot {
     return {
         application: {
@@ -34,5 +36,6 @@ export function createDiagnosticSnapshot(input: {
             message,
         })),
         operationalErrors: input.operationalErrors.map(error => ({ ...error })),
+        migrationCandidates: input.migrationCandidates.map(candidate => ({ ...candidate })),
     };
 }

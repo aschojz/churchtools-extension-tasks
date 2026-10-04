@@ -17,6 +17,7 @@ describe('diagnostic snapshot', () => {
                     kind: 'Error',
                 },
             ],
+            migrationCandidates: [{ entity: 'value', id: 43, categoryId: 3, fromVersion: 1, toVersion: 3 }],
         });
 
         expect(snapshot).toEqual({
@@ -31,6 +32,7 @@ describe('diagnostic snapshot', () => {
                     kind: 'Error',
                 },
             ],
+            migrationCandidates: [{ entity: 'value', id: 43, categoryId: 3, fromVersion: 1, toVersion: 3 }],
         });
         expect(JSON.stringify(snapshot)).not.toContain('firstName');
         expect(JSON.stringify(snapshot)).not.toContain('taskName');

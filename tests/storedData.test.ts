@@ -3,13 +3,16 @@ import {
     CURRENT_SCHEMA_VERSION,
     dataIssues,
     migrateStoredData,
+    migrationCandidates,
     parseStoredProject,
     parseStoredValue,
+    recordMigrationCandidate,
     withCurrentSchemaVersion,
 } from '../src/domain/storedData';
 
 beforeEach(() => {
     dataIssues.value = [];
+    migrationCandidates.value = [];
 });
 
 describe('stored data schemas and migrations', () => {
@@ -156,5 +159,14 @@ describe('stored data schemas and migrations', () => {
             name: 'Neu',
         });
         expect(withCurrentSchemaVersion({ name: 'Generic' })).toEqual({ name: 'Generic' });
+    });
+
+    it('tracks only records that need a migration', () => {
+        recordMigrationCandidate({ entity: 'value', id: 4, categoryId: 2, fromVersion: 1 });
+        recordMigrationCandidate({ entity: 'value', id: 5, categoryId: 2, fromVersion: CURRENT_SCHEMA_VERSION });
+
+        expect(migrationCandidates.value).toEqual([
+            { entity: 'value', id: 4, categoryId: 2, fromVersion: 1, toVersion: CURRENT_SCHEMA_VERSION },
+        ]);
     });
 });

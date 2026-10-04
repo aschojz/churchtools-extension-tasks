@@ -12,7 +12,16 @@ export type DataIssue = {
     message: string;
 };
 
+export type MigrationCandidate = {
+    entity: 'project' | 'value';
+    id: number;
+    categoryId?: number;
+    fromVersion: number;
+    toVersion: number;
+};
+
 export const dataIssues = ref<DataIssue[]>([]);
+export const migrationCandidates = ref<MigrationCandidate[]>([]);
 
 const asRecord = (value: unknown): Record<string, unknown> => {
     if (!value || typeof value !== 'object' || Array.isArray(value))
@@ -48,6 +57,10 @@ const readSchemaVersion = (value: Record<string, unknown>) => {
         throw new Error(`Schemaversion ${version} wird von dieser Extension noch nicht unterstützt.`);
     return Number(version);
 };
+
+export function storedSchemaVersion(value: unknown) {
+    return readSchemaVersion(asRecord(value));
+}
 
 export function migrateStoredData(value: unknown): Record<string, unknown> {
     let data = { ...asRecord(value) };
@@ -270,4 +283,20 @@ export function clearProjectDataIssues() {
 export function recordDataIssue(issue: DataIssue) {
     clearDataIssue(issue.entity, issue.id);
     dataIssues.value = [...dataIssues.value, issue];
+}
+
+export function clearMigrationCandidates(entity: MigrationCandidate['entity'], categoryId?: number) {
+    migrationCandidates.value = migrationCandidates.value.filter(candidate =>
+        entity === 'project'
+            ? candidate.entity !== 'project'
+            : candidate.entity !== 'value' || candidate.categoryId !== categoryId,
+    );
+}
+
+export function recordMigrationCandidate(candidate: Omit<MigrationCandidate, 'toVersion'>) {
+    migrationCandidates.value = migrationCandidates.value.filter(
+        item => item.entity !== candidate.entity || item.id !== candidate.id,
+    );
+    if (candidate.fromVersion < CURRENT_SCHEMA_VERSION)
+        migrationCandidates.value = [...migrationCandidates.value, { ...candidate, toVersion: CURRENT_SCHEMA_VERSION }];
 }

@@ -194,8 +194,9 @@ CCM-ID in der Oberfläche gemeldet, ohne die übrige Abfrage zu blockieren. Neue
 und regulär bearbeitete Werte werden mit `schemaVersion: 1` gespeichert.
 
 **Offen:** Die Migration arbeitet bewusst lazy und schreibt Altwerte nicht allein
-durch das Lesen zurück. Ein administrativer Migrationslauf mit Vorschau wäre für
-große Installationen sinnvoll. Jede zukünftige Schemaänderung benötigt eine
+durch das Lesen zurück. Der Systemstatus zeigt inzwischen eine datensparsame
+Vorschau der erkannten Altwerte. Ein administrativer Schreib-Migrationslauf wäre
+für große Installationen weiterhin sinnvoll. Jede zukünftige Schemaänderung benötigt eine
 weitere explizite Migration und passende Bestandsdatentests.
 
 **Akzeptanz:** Für Version 1 erfüllt. Beschädigte Testwerte blockieren keine
