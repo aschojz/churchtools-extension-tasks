@@ -6,6 +6,7 @@ import {
     clearDataIssuesForCategory,
     clearMigrationCandidates,
     clearProjectDataIssues,
+    CURRENT_SCHEMA_VERSION,
     parseStoredProject,
     parseStoredValue,
     recordDataIssue,
@@ -14,6 +15,7 @@ import {
     storedSchemaVersion,
     withCreateMetadata,
     withUpdateMetadata,
+    type MigrationCandidate,
 } from '../domain/storedData';
 import { queryClient } from './queryClient';
 
@@ -251,4 +253,53 @@ export function useCustomModuleDataCategoryMutations<T extends object>(moduleId:
         queryClient.removeQueries({ queryKey: ccmKeys.values(module, id) });
     };
     return { createDataCategory: save, updateDataCategory: save, deleteDataCategory: remove };
+}
+
+export async function migrateStoredCandidates(moduleId: number, candidates: MigrationCandidate[]) {
+    requireId(moduleId);
+    let migrated = 0;
+    const projectCandidates = new Set(candidates.filter(item => item.entity === 'project').map(item => item.id));
+    if (projectCandidates.size) {
+        const categories = await churchtoolsClient.get<Category[]>(categoryPath(moduleId));
+        for (const category of categories.filter(item => projectCandidates.has(item.id))) {
+            const decoded = decodeData<object>(category.data, {
+                id: category.id,
+                customModuleId: category.customModuleId,
+            });
+            if (storedSchemaVersion(decoded) >= CURRENT_SCHEMA_VERSION) continue;
+            const project = parseStoredProject(decoded);
+            const { id, customModuleId, name, shorty, description, ...data } = project;
+            void customModuleId;
+            await churchtoolsClient.put<Category>(`${categoryPath(moduleId)}/${id}`, {
+                name,
+                shorty,
+                description: description ?? '',
+                customModuleId: moduleId,
+                data: JSON.stringify(withUpdateMetadata(data, revisionOf(data))),
+            });
+            migrated += 1;
+        }
+        await queryClient.invalidateQueries({ queryKey: ccmKeys.categories(moduleId) });
+    }
+    const valueCandidates = candidates.filter(
+        (item): item is MigrationCandidate & { categoryId: number } => item.entity === 'value' && !!item.categoryId,
+    );
+    for (const categoryId of [...new Set(valueCandidates.map(item => item.categoryId))]) {
+        const ids = new Set(valueCandidates.filter(item => item.categoryId === categoryId).map(item => item.id));
+        const rows = await churchtoolsClient.get<Value[]>(valuePath(moduleId, categoryId));
+        for (const row of rows.filter(item => ids.has(item.id))) {
+            const decoded = decodeData<object>(row.value, { id: row.id, dataCategoryId: row.dataCategoryId });
+            if (storedSchemaVersion(decoded) >= CURRENT_SCHEMA_VERSION) continue;
+            const parsed = parseStoredValue(decoded);
+            const { id, dataCategoryId, ...data } = parsed;
+            await churchtoolsClient.put<Value>(`${valuePath(moduleId, categoryId)}/${id}`, {
+                id,
+                dataCategoryId,
+                value: JSON.stringify(withUpdateMetadata(data, revisionOf(data))),
+            });
+            migrated += 1;
+        }
+        await queryClient.invalidateQueries({ queryKey: ccmKeys.values(moduleId, categoryId) });
+    }
+    return migrated;
 }

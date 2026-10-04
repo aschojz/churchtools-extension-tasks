@@ -18,6 +18,7 @@
 - Schema 6 für Aufgabenabhängigkeiten, Startdaten und Wiederholungen mit getesteten Migrationen
 - Schutz exportierter CSV-Zellen vor Formelausführung in Tabellenprogrammen
 - Migrationsvorschau für erkannte Altwerte im Systemstatus
+- bestätigter Migrationslauf zum revisionsgeführten Zurückschreiben erkannter Altwerte
 - korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
 - explizite Domänenimporte statt globaler TypeScript-Typ-Aliase
 

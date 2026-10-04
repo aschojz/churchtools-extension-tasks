@@ -2,13 +2,16 @@
 import { computed, ref } from 'vue';
 import { operationalErrors } from '../application/operationalErrors';
 import { usePlugin } from '../composables/usePlugin';
+import { migrateStoredCandidates } from '../data/ccm';
 import { createDiagnosticSnapshot } from '../domain/diagnostics';
 import { dataIssues, migrationCandidates } from '../domain/storedData';
-import { authState } from '../platform';
+import { authState, requireCurrentUser } from '../platform';
 
 const emit = defineEmits<{ (event: 'close'): void }>();
 const { moduleId } = usePlugin();
 const copyState = ref<'idle' | 'success' | 'error'>('idle');
+const migrating = ref(false);
+const migrationMessage = ref('');
 const snapshot = computed(() =>
     createDiagnosticSnapshot({
         version: __APP_VERSION__,
@@ -34,6 +37,21 @@ const copyDiagnostics = async () => {
         copyState.value = 'success';
     } catch {
         copyState.value = 'error';
+    }
+};
+const migrateCandidates = async () => {
+    if (!moduleId.value || migrating.value || !migrationCandidates.value.length) return;
+    requireCurrentUser();
+    if (!window.confirm(`${migrationCandidates.value.length} erkannte Altwerte jetzt aktualisieren?`)) return;
+    migrating.value = true;
+    migrationMessage.value = '';
+    try {
+        const count = await migrateStoredCandidates(moduleId.value, [...migrationCandidates.value]);
+        migrationMessage.value = `${count} Altwerte wurden auf das aktuelle Schema migriert.`;
+    } catch (error) {
+        migrationMessage.value = error instanceof Error ? error.message : 'Die Migration ist fehlgeschlagen.';
+    } finally {
+        migrating.value = false;
     }
 };
 </script>
@@ -121,6 +139,7 @@ const copyDiagnostics = async () => {
                 title="Migrationsvorschau"
                 variant="subtle"
             />
+            <UAlert v-if="migrationMessage" class="mt-4" :title="migrationMessage" variant="subtle" />
 
             <UAlert
                 v-if="copyState === 'error'"
@@ -136,6 +155,15 @@ const copyDiagnostics = async () => {
                 </span>
                 <span v-else></span>
                 <div class="flex gap-2">
+                    <UButton
+                        v-if="snapshot.migrationCandidates.length"
+                        color="neutral"
+                        icon="i-lucide-database-backup"
+                        label="Altwerte migrieren"
+                        :loading="migrating"
+                        variant="outline"
+                        @click="migrateCandidates"
+                    />
                     <UButton
                         color="neutral"
                         icon="i-lucide-copy"

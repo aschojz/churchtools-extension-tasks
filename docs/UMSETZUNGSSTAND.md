@@ -51,6 +51,7 @@ Stand: 04.10.2026 · Version 0.4.0
   Projektaufgaben erst beim Öffnen.
 - Der Systemstatus zeigt Paketversion, Commit, Schema, Modul, Anmeldung und
   isolierte Datenprobleme, ohne Aufgabeninhalte oder Personendaten zu exportieren.
+  Erkannte Altwerte können dort kontrolliert auf das aktuelle Schema geschrieben werden.
 - Das Release-ZIP besitzt die vom offiziellen Boilerplate erwartete einzelne
   `dist/`-Wurzel. CI prüft Node 22 und 24 sowie Typen, Lint, Tests, Build und Paket.
 - Dependencies sind auf kompatiblen aktuellen Ständen; `npm audit` meldet keine
@@ -58,7 +59,7 @@ Stand: 04.10.2026 · Version 0.4.0
 
 ## Verifikation
 
-- `npm run check`: TypeScript, ESLint, 80 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
+- `npm run check`: TypeScript, ESLint, 81 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
 - `npm run package:verify`: Extension-Key, HTML-Assets, JavaScript, CSS und
   Archivstruktur erfolgreich geprüft.
 - Browser-Smoke-Tests im eingebetteten ChurchTools-Rahmen prüfen Dashboard,

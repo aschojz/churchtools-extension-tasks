@@ -37,7 +37,7 @@ in einem ersten Stabilisierungsschritt bearbeitet:
 
 | Finding | Status                   | Umsetzung                                                                                                                                                                                                                             |
 | ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 6 migriert. Defekte Einzelwerte werden isoliert, Altwerte in einer Vorschau gezählt und beim nächsten regulären Speichern migriert.                            |
+| DATA-02 | **Umgesetzt**             | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 6 migriert. Defekte Einzelwerte werden isoliert; erkannte Altwerte lassen sich im Systemstatus validiert und revisionsgeführt zurückschreiben.                   |
 | PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                                                                  |
 | PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                                                               |
 | PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                                                                  |
@@ -182,9 +182,10 @@ unbemerkt verlieren.
 
 #### DATA-02 · P0 · Fehlende Laufzeitvalidierung und Migrationen
 
-**Status:** Weitgehend umgesetzt. Version 1, die Migration von unversionierten
-Werten und die Isolation defekter Einträge sind implementiert. Ein administrativer
-Migrationslauf für das sofortige Zurückschreiben aller Altwerte bleibt offen.
+**Status:** Umgesetzt. Migrationen bis Schema 6, die Migration unversionierter
+Werte und die Isolation defekter Einträge sind implementiert. Ein administrativer
+Migrationslauf schreibt erkannte Altwerte nach Bestätigung validiert und
+revisionsgeführt zurück.
 
 **Umsetzung:** Projekte, Aufgaben, Listen und Tags werden beim Lesen durch ein
 zentrales Laufzeitschema geführt. Unversionierte Daten gelten als Version 0 und

@@ -7,6 +7,7 @@ import {
     DataConflictError,
     decodeData,
     fetchCustomModuleDataValues,
+    migrateStoredCandidates,
     useCustomModuleDataCategoryMutations,
     useCustomModuleDataValuesMutations,
     useCustomModuleDataValuesQuery,
@@ -143,6 +144,30 @@ describe('CCM repository', () => {
         });
         expect(JSON.parse(body.value).updatedAt).toEqual(expect.any(String));
         wrapper.unmount();
+    });
+    it('writes validated legacy values back with the current schema', async () => {
+        api.get.mockResolvedValue([
+            {
+                id: 9,
+                dataCategoryId: 3,
+                value: JSON.stringify({ type: 'task', name: 'Altwert', fullfilled: false, sortKey: 1 }),
+            },
+        ]);
+        api.put.mockResolvedValue({ id: 9, dataCategoryId: 3 });
+        await expect(
+            migrateStoredCandidates(7, [{ entity: 'value', id: 9, categoryId: 3, fromVersion: 0, toVersion: 6 }]),
+        ).resolves.toBe(1);
+        expect(api.put).toHaveBeenCalledWith('/custommodules/7/customdatacategories/3/customdatavalues/9', {
+            id: 9,
+            dataCategoryId: 3,
+            value: expect.any(String),
+        });
+        expect(JSON.parse(api.put.mock.calls[0][1].value)).toMatchObject({
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            revision: 1,
+            type: 'task',
+            name: 'Altwert',
+        });
     });
     it('rejects a stale update, refreshes the cache and does not overwrite server data', async () => {
         api.get.mockResolvedValue([
