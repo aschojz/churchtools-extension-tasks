@@ -11,17 +11,16 @@ const props = defineProps<{
 }>();
 const projectId = computed(() => parseInt(props.projectId));
 
-const { tasks, tasksMap, getPercentFullfilled } = useTasks(projectId);
+const { tasks, tasksMap, getPercentFullfilled, showTask } = useTasks(projectId);
 const store = taskStore();
+const sortMode = computed(() => store.sortForView(projectId.value, 'project-tasks'));
 
 const tasksByParent = computed(() => {
     const tasksWithSub = tasks.value.filter(task => Array.isArray(task.subTasks) && task.subTasks.length);
     return Object.fromEntries(
         tasksWithSub.map(parent => [
             parent.id,
-            parent.subTasks
-                ?.map(st => tasksMap.value[st])
-                .filter(st => !!st && ((!store.showFullfilled && !st.fullfilled) || store.showFullfilled)),
+            parent.subTasks?.map(st => tasksMap.value[st]).filter(st => !!st && showTask(st)),
         ]),
     );
 });
@@ -39,7 +38,7 @@ const boardlists = computed(() => {
 });
 </script>
 <template>
-    <ViewWrapper :project-id="projectId" :sub-task-toggle="false">
+    <ViewWrapper :project-id="projectId">
         <template v-for="list in boardlists" :key="list.id">
             <List
                 :is-draggable="false"
@@ -47,6 +46,7 @@ const boardlists = computed(() => {
                 :list="list"
                 :project-id="projectId"
                 :show-task="true"
+                :sort="sortMode"
             >
                 <template #header>
                     <ProgressRing class="progress-icon relative text-[20px] text-gray-500" :percent="list.percentage" />

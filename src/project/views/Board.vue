@@ -2,6 +2,7 @@
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import List from '../../components/List.vue';
+import { taskStore } from '../../composables/storeTasks';
 import { useLists } from '../../composables/useLists';
 import { useTasks } from '../../composables/useTasks';
 import ViewWrapper from './ViewWrapper.vue';
@@ -11,6 +12,8 @@ const props = defineProps<{ projectId: string }>();
 const projectId = computed(() => parseInt(props.projectId));
 const { transformedTasks, showTask } = useTasks(projectId);
 const { lists } = useLists(projectId);
+const store = taskStore();
+const sortMode = computed(() => store.sortForView(projectId.value, 'project-board'));
 
 const boardlists = computed(() => {
     const li = [...lists.value];
@@ -36,9 +39,11 @@ const tasksByList = computed(() => {
         <List
             v-for="list in boardlists"
             :key="list.id"
+            :is-draggable="sortMode === 'manual'"
             :items="tasksByList[list.id] ?? []"
             :list="list"
             :project-id="projectId"
+            :sort="sortMode"
         />
     </ViewWrapper>
 </template>

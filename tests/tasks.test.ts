@@ -5,6 +5,7 @@ import {
     dueDateBucket,
     normalizeTaskUrl,
     reorderTasks,
+    sortTasks,
     taskDiff,
     taskDraft,
     taskDueDate,
@@ -118,5 +119,17 @@ describe('task integrity', () => {
         expect(dueDateBucket(new Date(2026, 8, 27, 0, 0), now)).toBe('today');
         expect(dueDateBucket(new Date(2026, 8, 28, 0, 0), now)).toBe('upcoming');
         expect(dueDateBucket(undefined, now)).toBe('none');
+    });
+    it('sorts by priority, title and missing due dates predictably', () => {
+        const low = task(1, { name: 'Zebra', priority: 'low', dueDate: '2026-10-12' });
+        const urgent = task(2, { name: 'Alpha', priority: 'urgent' });
+        const medium = task(3, { name: 'Mitte', priority: 'medium', dueDate: '2026-10-10' });
+        expect(sortTasks([low, urgent, medium], 'priority').map(entry => entry.id)).toEqual([2, 3, 1]);
+        expect(sortTasks([low, urgent, medium], 'name').map(entry => entry.id)).toEqual([2, 3, 1]);
+        expect(
+            sortTasks([low, urgent, medium], 'dueDate', entry =>
+                entry.dueDate ? new Date(`${entry.dueDate}T00:00:00`) : undefined,
+            ).map(entry => entry.id),
+        ).toEqual([3, 1, 2]);
     });
 });

@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { failWithCompensation } from '../../application/compensation';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
+import { taskStore } from '../../composables/storeTasks';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
 import { CtColor, uiColor } from '../../platform';
@@ -14,6 +15,8 @@ const projectId = computed(() => parseInt(props.projectId));
 
 const { tasks, showTask, updateTask } = useTasks(projectId);
 const { tags, tagsArray, deleteTag } = useTags(projectId);
+const store = taskStore();
+const sortMode = computed(() => store.sortForView(projectId.value, 'project-tags'));
 const tagDialog = ref<TransformedTag | true>();
 const actionError = ref('');
 
@@ -107,7 +110,13 @@ const boardlists = computed(() => {
         </template>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <template v-for="list in boardlists" :key="list.id">
-            <List :is-draggable="false" :items="tasksByTag[list.id] ?? []" :list="list" :project-id="projectId">
+            <List
+                :is-draggable="false"
+                :items="tasksByTag[list.id] ?? []"
+                :list="list"
+                :project-id="projectId"
+                :sort="sortMode"
+            >
                 <template #header>
                     <UBadge :color="uiColor(list.color?.key ?? CtColor.BASIC)" :label="list.name" variant="soft" />
                     <UDropdownMenu v-if="list.id" :items="tagMenu(list.id)"

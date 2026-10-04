@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import TaskItem from '../../components/TaskItem.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { useTasks } from '../../composables/useTasks';
+import { sortTasks } from '../../domain/tasks';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{
@@ -16,10 +16,7 @@ const store = taskStore();
 
 const filteredTasks = computed(() => {
     const filtered = tasks.value.filter(task => showTask(task));
-    return sortBy(
-        filtered.map(t => ({ ...t, calculatedDueDate: calculateDueDate(t) })),
-        store.sortBy === 'dueDate' ? 'calculatedDueDate' : store.sortBy,
-    );
+    return sortTasks(filtered, store.sortForView(projectId.value, 'project-list'), calculateDueDate);
 });
 </script>
 <template>

@@ -35,4 +35,21 @@ describe('personal task view state', () => {
         setActivePinia(createPinia());
         expect(taskStore().preferencesForList(3, list)).toMatchObject({ isCollapsed: false, showCompleted: false });
     });
+
+    it('persists project filters and keeps sorting separate per view', () => {
+        const store = taskStore();
+        expect(store.filtersForProject(3)).toEqual({ status: 'default', priority: 'all' });
+        expect(store.sortForView(3, 'project-board')).toBe('manual');
+        expect(store.sortForView(3, 'project-list')).toBe('dueDate');
+
+        store.updateProjectFilters(3, { status: 'completed', priority: 'urgent' });
+        store.setSortForView(3, 'project-board', 'priority');
+
+        setActivePinia(createPinia());
+        const restored = taskStore();
+        expect(restored.filtersForProject(3)).toEqual({ status: 'completed', priority: 'urgent' });
+        expect(restored.filtersForProject(4)).toEqual({ status: 'default', priority: 'all' });
+        expect(restored.sortForView(3, 'project-board')).toBe('priority');
+        expect(restored.sortForView(3, 'project-list')).toBe('dueDate');
+    });
 });

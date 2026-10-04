@@ -1,4 +1,5 @@
 import { cloneDeep, isEqual, pick } from 'lodash-es';
+import type { TaskSort } from '../composables/storeTasks';
 
 export const TASK_PRIORITIES: Array<{
     id: TaskPriority;
@@ -16,6 +17,22 @@ export const TASK_PRIORITIES: Array<{
 
 export const taskPriority = (priority: TaskPriority | undefined) =>
     TASK_PRIORITIES.find(option => option.id === priority) ?? TASK_PRIORITIES[0];
+
+export function sortTasks(
+    tasks: TransformedTask[],
+    sort: TaskSort,
+    dueDate: (task: TransformedTask) => Date | undefined = () => undefined,
+) {
+    return [...tasks].sort((left, right) => {
+        if (sort === 'manual') return left.sortKey - right.sortKey;
+        if (sort === 'name') return left.name.localeCompare(right.name, 'de');
+        if (sort === 'priority') return taskPriority(right.priority).weight - taskPriority(left.priority).weight;
+        if (sort === 'updatedAt') return Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? '');
+        const leftDate = dueDate(left)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        const rightDate = dueDate(right)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        return leftDate - rightDate;
+    });
+}
 
 export function normalizeTaskUrl(value: string | undefined): string | undefined {
     const input = value?.trim();

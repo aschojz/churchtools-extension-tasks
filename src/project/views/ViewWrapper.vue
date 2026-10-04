@@ -4,16 +4,10 @@ import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
 import DialogTask from '../../components/taskDialog/DialogTask.vue';
-import { taskStore } from '../../composables/storeTasks';
+import { taskStore, type TaskPriorityFilter, type TaskSort, type TaskStatusFilter } from '../../composables/storeTasks';
 import { firstOrSelf } from '../../platform';
 
-const props = withDefaults(
-    defineProps<{
-        subTaskToggle?: boolean;
-        projectId: number;
-    }>(),
-    { subTaskToggle: true },
-);
+const props = defineProps<{ projectId: number }>();
 
 const fullscreen = ref(false);
 const onFullscreen = () => {
@@ -28,6 +22,40 @@ const projectSearch = computed({
 const listIsOpen = ref(false);
 
 const route = useRoute();
+const viewId = computed(() => String(route.name ?? 'project'));
+const filters = computed(() => store.filtersForProject(props.projectId));
+const statusFilter = computed({
+    get: () => filters.value.status,
+    set: (status: TaskStatusFilter) => store.updateProjectFilters(props.projectId, { status }),
+});
+const priorityFilter = computed({
+    get: () => filters.value.priority,
+    set: (priority: TaskPriorityFilter) => store.updateProjectFilters(props.projectId, { priority }),
+});
+const sortMode = computed({
+    get: () => store.sortForView(props.projectId, viewId.value),
+    set: (sort: TaskSort) => store.setSortForView(props.projectId, viewId.value, sort),
+});
+const statusOptions = [
+    { id: 'default', label: 'Status: Je Liste' },
+    { id: 'open', label: 'Status: Offen' },
+    { id: 'completed', label: 'Status: Erledigt' },
+    { id: 'all', label: 'Status: Alle' },
+];
+const priorityOptions = [
+    { id: 'all', label: 'Priorität: Alle' },
+    { id: 'urgent', label: 'Priorität: Dringend' },
+    { id: 'high', label: 'Priorität: Hoch' },
+    { id: 'medium', label: 'Priorität: Mittel' },
+    { id: 'low', label: 'Priorität: Niedrig' },
+];
+const sortOptions = [
+    { id: 'manual', label: 'Sortierung: Manuell' },
+    { id: 'dueDate', label: 'Sortierung: Fälligkeit' },
+    { id: 'priority', label: 'Sortierung: Priorität' },
+    { id: 'name', label: 'Sortierung: Titel' },
+    { id: 'updatedAt', label: 'Sortierung: Zuletzt geändert' },
+];
 const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
 const viewNavigation: NavigationMenuItem[] = [
     { label: 'Meine Aufgaben', icon: 'i-lucide-user-check', to: { name: 'my-tasks' } },
@@ -46,18 +74,41 @@ const viewNavigation: NavigationMenuItem[] = [
         <div class="project-view-header shrink-0 border-b">
             <UDashboardToolbar>
                 <template #left>
-                    <UInput
-                        v-model="projectSearch"
-                        class="w-72 max-w-full"
-                        icon="i-lucide-search"
-                        placeholder="Aufgaben in diesem Projekt filtern …"
-                    />
+                    <div class="flex flex-wrap items-center gap-2">
+                        <UInput
+                            v-model="projectSearch"
+                            class="w-64 max-w-full"
+                            icon="i-lucide-search"
+                            placeholder="Aufgaben filtern …"
+                        />
+                        <USelect
+                            v-model="statusFilter"
+                            class="w-40"
+                            :items="statusOptions"
+                            label-key="label"
+                            value-key="id"
+                        />
+                        <USelect
+                            v-model="priorityFilter"
+                            class="w-44"
+                            :items="priorityOptions"
+                            label-key="label"
+                            value-key="id"
+                        />
+                        <USelect
+                            v-model="sortMode"
+                            class="w-52"
+                            :items="sortOptions"
+                            label-key="label"
+                            value-key="id"
+                        />
+                    </div>
                 </template>
                 <template #right>
                     <slot name="extra-actions"></slot>
                     <slot name="actions">
                         <UButton
-                            :aria-label="fullscreen ? 'Vollbild verlassen' : 'Vollbild öffnen'"
+                            aria-label="Liste erstellen"
                             color="neutral"
                             icon="i-lucide-plus"
                             label="Liste"
@@ -65,6 +116,7 @@ const viewNavigation: NavigationMenuItem[] = [
                             @click="listIsOpen = true"
                         />
                         <UButton
+                            :aria-label="fullscreen ? 'Vollbild verlassen' : 'Vollbild öffnen'"
                             color="neutral"
                             :icon="fullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
                             variant="outline"

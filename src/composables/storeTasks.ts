@@ -6,8 +6,17 @@ type ListPreferences = {
     showCompleted?: boolean;
     showSubTasks?: boolean;
 };
+export type TaskStatusFilter = 'default' | 'open' | 'completed' | 'all';
+export type TaskPriorityFilter = 'all' | Exclude<TaskPriority, 'none'>;
+export type TaskSort = 'manual' | 'dueDate' | 'priority' | 'name' | 'updatedAt';
+type ProjectFilters = { status: TaskStatusFilter; priority: TaskPriorityFilter };
 
 const STORAGE_KEY = 'extension-tasks:view-preferences';
+const PROJECT_VIEW_STORAGE_KEY = 'extension-tasks:project-views';
+type StoredProjectViews = {
+    filters?: Record<number, Partial<ProjectFilters>>;
+    sorting?: Record<string, TaskSort>;
+};
 const loadPreferences = (): Record<string, ListPreferences> => {
     try {
         const value = localStorage.getItem(STORAGE_KEY);
@@ -16,12 +25,51 @@ const loadPreferences = (): Record<string, ListPreferences> => {
         return {};
     }
 };
+const loadProjectViews = (): StoredProjectViews => {
+    try {
+        const value = localStorage.getItem(PROJECT_VIEW_STORAGE_KEY);
+        return value ? (JSON.parse(value) as StoredProjectViews) : {};
+    } catch {
+        return {};
+    }
+};
 
 export const taskStore = defineStore('tasks', () => {
-    const showFullfilled = ref(true),
-        sortBy = ref('dueDate'),
-        searchByProject = ref<Record<number, string>>({}),
-        listPreferences = ref<Record<string, ListPreferences>>(loadPreferences());
+    const storedProjectViews = loadProjectViews();
+    const searchByProject = ref<Record<number, string>>({}),
+        listPreferences = ref<Record<string, ListPreferences>>(loadPreferences()),
+        filtersByProject = ref<Record<number, Partial<ProjectFilters>>>(storedProjectViews.filters ?? {}),
+        sortingByView = ref<Record<string, TaskSort>>(storedProjectViews.sorting ?? {});
+
+    const persistProjectViews = () => {
+        try {
+            localStorage.setItem(
+                PROJECT_VIEW_STORAGE_KEY,
+                JSON.stringify({ filters: filtersByProject.value, sorting: sortingByView.value }),
+            );
+        } catch {
+            // The view remains usable when storage is disabled or full.
+        }
+    };
+    const filtersForProject = (projectId: number): ProjectFilters => ({
+        status: 'default',
+        priority: 'all',
+        ...filtersByProject.value[projectId],
+    });
+    const updateProjectFilters = (projectId: number, update: Partial<ProjectFilters>) => {
+        filtersByProject.value = {
+            ...filtersByProject.value,
+            [projectId]: { ...filtersByProject.value[projectId], ...update },
+        };
+        persistProjectViews();
+    };
+    const sortingKey = (projectId: number, view: string) => `${projectId}:${view}`;
+    const sortForView = (projectId: number, view: string): TaskSort =>
+        sortingByView.value[sortingKey(projectId, view)] ?? (view === 'project-board' ? 'manual' : 'dueDate');
+    const setSortForView = (projectId: number, view: string, sort: TaskSort) => {
+        sortingByView.value = { ...sortingByView.value, [sortingKey(projectId, view)]: sort };
+        persistProjectViews();
+    };
 
     const searchForProject = (projectId: number) => searchByProject.value[projectId] ?? '';
     const setSearchForProject = (projectId: number, search: string) => {
@@ -55,8 +103,10 @@ export const taskStore = defineStore('tasks', () => {
     };
 
     return {
-        showFullfilled,
-        sortBy,
+        filtersForProject,
+        updateProjectFilters,
+        sortForView,
+        setSortForView,
         searchForProject,
         setSearchForProject,
         preferencesForList,

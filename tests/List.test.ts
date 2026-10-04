@@ -32,6 +32,7 @@ const item = {
     type: 'task' as const,
     name: 'Task',
     fullfilled: false,
+    priority: 'none' as const,
     list: 100,
     sortKey: 10000,
 };
@@ -72,5 +73,12 @@ describe('board writes only on deliberate moves', () => {
         await flushPromises();
         expect(wrapper.get('[role="alert"]').text()).toContain('fehlgeschlagen');
         expect(item.list).toBe(100);
+    });
+    it('does not persist drag order while a calculated sort is active', async () => {
+        const wrapper = render({ id: 200, name: 'Real', type: 'list', sortKey: 0, dataCategoryId: 1 });
+        await wrapper.setProps({ sort: 'priority' });
+        wrapper.findComponent({ name: 'Draggable' }).vm.$emit('change', { moved: { element: item } });
+        await flushPromises();
+        expect(mocks.updateTask).not.toHaveBeenCalled();
     });
 });

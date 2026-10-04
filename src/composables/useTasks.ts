@@ -171,10 +171,18 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
             : { showCompleted: false, showSubTasks: false };
         const showCompleted = preferences.showCompleted;
         const showSubTasks = preferences.showSubTasks;
+        const filters = store.filtersForProject(pId.value);
         const parent = findParent(task);
+        const matchesStatus =
+            filters.status === 'all' ||
+            (filters.status === 'open' && !task.fullfilled) ||
+            (filters.status === 'completed' && task.fullfilled) ||
+            (filters.status === 'default' && (showCompleted || !task.fullfilled));
+        const matchesPriority = filters.priority === 'all' || task.priority === filters.priority;
         return (
             tasksInSearch.value[task.id] &&
-            ((!showCompleted && !task.fullfilled) || showCompleted) &&
+            matchesStatus &&
+            matchesPriority &&
             ((!showSubTasks && !parent) || showSubTasks)
         );
     };

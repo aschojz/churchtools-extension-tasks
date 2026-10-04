@@ -3,10 +3,10 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import { sortBy } from 'lodash-es';
 import { computed, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
-import { taskStore } from '../composables/storeTasks';
+import { taskStore, type TaskSort } from '../composables/storeTasks';
 import { useLists } from '../composables/useLists';
 import { useTasks } from '../composables/useTasks.ts';
-import { reorderTasks } from '../domain/tasks';
+import { reorderTasks, sortTasks } from '../domain/tasks';
 import DialogList from './DialogList.vue';
 import NewTask from './NewTask.vue';
 import Task from './TaskItem.vue';
@@ -20,8 +20,9 @@ const props = withDefaults(
         showTask?: boolean;
         isDraggable?: boolean;
         projectId: number;
+        sort?: TaskSort;
     }>(),
-    { items: () => [], isDraggable: true },
+    { items: () => [], isDraggable: true, sort: 'manual' },
 );
 
 const pId = computed(() => props.projectId);
@@ -34,17 +35,16 @@ const updatePreferences = (update: Parameters<typeof store.updateListPreferences
 const projectSearch = computed(() => store.searchForProject(props.projectId));
 
 const initItems = (items: TransformedTask[]) => {
-    internItems.value = sortBy(items, projectSearch.value ? 'score' : 'sortKey');
+    internItems.value = projectSearch.value
+        ? sortBy(items, 'score')
+        : sortTasks(items, props.sort, task => calculateDueDate(task));
 };
 onMounted(() => initItems(props.items));
-watch(
-    () => props.items,
-    () => {
-        initItems(props.items);
-    },
-);
+watch([() => props.items, () => props.sort, projectSearch], () => {
+    initItems(props.items);
+});
 const internItems = ref<TransformedTask[]>([]);
-const { updateTask } = useTasks(pId);
+const { updateTask, calculateDueDate } = useTasks(pId);
 const saveError = ref('');
 const isSaving = ref(false);
 const deleteSelectedList = async (list: TransformedList) => {
@@ -57,7 +57,14 @@ const deleteSelectedList = async (list: TransformedList) => {
     }
 };
 const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
-    if (!props.isDraggable || props.list.type !== 'list' || isSaving.value || (!event.added && !event.moved)) return;
+    if (
+        !props.isDraggable ||
+        props.sort !== 'manual' ||
+        props.list.type !== 'list' ||
+        isSaving.value ||
+        (!event.added && !event.moved)
+    )
+        return;
     isSaving.value = true;
     saveError.value = '';
     try {
@@ -189,7 +196,7 @@ const listIsOpen = ref<TransformedList>();
                 v-model="internItems"
                 animation="200"
                 class="flex min-h-full flex-col gap-2"
-                :disabled="isSaving || !!projectSearch"
+                :disabled="isSaving || !!projectSearch || sort !== 'manual'"
                 group="tasks"
                 item-key="id"
                 @change="onDragChange"
