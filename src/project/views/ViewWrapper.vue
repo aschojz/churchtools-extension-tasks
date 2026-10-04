@@ -134,6 +134,7 @@ const viewNavigation: NavigationMenuItem[] = [
     { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
     { label: 'Kalender', icon: 'i-lucide-calendar-days', to: { name: 'project-calendar' } },
     { label: 'Timeline', icon: 'i-lucide-gantt-chart', to: { name: 'project-timeline' } },
+    { label: 'Auswertung', icon: 'i-lucide-chart-no-axes-column', to: { name: 'project-insights' } },
     { label: 'Archiv', icon: 'i-lucide-archive', to: { name: 'project-archive' } },
     { label: 'Papierkorb', icon: 'i-lucide-trash-2', to: { name: 'project-trash' } },
 ];

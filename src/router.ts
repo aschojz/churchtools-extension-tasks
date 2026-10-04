@@ -11,6 +11,7 @@ const TrashView = () => import('./project/views/TrashView.vue');
 const ArchiveView = () => import('./project/views/ArchiveView.vue');
 const CalendarView = () => import('./project/views/CalendarView.vue');
 const TimelineView = () => import('./project/views/TimelineView.vue');
+const InsightsView = () => import('./project/views/InsightsView.vue');
 const Overview = () => import('./views/Overview.vue');
 
 export const routes: RouteRecordRaw[] = [
@@ -59,6 +60,12 @@ export const routes: RouteRecordRaw[] = [
                 path: 'timeline/:taskId?',
                 name: 'project-timeline',
                 component: TimelineView,
+                props: true,
+            },
+            {
+                path: 'insights/:taskId?',
+                name: 'project-insights',
+                component: InsightsView,
                 props: true,
             },
             {

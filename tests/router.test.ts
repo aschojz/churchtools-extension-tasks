@@ -18,6 +18,13 @@ describe('task routes', () => {
         expect(resolved.params).toMatchObject({ projectId: '3', taskId });
     });
 
+    it('resolves the project insights route', () => {
+        const resolved = createAppRouter(createMemoryHistory('/ccm/tasks/')).resolve('/3/insights');
+        expect(resolved.name).toBe('project-insights');
+        expect(resolved.params).toEqual({ projectId: '3' });
+        expect(createAppRouter(createMemoryHistory('/ccm/tasks/')).resolve('/3/insights/42').params.taskId).toBe('42');
+    });
+
     it('redirects a project root to its personal task view', () => {
         const router = createAppRouter(createMemoryHistory('/ccm/tasks/'));
         const projectRoot = router.resolve('/3').matched.at(-1);

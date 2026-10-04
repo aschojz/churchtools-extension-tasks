@@ -138,7 +138,7 @@ Store-Upgrade-Test bleiben offen.
 | FEAT-01  | **P2** | Feature            | Prioritäten, Filter, Sortierung, gespeicherte Ansichten und Mehrfachaktionen fehlen |
 | FEAT-02  | **P3** | Feature            | Wiederholungen, Erinnerungen, Vorlagen, Papierkorb und Abhängigkeiten fehlen        |
 | FEAT-03  | **P3** | Feature            | Anhänge, Erwähnungen, Abos und ChurchTools-Objektbezüge fehlen                      |
-| FEAT-04  | **P3** | Feature            | Kalender und Timeline sind umgesetzt; Kapazität und Auswertungen fehlen             |
+| FEAT-04  | **P3** | Feature            | Kalender, Timeline und eine kompakte Projektauswertung sind umgesetzt               |
 
 ## 6. Findings nach Typ
 
