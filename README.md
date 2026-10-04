@@ -16,7 +16,7 @@ Unteraufgaben, Blocker, Wiederholungen, Vorlagen, Archiv und Papierkorb.
 - globale Suche und Schnellerfassung per Taste `N`
 - Systemstatus mit Version, Commit, Datenschema und datensparsamer Fehlerdiagnose
 - Aufgabenabhängigkeiten mit sichtbaren Blockern und abgesichertem Abschluss
-- Kalender, Timeline und Projektauswertung mit lokalem CSV-Export
+- Kalender, Timeline und Projektauswertung mit lokalem CSV-Export und geprüftem CSV-Import
 - persönliche gespeicherte Ansichten und Aufgabenvorlagen
 
 ## Lokal entwickeln

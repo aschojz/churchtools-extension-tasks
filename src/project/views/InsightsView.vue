@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { downloadTextFile } from '../../application/download';
 import { useLists } from '../../composables/useLists';
@@ -7,11 +7,13 @@ import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
 import { taskStore, type ProjectFilters } from '../../composables/storeTasks';
+import TaskImportDialog from '../../components/TaskImportDialog.vue';
 import { dueDateBucket, isDueWithinDays } from '../../domain/tasks';
 import { tasksToCsv } from '../../domain/taskExport';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
+const importOpen = ref(false);
 const projectId = computed(() => Number(props.projectId));
 const { tasks, calculateDueDate } = useTasks(projectId);
 const { people } = useProjectTaskContext();
@@ -108,6 +110,13 @@ const metrics = computed(() => [
         <template #actions>
             <UButton
                 color="neutral"
+                icon="i-lucide-upload"
+                label="CSV importieren"
+                variant="outline"
+                @click="importOpen = true"
+            />
+            <UButton
+                color="neutral"
                 :disabled="!visibleTasks.length"
                 icon="i-lucide-download"
                 label="CSV exportieren"
@@ -187,5 +196,6 @@ const metrics = computed(() => [
                 variant="subtle"
             />
         </div>
+        <TaskImportDialog v-if="importOpen" :project-id="projectId" @close="importOpen = false" />
     </ViewWrapper>
 </template>

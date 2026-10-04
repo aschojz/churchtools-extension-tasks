@@ -8,7 +8,7 @@
 - konkrete Personenfilter und persönliche gespeicherte Ansichten
 - Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
 - persönliche Aufgabenvorlagen pro Projekt
-- CSV-Export der gefilterten Projektauswertung
+- CSV-Export und sicherer CSV-Import mit Vorschau, Zuordnungsprüfung und Rückabwicklung
 - optionale Startdaten in Karten, Kalender, Timeline und Export
 - täglich, wöchentlich oder monatlich wiederkehrende Aufgaben mit frei wählbarem Intervall
 - responsiver Tab-Überlauf und aktivierbare Sammelauswahl in Board-, Listen-, Tag- und Unteraufgabenansichten
@@ -16,6 +16,7 @@
 ### Betrieb und Daten
 
 - Schema 6 für Aufgabenabhängigkeiten, Startdaten und Wiederholungen mit getesteten Migrationen
+- Schutz exportierter CSV-Zellen vor Formelausführung in Tabellenprogrammen
 - Migrationsvorschau für erkannte Altwerte im Systemstatus
 - korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
 

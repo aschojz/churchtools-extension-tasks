@@ -15,7 +15,8 @@ Stand: 04.10.2026 · Version 0.4.0
 - Erledigte Aufgaben können archiviert, gelöschte Aufgaben aus dem Papierkorb
   wiederhergestellt werden. Beide Abläufe erhalten Unteraufgabenbeziehungen.
 - Monatskalender, Timeline und Auswertung ergänzen die Aufgabenansichten. Persönliche
-  Ansichten und Aufgabenvorlagen werden lokal gespeichert; die Auswertung exportiert CSV.
+  Ansichten und Aufgabenvorlagen werden lokal gespeichert; die Auswertung exportiert
+  und importiert CSV mit Vorschau und geprüfter Zuordnung.
 - Aufgaben können andere Aufgaben blockieren. Offene Blocker verhindern den Abschluss,
   und zyklische Abhängigkeiten werden abgewiesen.
 - Aufgaben können sich täglich, wöchentlich oder monatlich wiederholen. Beim Abschluss
@@ -55,7 +56,7 @@ Stand: 04.10.2026 · Version 0.4.0
 
 ## Verifikation
 
-- `npm run check`: TypeScript, ESLint, 77 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
+- `npm run check`: TypeScript, ESLint, 80 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
 - `npm run package:verify`: Extension-Key, HTML-Assets, JavaScript, CSS und
   Archivstruktur erfolgreich geprüft.
 - Browser-Smoke-Tests im eingebetteten ChurchTools-Rahmen prüfen Dashboard,
