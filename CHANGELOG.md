@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.5.0 · 04.10.2026
+
+### Neu
+
+- optionale Startdaten in Karten, Kalender, Timeline und CSV-Export
+- täglich, wöchentlich oder monatlich wiederkehrende Aufgaben mit frei wählbarem Intervall
+- sicherer CSV-Import mit Vorschau, Zuordnungsprüfung und Rückabwicklung
+- aktivierbare Sammelauswahl in Board-, Listen-, Tag- und Unteraufgabenansichten
+- bestätigter Migrationslauf zum revisionsgeführten Zurückschreiben erkannter Altwerte
+
+### Stabilität und Architektur
+
+- Schema 6 für Startdaten und Wiederholungen mit getesteten Migrationen
+- zentrale Statusänderungen mit einheitlicher Blocker-, Wiederholungs- und Fehlerbehandlung
+- validierte persönliche Ansichts- und Listenpräferenzen
+- korrelierbare Fehler-IDs für Schnellerfassung und globale Suche
+- explizite Domänenimporte statt globaler TypeScript-Typ-Aliase
+- Schutz exportierter CSV-Zellen vor Formelausführung in Tabellenprogrammen
+
+### UI und Integration
+
+- responsiver Tab-Überlauf, kompaktere Projektsteuerung und ansichtsübergreifende Sammelaktionen
+- vollständig isolierte Lucide-Icons ohne Eingriff in Font Awesome des ChurchTools-Headers
+- vereinheitlichte Karten, Listenzeilen, Seitenleistenaktionen und Planungsansichten
+- korrigierte Kontraste für Kennzahlen und Sidebar-Titel im ChurchTools-Rahmen
+
 ## 0.4.0 · 04.10.2026
 
 ### Neu
@@ -8,20 +34,13 @@
 - konkrete Personenfilter und persönliche gespeicherte Ansichten
 - Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
 - persönliche Aufgabenvorlagen pro Projekt
-- CSV-Export und sicherer CSV-Import mit Vorschau, Zuordnungsprüfung und Rückabwicklung
-- optionale Startdaten in Karten, Kalender, Timeline und Export
-- täglich, wöchentlich oder monatlich wiederkehrende Aufgaben mit frei wählbarem Intervall
-- responsiver Tab-Überlauf und aktivierbare Sammelauswahl in Board-, Listen-, Tag- und Unteraufgabenansichten
+- CSV-Export der gefilterten Projektauswertung
 
 ### Betrieb und Daten
 
-- vollständig isolierte Lucide-Icons ohne Eingriff in Font Awesome des ChurchTools-Headers
-- Schema 6 für Aufgabenabhängigkeiten, Startdaten und Wiederholungen mit getesteten Migrationen
-- Schutz exportierter CSV-Zellen vor Formelausführung in Tabellenprogrammen
+- Schema 4 für Aufgabenabhängigkeiten mit getesteter Migration
 - Migrationsvorschau für erkannte Altwerte im Systemstatus
-- bestätigter Migrationslauf zum revisionsgeführten Zurückschreiben erkannter Altwerte
 - korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
-- explizite Domänenimporte statt globaler TypeScript-Typ-Aliase
 
 ## 0.3.0 · 04.10.2026
 

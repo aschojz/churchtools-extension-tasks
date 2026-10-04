@@ -2,7 +2,7 @@
 
 Stand: 04.10.2026
 
-Arbeitsstand: Version 0.4.0 nach dem Stabilitäts- und UI-Ausbau vom 04.10.2026
+Arbeitsstand: Version 0.5.0 nach dem Stabilitäts- und UI-Ausbau vom 04.10.2026
 
 ## 1. Kurzfazit
 

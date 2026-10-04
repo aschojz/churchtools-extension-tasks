@@ -1,6 +1,6 @@
 # Umsetzungsstand
 
-Stand: 04.10.2026 · Version 0.4.0
+Stand: 04.10.2026 · Version 0.5.0
 
 ## Produkt
 
