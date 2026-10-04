@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { parseProjectViewStorage, taskStore } from '../src/composables/storeTasks';
+import { parseListPreferences, parseProjectViewStorage, taskStore } from '../src/composables/storeTasks';
 
 const list: TransformedList = {
     id: 7,
@@ -158,5 +158,16 @@ describe('personal task view state', () => {
                 ],
             },
         });
+    });
+
+    it('sanitizes malformed list preferences', () => {
+        expect(
+            parseListPreferences({
+                '3:7': { isCollapsed: true, showCompleted: 'yes', showSubTasks: false },
+                invalid: { isCollapsed: false },
+                '3:8': 'broken',
+            }),
+        ).toEqual({ '3:7': { isCollapsed: true, showSubTasks: false } });
+        expect(parseListPreferences([])).toEqual({});
     });
 });

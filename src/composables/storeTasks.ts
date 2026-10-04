@@ -37,6 +37,20 @@ type StoredProjectViews = {
 };
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     !!value && typeof value === 'object' && !Array.isArray(value);
+export const parseListPreferences = (value: unknown): Record<string, ListPreferences> => {
+    if (!isRecord(value)) return {};
+    return Object.fromEntries(
+        Object.entries(value).flatMap(([key, preferences]) => {
+            if (!/^\d+:\d+$/.test(key) || !isRecord(preferences)) return [];
+            const parsed: ListPreferences = {
+                ...(typeof preferences.isCollapsed === 'boolean' ? { isCollapsed: preferences.isCollapsed } : {}),
+                ...(typeof preferences.showCompleted === 'boolean' ? { showCompleted: preferences.showCompleted } : {}),
+                ...(typeof preferences.showSubTasks === 'boolean' ? { showSubTasks: preferences.showSubTasks } : {}),
+            };
+            return Object.keys(parsed).length ? [[key, parsed]] : [];
+        }),
+    );
+};
 const statusFilters: TaskStatusFilter[] = ['default', 'open', 'completed', 'all'];
 const priorityFilters: TaskPriorityFilter[] = ['all', 'low', 'medium', 'high', 'urgent'];
 const dueFilters: TaskDueFilter[] = ['all', 'overdue', 'today', 'upcoming', 'none'];
@@ -108,7 +122,7 @@ export const parseProjectViewStorage = (value: unknown): StoredProjectViews => {
 const loadPreferences = (): Record<string, ListPreferences> => {
     try {
         const value = localStorage.getItem(STORAGE_KEY);
-        return value ? (JSON.parse(value) as Record<string, ListPreferences>) : {};
+        return value ? parseListPreferences(JSON.parse(value)) : {};
     } catch {
         return {};
     }
