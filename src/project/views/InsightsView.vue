@@ -137,7 +137,7 @@ const metrics = computed(() => [
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <p class="text-sm text-gray-500">{{ metric.label }}</p>
-                                <strong class="text-2xl">{{ metric.value }}</strong>
+                                <strong class="insight-value text-2xl">{{ metric.value }}</strong>
                             </div>
                             <UIcon class="size-6" :class="metric.colorClass" :name="metric.icon" />
                         </div>
@@ -153,7 +153,7 @@ const metrics = computed(() => [
                                 <h2 class="font-semibold">Fortschritt</h2>
                                 <p class="text-sm text-gray-500">Anteil erledigter sichtbarer Aufgaben</p>
                             </div>
-                            <strong class="text-2xl">{{ completionRate }} %</strong>
+                            <strong class="insight-value text-2xl">{{ completionRate }} %</strong>
                         </div>
                     </template>
                     <UProgress :model-value="completionRate" />
