@@ -529,7 +529,9 @@ Erfassung weiter beschleunigen.
 
 **Status:** Weiter ausgebaut. Neben den Daten- und Kompensationstests prüfen
 Komponententests jetzt die semantische Bedienung der Aufgabenkarten. Routertests
-decken Projektweiterleitung und Deep Links für alle Aufgabenansichten ab. Eine
+decken Projektweiterleitung und Deep Links für alle Aufgabenansichten ab. Die
+globale Suche besitzt einen Regressionstest, der den deaktivierten Fan-out bis
+zum Öffnen und das explizite Neuladen aller Projektabfragen prüft. Eine
 vollständige Browser-Suite und echte Store-Upgrade-Tests bleiben offen.
 
 **Gut abgedeckt:** Kernoperationen der Aufgabenlogik, CCM-Invalidierung,
@@ -540,7 +542,6 @@ URL-Validierung und Benutzerfehler.
 **Fehlend:**
 
 - Dialoge und Formularvalidierung
-- globale Suche und Request-Fan-out
 - CCM-Store-Installation und Upgrade
 
 **Empfehlung:** Tests entlang der Risiken ergänzen. Wenige Browser-Szenarien
