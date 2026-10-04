@@ -193,12 +193,20 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
             filters.assignee === 'all' ||
             (filters.assignee === 'mine' && currentUser.id > 0 && assignees.includes(currentUser.id)) ||
             (filters.assignee === 'unassigned' && assignees.length === 0);
+        const matchesList = filters.list === 'all' || listId === filters.list;
+        const taskTags = Array.isArray(task.tags) ? task.tags : [];
+        const matchesTag =
+            filters.tag === 'all' ||
+            (filters.tag === 'none' && taskTags.length === 0) ||
+            (typeof filters.tag === 'number' && taskTags.includes(filters.tag));
         return (
             tasksInSearch.value[task.id] &&
             matchesStatus &&
             matchesPriority &&
             matchesDue &&
             matchesAssignee &&
+            matchesList &&
+            matchesTag &&
             ((!showSubTasks && !parent) || showSubTasks)
         );
     };

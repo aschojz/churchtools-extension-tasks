@@ -43,6 +43,8 @@ describe('personal task view state', () => {
             priority: 'all',
             due: 'all',
             assignee: 'all',
+            list: 'all',
+            tag: 'all',
         });
         expect(store.sortForView(3, 'project-board')).toBe('manual');
         expect(store.sortForView(3, 'project-list')).toBe('dueDate');
@@ -52,6 +54,8 @@ describe('personal task view state', () => {
             priority: 'urgent',
             due: 'overdue',
             assignee: 'mine',
+            list: 7,
+            tag: 'none',
         });
         store.setSortForView(3, 'project-board', 'priority');
 
@@ -62,14 +66,21 @@ describe('personal task view state', () => {
             priority: 'urgent',
             due: 'overdue',
             assignee: 'mine',
+            list: 7,
+            tag: 'none',
         });
         expect(restored.filtersForProject(4)).toEqual({
             status: 'default',
             priority: 'all',
             due: 'all',
             assignee: 'all',
+            list: 'all',
+            tag: 'all',
         });
         expect(restored.sortForView(3, 'project-board')).toBe('priority');
         expect(restored.sortForView(3, 'project-list')).toBe('dueDate');
+
+        restored.resetProjectFilters(3);
+        expect(restored.filtersForProject(3)).toEqual(restored.filtersForProject(4));
     });
 });

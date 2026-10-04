@@ -8,10 +8,14 @@ import {
     taskStore,
     type TaskAssigneeFilter,
     type TaskDueFilter,
+    type TaskListFilter,
     type TaskPriorityFilter,
     type TaskSort,
     type TaskStatusFilter,
+    type TaskTagFilter,
 } from '../../composables/storeTasks';
+import { useLists } from '../../composables/useLists';
+import { useTags } from '../../composables/useTags';
 import { firstOrSelf } from '../../platform';
 
 const props = defineProps<{ projectId: number }>();
@@ -29,6 +33,9 @@ const projectSearch = computed({
 const listIsOpen = ref(false);
 
 const route = useRoute();
+const projectId = computed(() => props.projectId);
+const { lists } = useLists(projectId);
+const { tagsArray } = useTags(projectId);
 const viewId = computed(() => String(route.name ?? 'project'));
 const filters = computed(() => store.filtersForProject(props.projectId));
 const statusFilter = computed({
@@ -46,6 +53,14 @@ const dueFilter = computed({
 const assigneeFilter = computed({
     get: () => filters.value.assignee,
     set: (assignee: TaskAssigneeFilter) => store.updateProjectFilters(props.projectId, { assignee }),
+});
+const listFilter = computed({
+    get: () => filters.value.list,
+    set: (list: TaskListFilter) => store.updateProjectFilters(props.projectId, { list }),
+});
+const tagFilter = computed({
+    get: () => filters.value.tag,
+    set: (tag: TaskTagFilter) => store.updateProjectFilters(props.projectId, { tag }),
 });
 const sortMode = computed({
     get: () => store.sortForView(props.projectId, viewId.value),
@@ -76,6 +91,27 @@ const assigneeOptions = [
     { id: 'mine', label: 'Person: Mir zugewiesen' },
     { id: 'unassigned', label: 'Person: Nicht zugewiesen' },
 ];
+const listOptions = computed(() => [
+    { id: 'all' as const, label: 'Alle Listen' },
+    ...lists.value.map(list => ({ id: list.id, label: list.name })),
+]);
+const tagOptions = computed(() => [
+    { id: 'all' as const, label: 'Alle Tags' },
+    { id: 'none' as const, label: 'Ohne Tag' },
+    ...tagsArray.value.map(tag => ({ id: tag.id, label: tag.name })),
+]);
+const activeFilterCount = computed(
+    () =>
+        [
+            filters.value.status !== 'default',
+            filters.value.priority !== 'all',
+            filters.value.due !== 'all',
+            filters.value.assignee !== 'all',
+            filters.value.list !== 'all',
+            filters.value.tag !== 'all',
+        ].filter(Boolean).length,
+);
+const resetFilters = () => store.resetProjectFilters(props.projectId);
 const sortOptions = [
     { id: 'manual', label: 'Sortierung: Manuell' },
     { id: 'dueDate', label: 'Sortierung: Fälligkeit' },
@@ -108,34 +144,81 @@ const viewNavigation: NavigationMenuItem[] = [
                             icon="i-lucide-search"
                             placeholder="Aufgaben filtern …"
                         />
-                        <USelect
-                            v-model="statusFilter"
-                            class="w-40"
-                            :items="statusOptions"
-                            label-key="label"
-                            value-key="id"
-                        />
-                        <USelect
-                            v-model="priorityFilter"
-                            class="w-44"
-                            :items="priorityOptions"
-                            label-key="label"
-                            value-key="id"
-                        />
-                        <USelect
-                            v-model="dueFilter"
-                            class="w-48"
-                            :items="dueOptions"
-                            label-key="label"
-                            value-key="id"
-                        />
-                        <USelect
-                            v-model="assigneeFilter"
-                            class="w-52"
-                            :items="assigneeOptions"
-                            label-key="label"
-                            value-key="id"
-                        />
+                        <UPopover>
+                            <UButton
+                                color="neutral"
+                                icon="i-lucide-list-filter"
+                                :label="activeFilterCount ? `Filter (${activeFilterCount})` : 'Filter'"
+                                variant="outline"
+                            />
+                            <template #content>
+                                <div class="grid w-80 gap-3 p-4 sm:w-[34rem] sm:grid-cols-2">
+                                    <UFormField label="Status">
+                                        <USelect
+                                            v-model="statusFilter"
+                                            class="w-full"
+                                            :items="statusOptions"
+                                            label-key="label"
+                                            value-key="id"
+                                        />
+                                    </UFormField>
+                                    <UFormField label="Priorität">
+                                        <USelect
+                                            v-model="priorityFilter"
+                                            class="w-full"
+                                            :items="priorityOptions"
+                                            label-key="label"
+                                            value-key="id"
+                                        />
+                                    </UFormField>
+                                    <UFormField label="Fälligkeit">
+                                        <USelect
+                                            v-model="dueFilter"
+                                            class="w-full"
+                                            :items="dueOptions"
+                                            label-key="label"
+                                            value-key="id"
+                                        />
+                                    </UFormField>
+                                    <UFormField label="Verantwortlichkeit">
+                                        <USelect
+                                            v-model="assigneeFilter"
+                                            class="w-full"
+                                            :items="assigneeOptions"
+                                            label-key="label"
+                                            value-key="id"
+                                        />
+                                    </UFormField>
+                                    <UFormField label="Liste">
+                                        <USelect
+                                            v-model="listFilter"
+                                            class="w-full"
+                                            :items="listOptions"
+                                            label-key="label"
+                                            value-key="id"
+                                        />
+                                    </UFormField>
+                                    <UFormField label="Tag">
+                                        <USelect
+                                            v-model="tagFilter"
+                                            class="w-full"
+                                            :items="tagOptions"
+                                            label-key="label"
+                                            value-key="id"
+                                        />
+                                    </UFormField>
+                                    <div class="sm:col-span-2 sm:text-right">
+                                        <UButton
+                                            :disabled="!activeFilterCount"
+                                            icon="i-lucide-rotate-ccw"
+                                            label="Filter zurücksetzen"
+                                            variant="ghost"
+                                            @click="resetFilters"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+                        </UPopover>
                         <USelect
                             v-model="sortMode"
                             class="w-52"

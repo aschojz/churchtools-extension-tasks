@@ -10,12 +10,16 @@ export type TaskStatusFilter = 'default' | 'open' | 'completed' | 'all';
 export type TaskPriorityFilter = 'all' | Exclude<TaskPriority, 'none'>;
 export type TaskDueFilter = 'all' | 'overdue' | 'today' | 'upcoming' | 'none';
 export type TaskAssigneeFilter = 'all' | 'mine' | 'unassigned';
+export type TaskListFilter = 'all' | number;
+export type TaskTagFilter = 'all' | 'none' | number;
 export type TaskSort = 'manual' | 'dueDate' | 'priority' | 'name' | 'updatedAt';
 type ProjectFilters = {
     status: TaskStatusFilter;
     priority: TaskPriorityFilter;
     due: TaskDueFilter;
     assignee: TaskAssigneeFilter;
+    list: TaskListFilter;
+    tag: TaskTagFilter;
 };
 
 const STORAGE_KEY = 'extension-tasks:view-preferences';
@@ -63,6 +67,8 @@ export const taskStore = defineStore('tasks', () => {
         priority: 'all',
         due: 'all',
         assignee: 'all',
+        list: 'all',
+        tag: 'all',
         ...filtersByProject.value[projectId],
     });
     const updateProjectFilters = (projectId: number, update: Partial<ProjectFilters>) => {
@@ -70,6 +76,12 @@ export const taskStore = defineStore('tasks', () => {
             ...filtersByProject.value,
             [projectId]: { ...filtersByProject.value[projectId], ...update },
         };
+        persistProjectViews();
+    };
+    const resetProjectFilters = (projectId: number) => {
+        const { [projectId]: _removed, ...remaining } = filtersByProject.value;
+        void _removed;
+        filtersByProject.value = remaining;
         persistProjectViews();
     };
     const sortingKey = (projectId: number, view: string) => `${projectId}:${view}`;
@@ -114,6 +126,7 @@ export const taskStore = defineStore('tasks', () => {
     return {
         filtersForProject,
         updateProjectFilters,
+        resetProjectFilters,
         sortForView,
         setSortForView,
         searchForProject,

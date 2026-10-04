@@ -632,8 +632,8 @@ müssen die aktive Locale verwenden.
 ### P2 · Nächster sinnvoller Produktumfang
 
 - Priorität mit klarer visueller Darstellung (**umgesetzt mit Schema 2**)
-- kombinierbare Filter für Status, Priorität, Fälligkeit und eigene/nicht zugewiesene Aufgaben
-  (**umgesetzt und lokal pro Projekt gespeichert**); freie Personenauswahl, Tag und Liste bleiben offen
+- kombinierbare Filter für Status, Priorität, Fälligkeit, eigene/nicht zugewiesene Aufgaben,
+  Liste und Tag (**umgesetzt und lokal pro Projekt gespeichert**); freie Personenauswahl bleibt offen
 - Sortierung nach Fälligkeit, Priorität, Titel und Änderungsdatum (**umgesetzt und lokal pro Ansicht gespeichert**)
 - persönliche, gespeicherte Ansichten
 - Mehrfachauswahl und Bulk-Aktionen
