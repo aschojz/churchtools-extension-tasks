@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { reportOperationalError } from '../application/operationalErrors';
 import { colorOptions } from '../platform';
 import useProjects from './useProjects';
 
@@ -31,7 +32,11 @@ const onSave = async () => {
         await (props.project?.id ? updateProject : createProject)(proj.value);
         emit('close');
     } catch (error) {
-        saveError.value = error instanceof Error ? error.message : 'Projekt konnte nicht gespeichert werden.';
+        saveError.value = reportOperationalError(
+            'Projekt speichern',
+            error,
+            'Projekt konnte nicht gespeichert werden.',
+        );
     } finally {
         saving.value = false;
     }

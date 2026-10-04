@@ -3,6 +3,7 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import { sortBy } from 'lodash-es';
 import { computed, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
+import { reportOperationalError } from '../application/operationalErrors';
 import { taskStore, type TaskSort } from '../composables/storeTasks';
 import { useLists } from '../composables/useLists';
 import { useTasks } from '../composables/useTasks.ts';
@@ -53,7 +54,7 @@ const deleteSelectedList = async (list: TransformedList) => {
     try {
         await deleteList(list.id);
     } catch (caught) {
-        saveError.value = caught instanceof Error ? caught.message : 'Liste konnte nicht gelöscht werden.';
+        saveError.value = reportOperationalError('Liste löschen', caught, 'Liste konnte nicht gelöscht werden.');
     }
 };
 const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
@@ -70,8 +71,8 @@ const onDragChange = async (event: { added?: unknown; moved?: unknown }) => {
     try {
         for (const task of reorderTasks(internItems.value, props.list.id)) await updateTask(task);
     } catch (caught) {
-        saveError.value =
-            caught instanceof Error ? `Verschieben fehlgeschlagen: ${caught.message}` : 'Verschieben fehlgeschlagen.';
+        const moveError = caught instanceof Error ? new Error(`Verschieben fehlgeschlagen: ${caught.message}`) : caught;
+        saveError.value = reportOperationalError('Aufgaben verschieben', moveError, 'Verschieben fehlgeschlagen.');
         initItems(props.items);
     } finally {
         isSaving.value = false;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { sortBy } from 'lodash-es';
 import { computed, ref } from 'vue';
+import { reportOperationalError } from '../../application/operationalErrors';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { formatActivityChanges } from '../../domain/activity';
 import { formatDateTime, notNullish, personDisplay } from '../../platform';
@@ -38,7 +39,11 @@ const onComment = async () => {
         await props.saveComment(value);
         newComment.value = '';
     } catch (error) {
-        commentError.value = error instanceof Error ? error.message : 'Kommentar konnte nicht gespeichert werden.';
+        commentError.value = reportOperationalError(
+            'Kommentar speichern',
+            error,
+            'Kommentar konnte nicht gespeichert werden.',
+        );
     } finally {
         commentSaving.value = false;
     }

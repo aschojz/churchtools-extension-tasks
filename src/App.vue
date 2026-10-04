@@ -294,7 +294,7 @@ const newTaskRoute = computed(() =>
                                 v-if="authState.status === 'error'"
                                 class="m-4 mb-0 shrink-0"
                                 color="error"
-                                description="Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt."
+                                :description="`${authState.message ?? 'Anmeldung fehlgeschlagen.'} Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt.`"
                                 icon="i-lucide-user-x"
                                 title="Der aktuelle Benutzer konnte nicht geladen werden."
                                 variant="subtle"

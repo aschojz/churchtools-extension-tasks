@@ -2,6 +2,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { failWithCompensation } from '../../application/compensation';
+import { reportOperationalError } from '../../application/operationalErrors';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
 import { taskStore } from '../../composables/storeTasks';
@@ -37,8 +38,11 @@ const deleteSelectedTag = async (tag: TransformedTag) => {
             error,
             changedTasks.map(original => () => updateTask({ ...original, revision: (original.revision ?? 0) + 1 })),
         ).catch(compensationError => {
-            actionError.value =
-                compensationError instanceof Error ? compensationError.message : 'Tag konnte nicht gelöscht werden.';
+            actionError.value = reportOperationalError(
+                'Tag löschen',
+                compensationError,
+                'Tag konnte nicht gelöscht werden.',
+            );
         });
     }
 };

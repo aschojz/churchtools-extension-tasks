@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { operationalErrors } from '../application/operationalErrors';
 import { usePlugin } from '../composables/usePlugin';
 import { createDiagnosticSnapshot } from '../domain/diagnostics';
 import { dataIssues } from '../domain/storedData';
@@ -15,6 +16,7 @@ const snapshot = computed(() =>
         moduleId: moduleId.value,
         authentication: authState.status,
         dataIssues: dataIssues.value,
+        operationalErrors: operationalErrors.value,
     }),
 );
 const diagnosticText = computed(() => JSON.stringify(snapshot.value, null, 2));
@@ -68,6 +70,8 @@ const copyDiagnostics = async () => {
                         <dd>{{ authenticationLabel }}</dd>
                         <dt class="text-muted">Datenfehler</dt>
                         <dd>{{ snapshot.dataIssues.length }}</dd>
+                        <dt class="text-muted">Letzte Fehler</dt>
+                        <dd>{{ snapshot.operationalErrors.length }}</dd>
                     </dl>
                 </UCard>
             </div>
@@ -89,6 +93,18 @@ const copyDiagnostics = async () => {
                     color="warning"
                     :description="issue.message"
                     :title="`${issue.entity === 'project' ? 'Projekt' : 'Eintrag'} ${issue.id}`"
+                    variant="subtle"
+                />
+            </div>
+
+            <div v-if="snapshot.operationalErrors.length" class="mt-4 space-y-2">
+                <h3 class="font-semibold">Letzte technische Fehler</h3>
+                <UAlert
+                    v-for="error in snapshot.operationalErrors"
+                    :key="error.id"
+                    color="error"
+                    :description="`${new Date(error.occurredAt).toLocaleString('de-DE')} · ${error.context} · ${error.kind}`"
+                    :title="error.id"
                     variant="subtle"
                 />
             </div>

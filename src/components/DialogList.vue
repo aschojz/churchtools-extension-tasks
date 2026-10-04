@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue';
+import { reportOperationalError } from '../application/operationalErrors';
 import { useLists } from '../composables/useLists';
 
 const props = withDefaults(
@@ -36,7 +37,7 @@ const onSave = async () => {
         else await createList(payload);
         emit('close');
     } catch (caught) {
-        error.value = caught instanceof Error ? caught.message : 'Liste konnte nicht gespeichert werden.';
+        error.value = reportOperationalError('Liste speichern', caught, 'Liste konnte nicht gespeichert werden.');
     } finally {
         saving.value = false;
     }

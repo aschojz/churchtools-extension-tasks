@@ -1,5 +1,6 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
 import { reactive, readonly } from 'vue';
+import { reportOperationalError } from './application/operationalErrors';
 
 export const CtColor = {
     BASIC: 'basic',
@@ -38,8 +39,11 @@ export async function loadCurrentUser() {
     } catch (error) {
         currentUser.id = 0;
         currentUserState.status = 'error';
-        currentUserState.message =
-            error instanceof Error ? error.message : 'Der aktuelle Benutzer konnte nicht geladen werden.';
+        currentUserState.message = reportOperationalError(
+            'Anmeldung laden',
+            error,
+            'Der aktuelle Benutzer konnte nicht geladen werden.',
+        );
     }
 }
 

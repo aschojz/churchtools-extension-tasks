@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { failWithCompensation } from '../../application/compensation';
+import { reportOperationalError } from '../../application/operationalErrors';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
 import { appendComment } from '../../domain/tasks';
@@ -57,12 +58,18 @@ const createChild = async () => {
             await failWithCompensation('Unteraufgabe anlegen', error, [
                 () => deleteTask(child!.id, props.projectId, 1),
             ]).catch(compensationError => {
-                childError.value =
-                    compensationError instanceof Error
-                        ? compensationError.message
-                        : 'Unteraufgabe konnte nicht angelegt werden.';
+                childError.value = reportOperationalError(
+                    'Unteraufgabe anlegen',
+                    compensationError,
+                    'Unteraufgabe konnte nicht angelegt werden.',
+                );
             });
-        else childError.value = error instanceof Error ? error.message : 'Unteraufgabe konnte nicht angelegt werden.';
+        else
+            childError.value = reportOperationalError(
+                'Unteraufgabe anlegen',
+                error,
+                'Unteraufgabe konnte nicht angelegt werden.',
+            );
     } finally {
         childSaving.value = false;
     }

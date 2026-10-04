@@ -1,3 +1,4 @@
+import type { OperationalError } from '../application/operationalErrors';
 import type { DataIssue } from './storedData';
 import { CURRENT_SCHEMA_VERSION } from './storedData';
 
@@ -5,6 +6,7 @@ export type DiagnosticSnapshot = {
     application: { version: string; commit: string; schemaVersion: number };
     runtime: { moduleId?: number; authentication: 'loading' | 'authenticated' | 'error' };
     dataIssues: Array<Pick<DataIssue, 'entity' | 'id' | 'categoryId' | 'message'>>;
+    operationalErrors: OperationalError[];
 };
 
 export function createDiagnosticSnapshot(input: {
@@ -13,6 +15,7 @@ export function createDiagnosticSnapshot(input: {
     moduleId?: number;
     authentication: DiagnosticSnapshot['runtime']['authentication'];
     dataIssues: DataIssue[];
+    operationalErrors: OperationalError[];
 }): DiagnosticSnapshot {
     return {
         application: {
@@ -30,5 +33,6 @@ export function createDiagnosticSnapshot(input: {
             ...(categoryId ? { categoryId } : {}),
             message,
         })),
+        operationalErrors: input.operationalErrors.map(error => ({ ...error })),
     };
 }

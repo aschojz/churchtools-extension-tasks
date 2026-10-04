@@ -579,8 +579,10 @@ Vue-3-Linie; der als „latest“ gemeldete 2.x-Tag ist kein Upgrade.
 
 **Status:** Umgesetzt. Die Sidebar zeigt die Paketversion und öffnet einen
 Systemstatus mit Build-Commit, Datenschemaversion, Modul-ID, Anmeldestatus und
-isolierten Validierungsfehlern. Die kopierbare Diagnose enthält bewusst keine
-Aufgabeninhalte und keine Personendaten.
+isolierten Validierungsfehlern. Fehlgeschlagene sichtbare Schreibaktionen und
+die Anmeldung erhalten eine Fehler-ID, die im Systemstatus mit Zeitpunkt,
+Kontext und Fehlerklasse wiederzufinden ist. Die kopierbare Diagnose enthält
+bewusst keine Aufgabeninhalte, Fehlermeldungsinhalte oder Personendaten.
 
 **Beobachtung:** Die Anwendung zeigt keine Build-Version und bietet keine
 Diagnoseansicht für fehlerhafte CCM-Werte, Migrationsstand oder fehlgeschlagene

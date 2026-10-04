@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { reportOperationalError } from '../../application/operationalErrors';
 import { useTasks } from '../../composables/useTasks';
 import ViewWrapper from './ViewWrapper.vue';
 
@@ -25,7 +26,11 @@ const restore = async (task: TransformedTask) => {
     try {
         await restoreTaskTree(task);
     } catch (caught) {
-        error.value = caught instanceof Error ? caught.message : 'Aufgabe konnte nicht wiederhergestellt werden.';
+        error.value = reportOperationalError(
+            'Gelöschte Aufgabe wiederherstellen',
+            caught,
+            'Aufgabe konnte nicht wiederhergestellt werden.',
+        );
     } finally {
         restoringId.value = undefined;
     }

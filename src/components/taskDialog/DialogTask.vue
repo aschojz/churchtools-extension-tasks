@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
+import { reportOperationalError } from '../../application/operationalErrors';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
 import { useProject } from '../../project/useProject';
@@ -75,7 +76,11 @@ const onSave = async () => {
             await toggleTask();
         }
     } catch (error) {
-        saveError.value = error instanceof Error ? error.message : 'Speichern fehlgeschlagen. Bitte erneut versuchen.';
+        saveError.value = reportOperationalError(
+            'Aufgabe speichern',
+            error,
+            'Speichern fehlgeschlagen. Bitte erneut versuchen.',
+        );
     } finally {
         isSaving.value = false;
     }

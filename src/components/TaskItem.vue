@@ -3,6 +3,7 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { failWithCompensation } from '../application/compensation';
+import { reportOperationalError } from '../application/operationalErrors';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
 import { taskPriority } from '../domain/tasks';
 import { uiColor } from '../platform';
@@ -124,10 +125,11 @@ const runAction = async (action: () => Promise<unknown>) => {
     try {
         await action();
     } catch (caught) {
-        actionError.value =
-            caught instanceof Error
-                ? caught.message
-                : 'Aktion fehlgeschlagen. Bitte den aktuellen Aufgabenstand prüfen.';
+        actionError.value = reportOperationalError(
+            'Aufgabenaktion',
+            caught,
+            'Aktion fehlgeschlagen. Bitte den aktuellen Aufgabenstand prüfen.',
+        );
     }
 };
 const deleteRecursive = async (task: TransformedTask) => {

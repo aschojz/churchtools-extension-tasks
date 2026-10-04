@@ -2,6 +2,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref, watch } from 'vue';
 import { failWithCompensation } from '../../application/compensation';
+import { reportOperationalError } from '../../application/operationalErrors';
 import TaskItem from '../../components/TaskItem.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { useTasks } from '../../composables/useTasks';
@@ -60,10 +61,11 @@ const batchUpdate = async (transform: (task: TransformedTask) => TransformedTask
             error,
             changed.map(original => () => updateTask({ ...original, revision: (original.revision ?? 0) + 1 })),
         ).catch(compensationError => {
-            batchError.value =
-                compensationError instanceof Error
-                    ? compensationError.message
-                    : 'Die Sammelaktion konnte nicht abgeschlossen werden.';
+            batchError.value = reportOperationalError(
+                'Sammelaktion',
+                compensationError,
+                'Die Sammelaktion konnte nicht abgeschlossen werden.',
+            );
         });
     } finally {
         batchSaving.value = false;

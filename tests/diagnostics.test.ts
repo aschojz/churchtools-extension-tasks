@@ -9,12 +9,28 @@ describe('diagnostic snapshot', () => {
             moduleId: 7,
             authentication: 'authenticated',
             dataIssues: [{ entity: 'value', id: 42, categoryId: 3, message: 'Ungültiger Wert' }],
+            operationalErrors: [
+                {
+                    id: 'ERR-TEST-01',
+                    occurredAt: '2026-10-04T10:00:00.000Z',
+                    context: 'Aufgabe speichern',
+                    kind: 'Error',
+                },
+            ],
         });
 
         expect(snapshot).toEqual({
             application: { version: '1.2.3', commit: 'abc1234', schemaVersion: 3 },
             runtime: { moduleId: 7, authentication: 'authenticated' },
             dataIssues: [{ entity: 'value', id: 42, categoryId: 3, message: 'Ungültiger Wert' }],
+            operationalErrors: [
+                {
+                    id: 'ERR-TEST-01',
+                    occurredAt: '2026-10-04T10:00:00.000Z',
+                    context: 'Aufgabe speichern',
+                    kind: 'Error',
+                },
+            ],
         });
         expect(JSON.stringify(snapshot)).not.toContain('firstName');
         expect(JSON.stringify(snapshot)).not.toContain('taskName');

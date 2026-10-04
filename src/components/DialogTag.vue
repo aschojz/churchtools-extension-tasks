@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue';
+import { reportOperationalError } from '../application/operationalErrors';
 import { useTags } from '../composables/useTags';
 import { colorOptions, CtColor } from '../platform';
 
@@ -35,7 +36,7 @@ const onSave = async () => {
         else await createTag(value);
         emit('close');
     } catch (caught) {
-        error.value = caught instanceof Error ? caught.message : 'Tag konnte nicht gespeichert werden.';
+        error.value = reportOperationalError('Tag speichern', caught, 'Tag konnte nicht gespeichert werden.');
     } finally {
         saving.value = false;
     }
