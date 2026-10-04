@@ -1,8 +1,8 @@
 # ChurchTools Extension Tasks
 
-Aufgabenverwaltung für ChurchTools: projektübergreifende persönliche Übersicht,
-Listen und Boards, Prioritäten, kombinierbare Filter, verwaltbare Tags,
-Verantwortliche, Unteraufgaben, Fälligkeiten, Aktivitäten, Archiv und Papierkorb.
+Aufgabenverwaltung für ChurchTools: persönliche Übersicht, Listen und Boards,
+Kalender, Timeline, Auswertung, Prioritäten, Filter, Tags, Verantwortliche,
+Unteraufgaben, Blocker, Vorlagen, Archiv und Papierkorb.
 
 ## Funktionsumfang
 
@@ -16,6 +16,8 @@ Verantwortliche, Unteraufgaben, Fälligkeiten, Aktivitäten, Archiv und Papierko
 - globale Suche und Schnellerfassung per Taste `N`
 - Systemstatus mit Version, Commit, Datenschema und datensparsamer Fehlerdiagnose
 - Aufgabenabhängigkeiten mit sichtbaren Blockern und abgesichertem Abschluss
+- Kalender, Timeline und Projektauswertung mit lokalem CSV-Export
+- persönliche gespeicherte Ansichten und Aufgabenvorlagen
 
 ## Lokal entwickeln
 

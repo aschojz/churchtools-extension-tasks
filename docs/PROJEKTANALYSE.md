@@ -2,7 +2,7 @@
 
 Stand: 04.10.2026
 
-Untersuchter Commit: `477250a`
+Untersuchter Commit: `06ba394`
 
 ## 1. Kurzfazit
 
@@ -19,7 +19,7 @@ Kompensationen. Defekte Einzelwerte blockieren keine vollständige Ansicht.
 Die verbleibenden Freigaberisiken hängen überwiegend von externen ChurchTools-
 Eigenschaften ab: atomisches Compare-and-swap der CCM-API, die genaue Semantik
 der Sicherheitsstufe und ein realer Store-Upgrade-Test. Produktseitig bleiben
-vor allem Erinnerungen, Wiederholungen, Vorlagen und Benachrichtigungen offen.
+vor allem Erinnerungen, Wiederholungen, Benachrichtigungen und Projektvorlagen offen.
 
 ## 2. Prioritäten
 
@@ -37,7 +37,7 @@ in einem ersten Stabilisierungsschritt bearbeitet:
 
 | Finding | Status                   | Umsetzung                                                                                                                                                                                                                             |
 | ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 3 migriert. Defekte Einzelwerte werden isoliert und sichtbar gemeldet. Automatische Schreibmigrationen erfolgen beim nächsten regulären Speichern.             |
+| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 4 migriert. Defekte Einzelwerte werden isoliert, Altwerte in einer Vorschau gezählt und beim nächsten regulären Speichern migriert.                            |
 | PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                                                                  |
 | PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                                                               |
 | PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                                                                  |
@@ -59,7 +59,7 @@ nun defensiv normalisiert und durch das zentrale Laufzeitschema geprüft.
 
 - TypeScript-Prüfung erfolgreich
 - ESLint-Prüfung erfolgreich
-- 14 Testdateien mit 57 Tests erfolgreich
+- 17 Testdateien mit 70 Tests erfolgreich
 - Produktions-Build erfolgreich
 - Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
   Konsolenwarnungen oder Konsolenfehler geladen
@@ -69,9 +69,9 @@ nun defensiv normalisiert und durch das zentrale Laufzeitschema geprüft.
 
 ### 3.2 Build- und Bundle-Befunde
 
-- Das Initial-Bundle umfasst ungefähr 174 KB minifiziert bzw. 47 KB gzip.
-- Routen, Archiv, Papierkorb und größere Dialoge werden in eigene Chunks geteilt.
-- Der größte lazy Chunk bleibt mit ungefähr 456 KB unter Vites 500-KB-Grenze.
+- Das Initial-Bundle umfasst ungefähr 179 KB minifiziert bzw. 48 KB gzip.
+- Routen, Kalender, Timeline, Auswertung, Archiv, Papierkorb und größere Dialoge werden in eigene Chunks geteilt.
+- Der größte lazy Chunk bleibt mit ungefähr 458 KB unter Vites 500-KB-Grenze.
 - Vite meldet keine Chunk-Warnung.
 
 ### 3.3 Dependency- und Security-Stand
@@ -91,20 +91,20 @@ Store-Upgrade-Test bleiben offen.
 
 ## 4. Vorhandener Funktionsumfang
 
-| Bereich       | Vorhanden                                                      | Reifegrad / Einschränkung                                    |
-| ------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
-| Projekte      | Erstellen, bearbeiten, löschen, Farbe, Icon, Beschreibung      | Gute Basis; Löschen und Fehlerfälle brauchen mehr Schutz     |
-| Aufgaben      | Titel, Beschreibung, URL, Datum, Priorität, Abschluss          | Zusätzlich Archiv und wiederherstellbarer Papierkorb         |
-| Listen        | Mehrere Listen, Sortierung per Drag-and-drop, Ein-/Ausklappen  | Persönliche Anzeigeoptionen werden lokal gespeichert         |
-| Ansichten     | Board, kompakte Liste, „Meine Aufgaben“, Tags, Unteraufgaben   | Filter und Sortierung werden pro Projekt/Ansicht gespeichert |
-| Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, Löschen/Archivieren | Mehrschrittfehler werden clientseitig kompensiert            |
-| Tags          | CRUD, Mehrfachauswahl und Filter                               | Löschen bereinigt Aufgabenreferenzen mit Kompensation        |
-| Personen      | Zuweisung, Suche und Filter                                    | Filtert nach mir, unbesetzt oder einer konkreten Person      |
-| Fälligkeit    | Absolutes und relatives Fälligkeitsdatum                       | Relative Eingabe nur in bestimmten Bearbeitungswegen         |
-| Aktivität     | Kommentare und Änderungsprotokoll                              | Deutsche Anzeige; Kommentare bleiben Teil des Task-Objekts   |
-| Suche         | Projektbezogene und globale Suche                              | Projekt-Fan-out startet erst beim Öffnen                     |
-| Oberfläche    | Nuxt-UI-Dashboard, Navigation, Sidebar, Dialoge                | Semantik verbessert; vollständiger Screenreader-Test offen   |
-| Auslieferung  | Build, ZIP-Prüfung, CI Node 22/24                              | Realer Store-Upgrade-Test bleibt extern offen                |
+| Bereich       | Vorhanden                                                      | Reifegrad / Einschränkung                                   |
+| ------------- | -------------------------------------------------------------- | ----------------------------------------------------------- |
+| Projekte      | Erstellen, bearbeiten, löschen, Farbe, Icon, Beschreibung      | Gute Basis; Löschen und Fehlerfälle brauchen mehr Schutz    |
+| Aufgaben      | Titel, Beschreibung, URL, Datum, Priorität, Blocker, Abschluss | Zusätzlich Archiv und wiederherstellbarer Papierkorb        |
+| Listen        | Mehrere Listen, Sortierung per Drag-and-drop, Ein-/Ausklappen  | Persönliche Anzeigeoptionen werden lokal gespeichert        |
+| Ansichten     | Board, Liste, Kalender, Timeline, Auswertung                   | Filter, Sortierung und benannte Ansichten lokal gespeichert |
+| Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, Löschen/Archivieren | Mehrschrittfehler werden clientseitig kompensiert           |
+| Tags          | CRUD, Mehrfachauswahl und Filter                               | Löschen bereinigt Aufgabenreferenzen mit Kompensation       |
+| Personen      | Zuweisung, Suche und Filter                                    | Filtert nach mir, unbesetzt oder einer konkreten Person     |
+| Fälligkeit    | Absolutes und relatives Fälligkeitsdatum                       | Relative Eingabe nur in bestimmten Bearbeitungswegen        |
+| Aktivität     | Kommentare und Änderungsprotokoll                              | Deutsche Anzeige; Kommentare bleiben Teil des Task-Objekts  |
+| Suche         | Projektbezogene und globale Suche                              | Projekt-Fan-out startet erst beim Öffnen                    |
+| Oberfläche    | Nuxt-UI-Dashboard, Navigation, Sidebar, Dialoge                | Semantik verbessert; vollständiger Screenreader-Test offen  |
+| Auslieferung  | Build, ZIP-Prüfung, CI Node 22/24                              | Realer Store-Upgrade-Test bleibt extern offen               |
 
 ## 5. Priorisierte Übersicht
 

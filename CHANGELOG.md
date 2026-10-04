@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.0 · 04.10.2026
+
+### Neu
+
+- Monatskalender, chronologische Timeline und kompakte Projektauswertung
+- konkrete Personenfilter und persönliche gespeicherte Ansichten
+- Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
+- persönliche Aufgabenvorlagen pro Projekt
+- CSV-Export der gefilterten Projektauswertung
+
+### Betrieb und Daten
+
+- Schema 4 für Aufgabenabhängigkeiten mit getesteter Migration
+- Migrationsvorschau für erkannte Altwerte im Systemstatus
+- korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
+
 ## 0.3.0 · 04.10.2026
 
 ### Neu
@@ -10,13 +26,10 @@
 - Archiv für erledigte Aufgaben sowie Papierkorb mit Wiederherstellung
 - Schnellerfassung per Taste `N`
 - datensparsamer Systemstatus mit Version, Commit und Schema
-- Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
-- CSV-Export der gefilterten Projektauswertung
-- persönliche Aufgabenvorlagen pro Projekt
 
 ### Stabilität und Architektur
 
-- versionierte Laufzeitschemas und Migrationen bis Schema 4
+- versionierte Laufzeitschemas und Migrationen bis Schema 3
 - clientseitige Revisionen und sichtbare Konflikte bei parallelen Änderungen
 - Kompensation für mehrstufige Projekt-, Aufgaben-, Tag- und Sammeloperationen
 - explizites Domänenmodell ohne `any` in Aktivitätseinträgen
