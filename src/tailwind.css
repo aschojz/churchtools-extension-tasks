@@ -166,6 +166,14 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     background: transparent !important;
     box-shadow: none !important;
 }
+.tasks-sidebar-footer > a {
+    outline: none !important;
+}
+.tasks-sidebar-footer > a:focus-visible,
+.tasks-sidebar-footer > button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent), white 15%) !important;
+    outline-offset: 1px;
+}
 .tasks-sidebar-footer.is-collapsed > a,
 .tasks-sidebar-footer.is-collapsed > button {
     justify-content: center;
