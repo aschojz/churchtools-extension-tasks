@@ -1,6 +1,6 @@
 import { computed, inject, provide, type ComputedRef, type InjectionKey, type MaybeRefOrGetter } from 'vue';
-import { assertTaskCanComplete, taskProgress } from '../domain/tasks';
-import { CtColor, notNullish, personDisplay, useCurrentUser, type PersonDisplay } from '../platform';
+import { taskProgress } from '../domain/tasks';
+import { CtColor, notNullish, personDisplay, type PersonDisplay } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
 import { useTags } from './useTags';
 import { useTasks } from './useTasks';
@@ -34,18 +34,6 @@ export function provideProjectTaskContext(projectId: MaybeRefOrGetter<number>) {
     const people = computed(() =>
         Object.fromEntries((persons.value ?? []).map(person => [person.id, personDisplay(person)])),
     );
-    const currentUser = useCurrentUser();
-    const toggleTask = async (task: TransformedTask) => {
-        if (!task.fullfilled) assertTaskCanComplete(task, taskData.tasksMap.value);
-        const activity = [...(Array.isArray(task.activity) ? task.activity : [])];
-        activity.push({
-            personId: currentUser.id,
-            date: new Date().toISOString(),
-            type: 'fullfilled',
-            value: !task.fullfilled,
-        });
-        await taskData.updateTask({ ...task, fullfilled: !task.fullfilled, activity });
-    };
     const dueColor = (dueDate: Date | undefined) => {
         if (!dueDate) return CtColor.BASIC;
         const day = new Date(dueDate);
@@ -65,7 +53,7 @@ export function provideProjectTaskContext(projectId: MaybeRefOrGetter<number>) {
         deleteTask: taskData.deleteTask,
         archiveTaskTree: taskData.archiveTaskTree,
         archiveCompletedTaskTree: taskData.archiveCompletedTaskTree,
-        toggleTask,
+        toggleTask: taskData.toggleTask,
         getSuperParent: taskData.getSuperParent,
         getProgress: task => taskProgress(task, taskData.tasksMap.value),
         dueColor,

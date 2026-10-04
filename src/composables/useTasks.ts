@@ -99,6 +99,19 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     const tasksMap = computed(() => Object.fromEntries(tasks.value.map(t => [t.id, t])));
     const allTasksMap = computed(() => Object.fromEntries(allTasks.value.map(t => [t.id, t])));
 
+    const toggleTask = async (task: TransformedTask) => {
+        requireCurrentUser();
+        if (!task.fullfilled) assertTaskCanComplete(task, tasksMap.value);
+        const activity = [...(Array.isArray(task.activity) ? task.activity : [])];
+        activity.push({
+            personId: currentUser.id,
+            date: new Date().toISOString(),
+            type: 'fullfilled',
+            value: !task.fullfilled,
+        });
+        await updateTask({ ...task, fullfilled: !task.fullfilled, activity });
+    };
+
     const archiveTaskTree = async (root: TransformedTask) => {
         const originals = descendantIds(root, allTasksMap.value)
             .map(id => allTasksMap.value[id])
@@ -300,6 +313,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         showTask,
         createTask,
         updateTask,
+        toggleTask,
         getObjectDiff,
         calculateDueDate,
         deleteTask,

@@ -1,19 +1,22 @@
 import { sortBy } from 'lodash-es';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
-import { useCustomModuleDataValuesMutations } from '../data/ccm';
-import { assertTaskCanComplete } from '../domain/tasks';
-import { CtColor, notNullish, personDisplay, requireCurrentUser, useCurrentUser } from '../platform';
+import { CtColor, notNullish, personDisplay } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
-import { usePlugin } from './usePlugin';
 import { useTags } from './useTags';
 import { useTasks } from './useTasks';
 
 export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrGetter<number | undefined>) {
     const pId = computed(() => toValue(projectId));
     const tId = computed(() => toValue(taskId));
-    const { moduleId } = usePlugin();
-    const { updateCustomDataValue, deleteCustomDataValue } = useCustomModuleDataValuesMutations<Task>(moduleId, pId);
-    const { tasksMap, findParent, calculateDueDate, getSuperParent, getPercentFullfilled } = useTasks(pId);
+    const {
+        tasksMap,
+        findParent,
+        calculateDueDate,
+        getSuperParent,
+        getPercentFullfilled,
+        toggleTask: toggleSelectedTask,
+        deleteTask: deleteSelectedTask,
+    } = useTasks(pId);
 
     const task = computed(() => (tId.value ? tasksMap.value[tId.value] : undefined));
 
@@ -43,26 +46,12 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
         return sortBy(tt, 'name');
     });
 
-    const currentUser = useCurrentUser();
     const toggleTask = async () => {
-        requireCurrentUser();
         if (!task.value) return;
-        if (!task.value.fullfilled) assertTaskCanComplete(task.value, tasksMap.value);
-        const activity = [...(Array.isArray(task.value.activity) ? task.value.activity : [])];
-        activity.push({
-            personId: currentUser.id,
-            date: new Date().toISOString(),
-            type: 'fullfilled',
-            value: !task.value.fullfilled,
-        });
-        const payload = { ...task.value, fullfilled: !task.value.fullfilled, activity };
-        await updateCustomDataValue(payload);
+        await toggleSelectedTask(task.value);
     };
     const deleteTask = () => {
-        requireCurrentUser();
-        return tId.value
-            ? deleteCustomDataValue({ id: tId.value, dataCategoryId: pId.value, revision: task.value?.revision })
-            : undefined;
+        return tId.value ? deleteSelectedTask(tId.value, pId.value, task.value?.revision) : undefined;
     };
 
     const comments = computed(() =>
