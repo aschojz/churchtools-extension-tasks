@@ -1,8 +1,20 @@
 # ChurchTools Extension Tasks
 
 Aufgabenverwaltung für ChurchTools: projektübergreifende persönliche Übersicht,
-Listen und Boards, verwaltbare Tags, Verantwortliche, Unteraufgaben, Fälligkeiten
-und Aktivitäten.
+Listen und Boards, Prioritäten, kombinierbare Filter, verwaltbare Tags,
+Verantwortliche, Unteraufgaben, Fälligkeiten, Aktivitäten, Archiv und Papierkorb.
+
+## Funktionsumfang
+
+- Projekte mit Board, kompakter Liste, persönlichen Aufgaben, Tags und Unteraufgaben
+- Prioritäten sowie Filter nach Status, Priorität, Fälligkeit, Verantwortlichkeit,
+  Liste und Tag
+- Sortierung nach Fälligkeit, Priorität, Titel, Änderung oder manueller Reihenfolge
+- Mehrfachauswahl für gemeinsame Status- und Prioritätsänderungen
+- Kommentare, Aktivitätsverlauf, absolute und relative Fälligkeiten und sichere Links
+- Archiv für erledigte Aufgaben und wiederherstellbarer Papierkorb
+- globale Suche und Schnellerfassung per Taste `N`
+- Systemstatus mit Version, Commit, Datenschema und datensparsamer Fehlerdiagnose
 
 ## Lokal entwickeln
 
@@ -58,11 +70,13 @@ ChurchTools-Testinstanz geprüft werden.
 - Projekte sind CCM-Datenkategorien; Aufgaben, Listen und Tags sind JSON-Datenwerte.
 - `src/data/ccm.ts` kapselt REST-Verträge, Serialisierung und Invalidierung.
 - `src/data/queryClient.ts` ist der gemeinsame Client für Extension-Abfragen.
-- `src/domain/tasks.ts` enthält reine Funktionen für Entwürfe, Hierarchie, Termine
-  und Sortierung; die Regressionstests liegen unter `tests/`.
+- `src/domain/types.ts`, `storedData.ts` und `tasks.ts` enthalten das versionierte
+  Domänenmodell, Migrationen und reine Funktionen für Hierarchie, Termine und
+  Sortierung; die Regressionstests liegen unter `tests/`.
 - Nuxt UI stellt Dialoge, Felder, Menüs, Karten, Tags, Personen und Ladezustände
   bereit. Die Vue/Vite-Einbindung liegt in `vite.config.ts` und `src/main.ts`;
-  ein eigener Tailwind-Präfix verhindert CSS-Kollisionen mit dem ChurchTools-Rahmen.
+  auf `#tasks` gescopte Tailwind-Utilities verhindern CSS-Kollisionen mit dem
+  ChurchTools-Rahmen.
 - Der App-Rahmen verwendet Nuxt UI Dashboard mit einklappbarer, größenveränderbarer
   Projekt-Sidebar, Navbar, projektweiter Navigation und globaler Suche nach
   Projekten und Aufgaben.
@@ -83,8 +97,9 @@ die aktuelle Person kapselt `src/platform.ts`. Damit hängt der Build weder von
 internen Frontend-Paketen noch von einem benachbarten ChurchTools-Checkout ab.
 
 Font Awesome bleibt für Icons erhalten. Die Projektauswahl nutzt eine kuratierte
-lokale Icon-Liste; dadurch sind für die Oberfläche weder Apollo noch GraphQL oder
-die externe Font-Awesome-Suche erforderlich.
+lokale Icon-Liste und der Build bündelt CSS sowie Webfonts; dadurch sind für die
+Oberfläche weder Host-Styles, Apollo, GraphQL noch eine externe Icon-Suche
+erforderlich.
 
 Offene Themen, Audit-Einordnung und Entwicklungsplan:
 [Projektanalyse](docs/PROJEKTANALYSE.md) und [Umsetzungsstand](docs/UMSETZUNGSSTAND.md).

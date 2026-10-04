@@ -1,31 +1,26 @@
 # Extension Tasks – Projekt-Audit und Entwicklungsplan
 
-Stand: 03.10.2026
+Stand: 04.10.2026
 
-Untersuchter Commit: `e95424f`
+Untersuchter Commit: `477250a`
 
 ## 1. Kurzfazit
 
-Extension Tasks hat inzwischen einen tragfähigen Funktionskern und eine deutlich
-stimmigere Oberfläche. Projekte, Listen, Aufgaben, Unteraufgaben, Tags,
-Zuweisungen, Fälligkeiten, Kommentare, Suche und Drag-and-drop sind vorhanden.
-Die Anwendung lässt sich bauen, die vorhandenen Tests laufen durch und im
-lokalen ChurchTools-System treten auf der geprüften Board-Route keine
-Konsolenfehler auf.
+Extension Tasks besitzt inzwischen einen belastbaren Kern und eine eigenständige
+Nuxt-UI-Oberfläche. Projekte, Aufgaben, Listen, Boards, Unteraufgaben, Tags,
+Verantwortliche, Fälligkeiten, Kommentare, Prioritäten, kombinierbare Filter,
+Sortierungen, Mehrfachaktionen, Archiv und Papierkorb sind vorhanden.
 
-Für einen verlässlichen produktiven Einsatz fehlen vor allem Schutzmechanismen
-auf der Datenebene. Aufgaben und Projekte werden als vollständige JSON-Objekte
-in CCM-Werten gespeichert. Gleichzeitige Änderungen können sich deshalb
-unbemerkt überschreiben. Außerdem werden gespeicherte Daten nicht gegen ein
-Laufzeitschema geprüft und besitzen keine explizite Schemaversion. Beschädigte
-oder ältere Daten können dadurch ganze Ansichten unbrauchbar machen.
+Die wesentlichen Datenrisiken des ursprünglichen Audits sind clientseitig
+abgesichert: gespeicherte Werte durchlaufen Schema-3-Validierung und Migrationen,
+Revisionen erkennen konkurrierende Bearbeitungen und mehrstufige Abläufe besitzen
+Kompensationen. Defekte Einzelwerte blockieren keine vollständige Ansicht.
 
-Die nächsten Arbeiten sollten sich daher zuerst auf Datenintegrität,
-Migrationen und robuste Schreibvorgänge konzentrieren. Danach folgen
-Performance, Berechtigungen, Barrierefreiheit, CSS-Isolation und der
-Store-/Release-Prozess. Produktfunktionen wie Prioritäten, gespeicherte
-Ansichten, Erinnerungen oder Kalenderansichten bauen sinnvoll auf dieser Basis
-auf.
+Die verbleibenden Freigaberisiken hängen überwiegend von externen ChurchTools-
+Eigenschaften ab: atomisches Compare-and-swap der CCM-API, die genaue Semantik
+der Sicherheitsstufe und ein realer Store-Upgrade-Test. Produktseitig bleiben
+vor allem Erinnerungen, Wiederholungen, Vorlagen, Benachrichtigungen sowie
+Kalender- und Auswertungsansichten offen.
 
 ## 2. Prioritäten
 
@@ -36,29 +31,28 @@ auf.
 | **P2**    | Klarer Qualitäts-, Wartungs- oder Funktionsgewinn                                | Danach geplant umsetzen                    |
 | **P3**    | Ausbau und Differenzierung des Produkts                                          | Nach stabiler Kernplattform priorisieren   |
 
-### Umsetzungsstand vom 03.10.2026
+### Umsetzungsstand vom 04.10.2026
 
 Die im Anschluss an den Audit beauftragten Performance- und UI/UX-Punkte wurden
 in einem ersten Stabilisierungsschritt bearbeitet:
 
-| Finding | Status                   | Umsetzung                                                                                                                                                                                                                                       |
-| ------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen ein Laufzeitschema und werden von Version 0 auf Version 1 migriert. Defekte Einzelwerte werden isoliert und sichtbar gemeldet. Automatische Schreibmigrationen erfolgen erst beim nächsten regulären Speichern. |
-| PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                                                                            |
-| PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                                                                         |
-| PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                                                                            |
-| UX-01   | **Umgesetzt**            | Einklappen sowie die Anzeige erledigter Aufgaben und Unteraufgaben werden lokal pro Projekt und Liste gespeichert.                                                                                                                              |
-| UX-02   | **Umgesetzt**            | Suchtexte werden pro Projekt getrennt gehalten.                                                                                                                                                                                                 |
-| UI-02   | **Umgesetzt**            | Listenansichten besitzen eine kompakte Zeilendarstellung.                                                                                                                                                                                       |
-| UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                                                                               |
-| UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                                                                            |
-| A11Y-01 | **Weitgehend umgesetzt** | Aufgabentitel, Statusschalter und zentrale Icon-Aktionen verwenden semantische, benannte Bedienelemente. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                             |
-| UI-01   | **Weitgehend umgesetzt** | Tailwind Preflight ist deaktiviert, Utility-Selektoren werden unter `#tasks` erzeugt und das Dashboard berechnet seine Höhe aus dem tatsächlichen Einbaupunkt. Portal-Styles bleiben gezielt auf die aktive Extension-Seite begrenzt.           |
+| Finding | Status                   | Umsetzung                                                                                                                                                                                                                             |
+| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 3 migriert. Defekte Einzelwerte werden isoliert und sichtbar gemeldet. Automatische Schreibmigrationen erfolgen beim nächsten regulären Speichern.             |
+| PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                                                                  |
+| PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                                                               |
+| PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                                                                  |
+| UX-01   | **Umgesetzt**            | Einklappen sowie die Anzeige erledigter Aufgaben und Unteraufgaben werden lokal pro Projekt und Liste gespeichert.                                                                                                                    |
+| UX-02   | **Umgesetzt**            | Suchtexte werden pro Projekt getrennt gehalten.                                                                                                                                                                                       |
+| UI-02   | **Umgesetzt**            | Listenansichten besitzen eine kompakte Zeilendarstellung.                                                                                                                                                                             |
+| UX-03   | **Weitgehend umgesetzt** | Schreibfehler bleiben am betroffenen Bereich sichtbar; alle destruktiven Projekt-, Listen-, Tag- und Aufgabenaktionen verlangen eine Bestätigung.                                                                                     |
+| UX-04   | **Umgesetzt**            | Der Aufgabeneditor bietet eine direkte Listenauswahl und wählt beim Erstellen die Standardliste vor.                                                                                                                                  |
+| A11Y-01 | **Weitgehend umgesetzt** | Aufgabentitel, Statusschalter und zentrale Icon-Aktionen verwenden semantische, benannte Bedienelemente. Ein vollständiger Axe- und Screenreader-Test bleibt offen.                                                                   |
+| UI-01   | **Weitgehend umgesetzt** | Tailwind Preflight ist deaktiviert, Utility-Selektoren werden unter `#tasks` erzeugt und das Dashboard berechnet seine Höhe aus dem tatsächlichen Einbaupunkt. Portal-Styles bleiben gezielt auf die aktive Extension-Seite begrenzt. |
 
 Beim Browser-Smoke-Test wurde außerdem ein älterer CCM-Wert mit einem ungültigen
 `tags`-Feld gefunden. Array-Felder werden in Karten, Lookups und Editor-Drafts
-nun defensiv normalisiert. Das ersetzt nicht die unter DATA-02 geforderte
-vollständige Schemavalidierung und Migration.
+nun defensiv normalisiert und durch das zentrale Laufzeitschema geprüft.
 
 ## 3. Verifizierter technischer Stand
 
@@ -66,7 +60,7 @@ vollständige Schemavalidierung und Migration.
 
 - TypeScript-Prüfung erfolgreich
 - ESLint-Prüfung erfolgreich
-- 6 Testdateien mit 26 Tests erfolgreich
+- 14 Testdateien mit 57 Tests erfolgreich
 - Produktions-Build erfolgreich
 - Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
   Konsolenwarnungen oder Konsolenfehler geladen
@@ -76,54 +70,42 @@ vollständige Schemavalidierung und Migration.
 
 ### 3.2 Build- und Bundle-Befunde
 
-- Das größte JavaScript-Bundle umfasst ungefähr 1,30 MB minifiziert bzw.
-  391 KB gzip-komprimiert.
-- Vite meldet ein Chunk-Limit von mehr als 500 KB.
-- Das CSS umfasst ungefähr 111 KB minifiziert bzw. 16 KB gzip-komprimiert.
-- Die Routen werden derzeit nicht sichtbar in eigene, lazy geladene Chunks
-  aufgeteilt.
+- Das Initial-Bundle umfasst ungefähr 174 KB minifiziert bzw. 47 KB gzip.
+- Routen, Archiv, Papierkorb und größere Dialoge werden in eigene Chunks geteilt.
+- Der größte lazy Chunk bleibt mit ungefähr 456 KB unter Vites 500-KB-Grenze.
+- Vite meldet keine Chunk-Warnung.
 
 ### 3.3 Dependency- und Security-Stand
 
-`npm audit` meldet fünf bekannte Schwachstellen:
-
-- vier hohe Findings in der Entwicklungswerkzeug-Kette
-  `@vue/eslint-config-typescript → fast-glob → micromatch → braces`
-- ein niedriges Finding in einer verschachtelten `esbuild`-Version über
-  `@nuxt/ui → @nuxt/fonts → fontless`
-
-Mit `--omit=dev` bleibt nur das niedrige `esbuild`-Finding übrig. Es betrifft
-den Entwicklungsserver unter Windows. Der direkte Vite-Zweig verwendet bereits
-eine neuere `esbuild`-Version.
-
-`npm outdated --json` lieferte in zwei Versuchen kein Ergebnis und musste
-abgebrochen werden. Eine belastbare Liste aller verfügbaren Updates ist deshalb
-noch offen. Das von `npm audit` vorgeschlagene automatische Downgrade der
-ESLint-Konfiguration sollte nicht ungeprüft übernommen werden.
+Die kompatiblen direkten Dependencies sind aktualisiert. `npm audit` meldet null
+bekannte Schwachstellen. Dependabot prüft wöchentlich und gruppiert Patch- und
+Minor-Updates. Bewusste Holds für TypeScript und Node-Typen sind unter DEP-01
+dokumentiert.
 
 ### 3.4 Test- und CI-Umfang
 
-Die CI führt unter Node 24 `npm ci` und `npm run check` aus. Die Engine erlaubt
-Node 22 und 24, die CI prüft jedoch nur Node 24. Browser-End-to-End-Tests,
-Coverage-Grenzen, Store-Paket-Prüfungen, Upgrade-Tests und eine automatisierte
-Dependency-Pflege fehlen.
+Die CI führt unter Node 22 und 24 `npm ci`, `npm run check` und die strukturelle
+CCM-Paketprüfung aus. Router, Suche, Datenmigrationen, Konflikte, Kompensationen,
+Domänenregeln und zentrale Komponenten besitzen Regressionstests. Eine
+vollständige Browser-End-to-End-Suite, Coverage-Grenzen und ein echter
+Store-Upgrade-Test bleiben offen.
 
 ## 4. Vorhandener Funktionsumfang
 
-| Bereich       | Vorhanden                                                     | Reifegrad / Einschränkung                                   |
-| ------------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
-| Projekte      | Erstellen, bearbeiten, löschen, Farbe, Icon, Beschreibung     | Gute Basis; Löschen und Fehlerfälle brauchen mehr Schutz    |
-| Aufgaben      | Titel, Beschreibung, URL, Datum, Abschluss                    | Kern funktionsfähig; keine Priorität und keine Archivierung |
-| Listen        | Mehrere Listen, Sortierung per Drag-and-drop, Ein-/Ausklappen | Anzeigeoptionen werden teamweit gespeichert                 |
-| Ansichten     | Board, Liste, „Meine Aufgaben“, Tags, Unteraufgaben           | Listenansicht nutzt weiterhin weitgehend Karten             |
-| Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, rekursives Löschen | Mehrere Schreibschritte sind nicht atomar                   |
-| Tags          | CRUD und Mehrfachauswahl                                      | Löschen über mehrere Aufgaben kann teilweise scheitern      |
-| Personen      | Zuweisung und Personensuche                                   | Fehler- und Reihenfolgebehandlung der Suche fehlen          |
-| Fälligkeit    | Absolutes und relatives Fälligkeitsdatum                      | Relative Eingabe nur in bestimmten Bearbeitungswegen        |
-| Aktivität     | Kommentare und Änderungsprotokoll                             | Keine robuste Fehleranzeige; gemischte Sprache              |
-| Suche         | Projektbezogene und globale Suche                             | Globale Suche erzeugt viele Requests                        |
-| Oberfläche    | Nuxt-UI-Dashboard, Navigation, Sidebar, Dialoge               | Gute Richtung; A11y, Fokus und Konsistenz noch offen        |
-| Auslieferung  | Build, ZIP-Skript, CI                                         | CCM-Store-Kompatibilität und Upgrade-Pfad nicht verifiziert |
+| Bereich       | Vorhanden                                                      | Reifegrad / Einschränkung                                    |
+| ------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
+| Projekte      | Erstellen, bearbeiten, löschen, Farbe, Icon, Beschreibung      | Gute Basis; Löschen und Fehlerfälle brauchen mehr Schutz     |
+| Aufgaben      | Titel, Beschreibung, URL, Datum, Priorität, Abschluss          | Zusätzlich Archiv und wiederherstellbarer Papierkorb         |
+| Listen        | Mehrere Listen, Sortierung per Drag-and-drop, Ein-/Ausklappen  | Persönliche Anzeigeoptionen werden lokal gespeichert         |
+| Ansichten     | Board, kompakte Liste, „Meine Aufgaben“, Tags, Unteraufgaben   | Filter und Sortierung werden pro Projekt/Ansicht gespeichert |
+| Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, Löschen/Archivieren | Mehrschrittfehler werden clientseitig kompensiert            |
+| Tags          | CRUD, Mehrfachauswahl und Filter                               | Löschen bereinigt Aufgabenreferenzen mit Kompensation        |
+| Personen      | Zuweisung, Suche und Filter                                    | Suche ist entprellt und schützt vor alten Antworten          |
+| Fälligkeit    | Absolutes und relatives Fälligkeitsdatum                       | Relative Eingabe nur in bestimmten Bearbeitungswegen         |
+| Aktivität     | Kommentare und Änderungsprotokoll                              | Deutsche Anzeige; Kommentare bleiben Teil des Task-Objekts   |
+| Suche         | Projektbezogene und globale Suche                              | Projekt-Fan-out startet erst beim Öffnen                     |
+| Oberfläche    | Nuxt-UI-Dashboard, Navigation, Sidebar, Dialoge                | Semantik verbessert; vollständiger Screenreader-Test offen   |
+| Auslieferung  | Build, ZIP-Prüfung, CI Node 22/24                              | Realer Store-Upgrade-Test bleibt extern offen                |
 
 ## 5. Priorisierte Übersicht
 

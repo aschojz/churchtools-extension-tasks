@@ -1,91 +1,71 @@
 # Umsetzungsstand
 
-Stand: 02.10.2026
+Stand: 04.10.2026 · Version 0.3.0
 
-Die erste Stabilisierung aus der Projektanalyse ist umgesetzt. Der Stand baut,
-wird typgeprüft und besitzt Regressionstests für die wichtigsten Datenrisiken.
+## Produkt
 
-## Erledigt
+- Projekte, Listen, Board, kompakte Liste, persönliche Aufgaben, Tags und
+  Unteraufgaben sind produktiv nutzbar.
+- Aufgaben besitzen Priorität, Verantwortliche, Fälligkeit, Beschreibung, Link,
+  Kommentare und Aktivitätsverlauf.
+- Status, Priorität, Fälligkeit, Verantwortlichkeit, Liste und Tag lassen sich
+  kombinieren; Sortierungen werden je Ansicht gespeichert.
+- Die Listenansicht bietet Mehrfachauswahl und Sammelaktionen für Status und
+  Priorität. `N` öffnet die Schnellerfassung.
+- Erledigte Aufgaben können archiviert, gelöschte Aufgaben aus dem Papierkorb
+  wiederhergestellt werden. Beide Abläufe erhalten Unteraufgabenbeziehungen.
 
-- Dependencies aktualisiert und per Lockfile reproduzierbar gemacht.
-- ChurchTools Styleguide und Utils vollständig entfernt. Nuxt UI deckt Dialoge,
-  Felder, Menüs, Tags, Karten und Statusanzeigen ab; `src/platform.ts` kapselt die
-  wenigen benötigten Plattformfunktionen.
-- Den App-Rahmen auf Nuxt UI Dashboard umgestellt: responsive Sidebar mit
-  Projekt- und Ansichts-Navigation, Navbar, globale Projektsuche/Aufgabensuche,
-  Kontextaktionen und kompaktere Dashboard-Karten.
-- Apollo, GraphQL und die externe Icon-Suche entfernt; Projekte verwenden eine
-  kuratierte lokale Font-Awesome-Auswahl.
-- CCM-Zugriffe, JSON-Serialisierung und Cache-Invalidierung in
-  `src/data/ccm.ts` gekapselt.
-- Einen eigenen QueryClient für die Extension eingeführt.
-- Produktionsbuild repariert; Router- und Asset-Basis verwenden beide
-  `VITE_KEY`.
-- Unbeabsichtigte Schreibzugriffe beim Laden, Refetch und Anzeigen virtueller
-  Tag-/Unteraufgaben-Spalten beseitigt. Nur ein echtes Drag-Ereignis in einer
-  echten Liste speichert.
-- Editor arbeiten mit tief kopierten Entwürfen. Abbrechen verändert weder Cache
-  noch API-Daten. Schnelles Tippen und direktes Speichern verliert keinen Wert.
-- Statuswechsel im Aufgabendialog implementiert.
-- Tags, relative Termine und das Erstellen von Unteraufgaben in den aktiven
-  Dialog übernommen; den ungenutzten Alt-Dialog entfernt.
-- Projektanlage erstellt explizit eine Standardliste. Für bestehende Projekte
-  lässt sich eine Liste über die Board-Leiste anlegen.
-- Laufzeitfehler, fehlende Datensätze und Mutationsfehler erhalten sichtbare
-  Zustände. Rekursive Operationen besitzen Zyklenschutz.
-- Typecheck, Lint, Tests und Build in `npm run check` zusammengeführt; CI ergänzt.
-- Release-Skript erzeugt ein frisches ZIP, sodass gelöschte Assets nicht aus
-  einem älteren Archiv übernommen werden.
-- Die Startseite zeigt offene, persönlich zugewiesene Aufgaben projektübergreifend
-  als „Überfällig“, „Heute“, „Demnächst“ oder „Ohne Termin“ und öffnet direkt den
-  passenden Projektdialog.
-- Tags lassen sich direkt in der Tag-Ansicht anlegen, bearbeiten und nach Bestätigung
-  löschen. Beim Löschen werden Referenzen aus den betroffenen Aufgaben entfernt.
-- Die Projektanlage funktioniert auch in lokalen HTTP-Kontexten, in denen
-  `crypto.randomUUID` fehlt. Ein `getRandomValues`-basierter Fallback erzeugt einen
-  zulässigen, eindeutigen Kategorie-Schlüssel.
+## Daten und Zuverlässigkeit
+
+- Alle gespeicherten Entitäten werden gegen Laufzeitschemas geprüft. Defekte
+  Einzelwerte werden isoliert und im Systemstatus gemeldet.
+- Schema 3 migriert unversionierte Daten, normalisiert das historische
+  `fulfilled`-Feld, ergänzt Prioritäten und unterstützt Archivmetadaten.
+- Revision und Änderungszeitpunkt schützen clientseitig vor unbemerktem
+  Überschreiben. Ohne serverseitiges Compare-and-swap bleibt ein kleines
+  Zeitfenster zwischen Prüfung und Schreiben.
+- Mehrstufige Projekt-, Unteraufgaben-, Duplizierungs-, Tag-, Papierkorb-,
+  Archiv- und Sammeloperationen besitzen Kompensationen für Teilfehler.
+- Authentifizierungsfehler sind sichtbar und sperren sämtliche Schreibpfade.
+  Unsichere Aufgaben-URLs werden weder gespeichert noch ausgegeben.
+
+## Architektur, UI und Betrieb
+
+- ChurchTools Styleguide und Utils sind entfernt. Als ChurchTools-Abhängigkeit
+  bleibt ausschließlich `@churchtools/churchtools-client`.
+- Nuxt UI stellt Dashboard, Sidebar, Navbar, Suche, Formulare, Dialoge und Menüs.
+  Tailwind-Utilities sind unter `#tasks` gescopt; die Höhe richtet sich nach dem
+  tatsächlichen Einbaupunkt im Host.
+- Font Awesome wird einschließlich Webfonts gebündelt. Der Produktionsbuild
+  benötigt keine Host-Styles und keinen benachbarten ChurchTools-Checkout.
+- Routen und große Dialoge werden lazy geladen. Die globale Suche lädt
+  Projektaufgaben erst beim Öffnen.
+- Der Systemstatus zeigt Paketversion, Commit, Schema, Modul, Anmeldung und
+  isolierte Datenprobleme, ohne Aufgabeninhalte oder Personendaten zu exportieren.
+- Das Release-ZIP besitzt die vom offiziellen Boilerplate erwartete einzelne
+  `dist/`-Wurzel. CI prüft Node 22 und 24 sowie Typen, Lint, Tests, Build und Paket.
+- Dependencies sind auf kompatiblen aktuellen Ständen; `npm audit` meldet keine
+  bekannten Schwachstellen.
 
 ## Verifikation
 
-- `npm run check`: Typecheck, ESLint, 17 Vitest-Tests und Production-Build grün.
-- Browser-Smoke-Test mit vollständig simulierten CCM-Daten: Übersicht, Board,
-  Tags, Detail und Projekt-Dialog laden ohne Browserfehler.
-- Der Smoke-Test bestätigt: reine Navigation erzeugt keine Schreibanfrage,
-  Abbrechen speichert nicht, Bearbeiten speichert den neuen Titel und Statuswechsel
-  erzeugen jeweils genau einen PUT.
-- Ein separater Browser-Test mit zwei simulierten Projekten bestätigt die globale
-  Aufgabenübersicht, schreibfreie Navigation und den richtigen Projekt-/Aufgabenlink.
-- Die gebaute Extension ist in ChurchTools `3.137.0-RC17` lokal als `tasks`
-  verknüpft. Ein isolierter End-to-End-Test gegen die echte CCM-API bestätigt
-  Projekt und Standardliste, Aufgabenanlage, Bearbeitung, Statuswechsel,
-  Aktivitätsverlauf sowie alle fünf Projektansichten. Das Testprojekt wurde danach
-  vollständig gelöscht.
-- Ein weiterer echter Browser-/CCM-Test bestätigt die Projektanlage ohne
-  `crypto.randomUUID`, den erzeugten Kategorie-Schlüssel und die Standardliste;
-  auch dieses Testprojekt wurde danach vollständig gelöscht.
-- `npm audit`: ein niedriger Befund in der transitiven Windows-Dev-Server-Abhängigkeit
-  `fontless > esbuild`; `npm audit fix` kann ihn mit dem aktuellen Nuxt-UI-Baum
-  noch nicht auflösen. Produktionscode und die lokale macOS-Ausführung sind davon
-  nicht betroffen.
-- Browserprüfung der Nuxt-UI-Oberfläche im echten eingebetteten ChurchTools-Rahmen:
-  Übersicht, Projektansicht, Select-Menüs sowie einfache und verschachtelte Dialoge
-  sind funktionsfähig. Der Tailwind-Präfix verhindert Klassennamenskollisionen.
-- Dashboard-Sidebar einschließlich Ein-/Ausklappen, globale Suche und Navigation
-  von Suchergebnissen direkt in den bestehenden Aufgabendialog wurden im echten
-  ChurchTools-Rahmen geprüft.
+- `npm run check`: TypeScript, ESLint, 57 Vitest-Tests und Produktionsbuild grün.
+- `npm run package:verify`: Extension-Key, HTML-Assets, JavaScript, CSS und
+  Archivstruktur erfolgreich geprüft.
+- Browser-Smoke-Tests im eingebetteten ChurchTools-Rahmen prüfen Dashboard,
+  Deep Links, Karten, Dialoge, Filter, Sortierung, Sammelmenü, Archiv,
+  Tastatur-Schnellerfassung und leere Browserkonsole.
 
-## Noch offen
+## Extern verbleibend
 
-- Der lokale Neuinstallations- und CRUD-Test ist abgeschlossen. Noch ausstehend ist
-  ein Upgrade-Test mit einem repräsentativen Bestandsdatenbestand und einem
-  vorher/nachher dokumentierten Rollback.
-- Berechtigungsmodell für Projekte und CCM-Kategorien mit der Zielinstanz prüfen.
-- Konfliktschutz für gleichzeitige Bearbeitung hängt von ETag-/Versionsfunktionen
-  der ChurchTools-API ab und ist noch nicht umgesetzt.
-- Unteraufgaben werden derzeit in zwei aufeinanderfolgenden Requests angelegt und
-  verknüpft. Bei einem Teilausfall bleibt die neue Aufgabe als normale Aufgabe
-  erhalten und ein Fehler wird angezeigt; eine serverseitige Transaktion fehlt.
-- Die Accessibility der fachlichen Abläufe sollte trotz der zugänglichen
-  Nuxt-UI-Basis in einem eigenen Durchlauf mit Tastatur und Screenreader geprüft werden.
-- Produktfeatures aus der Analyse wie Vorlagen, Wiederholungen, Erinnerungen,
-  Archiv und Mehrfachaktionen folgen nach der Testinstanz-Abnahme.
+- Die CCM-API bietet aktuell kein dokumentiertes atomisches Compare-and-swap;
+  vollständiger serverseitiger Konfliktschutz hängt davon ab.
+- Neuinstallation und Update mit repräsentativen Bestandsdaten müssen vor einem
+  Store-Release in einer dedizierten ChurchTools-Testinstanz abgenommen werden.
+- Die konkrete Wirkung von `securityLevelId: 1` und differenzierte Rechte müssen
+  mit der Zielinstanz verifiziert werden.
+- Ein vollständiger Axe- und Screenreader-Durchlauf bleibt trotz semantischer
+  Buttons, zugänglicher Namen und Tastaturbedienung offen.
+
+Weitere technische Einordnung und der langfristige Funktionsplan stehen in
+[PROJEKTANALYSE.md](./PROJEKTANALYSE.md).
