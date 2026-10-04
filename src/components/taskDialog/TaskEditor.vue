@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { useLists } from '../../composables/useLists';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
+import { useTaskTemplates } from '../../composables/useTaskTemplates';
 import { useTasks } from '../../composables/useTasks';
 import { TASK_PRIORITIES, taskDraft } from '../../domain/tasks';
 import { type PersonDisplay, personDisplay } from '../../platform';
@@ -33,6 +34,26 @@ const tagOptions = computed(() =>
     })),
 );
 const internTask = ref<Task>(taskDraft());
+const { templates, saveTemplate, removeTemplate } = useTaskTemplates(props.projectId);
+const templateOptions = computed(() => templates().map(template => ({ id: template.id, label: template.name })));
+const selectedTemplateId = ref<string>();
+const templateName = ref('');
+const applyTemplate = () => {
+    const template = templates().find(item => item.id === selectedTemplateId.value);
+    if (template) internTask.value = taskDraft({ ...internTask.value, ...template.task });
+};
+const saveCurrentTemplate = () => {
+    const saved = saveTemplate(templateName.value, internTask.value);
+    if (!saved) return;
+    selectedTemplateId.value = saved.id;
+    templateName.value = '';
+};
+const removeSelectedTemplate = () => {
+    if (!selectedTemplateId.value) return;
+    if (!window.confirm('Die persönliche Aufgabenvorlage wird gelöscht.')) return;
+    removeTemplate(selectedTemplateId.value);
+    selectedTemplateId.value = undefined;
+};
 const createTagIsOpen = ref(false);
 const missing = ref(false);
 watch(
@@ -122,6 +143,46 @@ watch(personSearch, (query, _previous, onCleanup) => {
     <UAlert v-else-if="missing" color="warning" title="Diese Aufgabe wurde nicht gefunden." />
     <div v-else class="task-editor-layout">
         <section class="task-editor-main">
+            <UCard v-if="!taskId" variant="subtle">
+                <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+                    <USelect
+                        v-model="selectedTemplateId"
+                        :items="templateOptions"
+                        label-key="label"
+                        placeholder="Vorlage auswählen …"
+                        value-key="id"
+                    />
+                    <UButton
+                        :disabled="!selectedTemplateId"
+                        icon="i-lucide-wand-sparkles"
+                        label="Anwenden"
+                        variant="outline"
+                        @click="applyTemplate"
+                    />
+                    <UButton
+                        aria-label="Vorlage löschen"
+                        color="error"
+                        :disabled="!selectedTemplateId"
+                        icon="i-lucide-trash-2"
+                        variant="ghost"
+                        @click="removeSelectedTemplate"
+                    />
+                </div>
+                <div class="mt-3 flex gap-2">
+                    <UInput
+                        v-model="templateName"
+                        class="min-w-0 flex-1"
+                        placeholder="Aktuelle Werte als Vorlage speichern"
+                        @keydown.enter="saveCurrentTemplate"
+                    />
+                    <UButton
+                        :disabled="!templateName.trim()"
+                        icon="i-lucide-save"
+                        label="Vorlage speichern"
+                        @click="saveCurrentTemplate"
+                    />
+                </div>
+            </UCard>
             <UFormField label="Titel" required>
                 <UInput
                     v-model="internTask.name"

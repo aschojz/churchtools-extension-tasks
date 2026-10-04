@@ -630,7 +630,7 @@ müssen die aktive Locale verwenden.
 ### P3 · Ausbau nach Stabilisierung
 
 - Wiederholende Aufgaben und Erinnerungen
-- Aufgabenvorlagen und Projektvorlagen
+- Persönliche Aufgabenvorlagen (**umgesetzt**); Projektvorlagen bleiben offen
 - Papierkorb mit Wiederherstellung
 - Abhängigkeiten und Blocker zwischen Aufgaben (**umgesetzt mit Schema 4**)
 - Startdatum und optionaler Zeitraum

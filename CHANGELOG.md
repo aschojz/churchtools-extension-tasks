@@ -12,6 +12,7 @@
 - datensparsamer Systemstatus mit Version, Commit und Schema
 - Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
 - CSV-Export der gefilterten Projektauswertung
+- persönliche Aufgabenvorlagen pro Projekt
 
 ### Stabilität und Architektur
 
