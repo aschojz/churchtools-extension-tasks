@@ -636,7 +636,7 @@ müssen die aktive Locale verwenden.
   Liste und Tag (**umgesetzt und lokal pro Projekt gespeichert**); freie Personenauswahl bleibt offen
 - Sortierung nach Fälligkeit, Priorität, Titel und Änderungsdatum (**umgesetzt und lokal pro Ansicht gespeichert**)
 - persönliche, gespeicherte Ansichten
-- Mehrfachauswahl und Bulk-Aktionen
+- Mehrfachauswahl mit Sammelaktionen für Status und Priorität in der Listenansicht (**umgesetzt**)
 - schnelle Aufgaben- und Projekterfassung mit der Taste `N` (**umgesetzt**)
 - Archiv für abgeschlossene Aufgaben
 - echte kompakte Tabellen-/Listenansicht
