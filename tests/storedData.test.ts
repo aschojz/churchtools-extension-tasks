@@ -142,6 +142,32 @@ describe('stored data schemas and migrations', () => {
         ).not.toHaveProperty('startDate');
     });
 
+    it('migrates version 5 tasks and validates recurrence settings', () => {
+        expect(
+            parseStoredValue({
+                schemaVersion: 5,
+                id: 13,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Wöchentlich',
+                recurrence: { frequency: 'weekly', interval: 2 },
+            }),
+        ).toMatchObject({
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            recurrence: { frequency: 'weekly', interval: 2 },
+        });
+        expect(
+            parseStoredValue({
+                schemaVersion: 5,
+                id: 14,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Ungültig',
+                recurrence: { frequency: 'hourly', interval: 0 },
+            }),
+        ).not.toHaveProperty('recurrence');
+    });
+
     it('normalizes persistence metadata on legacy and current values', () => {
         expect(
             parseStoredValue({

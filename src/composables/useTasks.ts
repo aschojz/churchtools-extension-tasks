@@ -8,6 +8,7 @@ import {
     descendantIds,
     dueDateBucket,
     isDueWithinDays,
+    nextRecurringTask,
     normalizeTaskUrl,
     taskDiff,
     taskDraft,
@@ -110,7 +111,24 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
             type: 'fullfilled',
             value: !task.fullfilled,
         });
-        await updateTask({ ...task, fullfilled: !task.fullfilled, activity });
+        const nextTask = !task.fullfilled ? nextRecurringTask(task) : undefined;
+        let created: Awaited<ReturnType<typeof createTask>> | undefined;
+        try {
+            if (nextTask) created = await createTask(nextTask);
+            await updateTask({ ...task, fullfilled: !task.fullfilled, activity });
+        } catch (error) {
+            if (created)
+                await failWithCompensation('Wiederkehrende Aufgabe abschließen', error, [
+                    () => deleteTask(created!.id, created!.dataCategoryId, 1),
+                ]);
+            throw error;
+        }
+        return {
+            rollback: async () => {
+                await updateTask({ ...task, revision: (task.revision ?? 0) + 1 });
+                if (created) await deleteTask(created.id, created.dataCategoryId, 1);
+            },
+        };
     };
 
     const archiveTaskTree = async (root: TransformedTask) => {

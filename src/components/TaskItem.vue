@@ -6,7 +6,7 @@ import { failWithCompensation } from '../application/compensation';
 import { reportOperationalError } from '../application/operationalErrors';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
 import { useTaskSelection } from '../composables/useTaskSelection';
-import { incompleteTaskBlockers, taskPriority, taskStartDate } from '../domain/tasks';
+import { incompleteTaskBlockers, recurrenceLabel, taskPriority, taskStartDate } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
 
@@ -73,6 +73,7 @@ const showLastRow = computed(
         comments.value.length ||
         (Array.isArray(task.value.tags) && task.value.tags.length) ||
         task.value.url ||
+        task.value.recurrence ||
         openBlockers.value.length,
 );
 
@@ -263,6 +264,14 @@ const breadcrumbs = computed(() => {
                     color="neutral"
                     icon="i-lucide-calendar-range"
                     :label="`Start ${toDayMonth(startDate)}`"
+                    size="sm"
+                    variant="soft"
+                />
+                <UBadge
+                    v-if="task.recurrence"
+                    color="neutral"
+                    icon="i-lucide-repeat-2"
+                    :label="recurrenceLabel(task.recurrence)"
                     size="sm"
                     variant="soft"
                 />

@@ -2,7 +2,7 @@
 
 Aufgabenverwaltung für ChurchTools: persönliche Übersicht, Listen und Boards,
 Kalender, Timeline, Auswertung, Prioritäten, Filter, Tags, Verantwortliche,
-Unteraufgaben, Blocker, Vorlagen, Archiv und Papierkorb.
+Unteraufgaben, Blocker, Wiederholungen, Vorlagen, Archiv und Papierkorb.
 
 ## Funktionsumfang
 
@@ -11,7 +11,7 @@ Unteraufgaben, Blocker, Vorlagen, Archiv und Papierkorb.
   Liste und Tag
 - Sortierung nach Fälligkeit, Priorität, Titel, Änderung oder manueller Reihenfolge
 - Mehrfachauswahl für gemeinsame Status- und Prioritätsänderungen
-- Kommentare, Aktivitätsverlauf, Startdaten, absolute und relative Fälligkeiten und sichere Links
+- Kommentare, Aktivitätsverlauf, Startdaten, absolute und relative Fälligkeiten, Wiederholungen und sichere Links
 - Archiv für erledigte Aufgaben und wiederherstellbarer Papierkorb
 - globale Suche und Schnellerfassung per Taste `N`
 - Systemstatus mit Version, Commit, Datenschema und datensparsamer Fehlerdiagnose

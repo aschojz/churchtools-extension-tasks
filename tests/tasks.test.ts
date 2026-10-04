@@ -6,7 +6,9 @@ import {
     descendantIds,
     dueDateBucket,
     isDueWithinDays,
+    nextRecurringTask,
     normalizeTaskUrl,
+    recurrenceLabel,
     reorderTasks,
     sortTasks,
     taskDiff,
@@ -92,6 +94,32 @@ describe('task integrity', () => {
     it('parses optional task start dates in local time', () => {
         expect(taskStartDate(task(1, { startDate: '2026-10-04' }))).toEqual(new Date(2026, 9, 4));
         expect(taskStartDate(task(2, { startDate: 'invalid' }))).toBeUndefined();
+    });
+    it('creates the next recurring task and clamps month-end dates', () => {
+        const next = nextRecurringTask(
+            task(1, {
+                name: 'Monatsabschluss',
+                dueDate: '2026-01-31',
+                startDate: '2026-01-30',
+                recurrence: { frequency: 'monthly', interval: 1 },
+                fullfilled: true,
+                subTasks: [2],
+                blockedBy: [3],
+                activity: [{ personId: 1, date: '2026-01-01', type: 'create' }],
+            }),
+        );
+        expect(next).toMatchObject({
+            name: 'Monatsabschluss',
+            dueDate: '2026-02-28',
+            startDate: '2026-02-28',
+            recurrence: { frequency: 'monthly', interval: 1 },
+            fullfilled: false,
+        });
+        expect(next?.activity).toBeUndefined();
+        expect(next?.subTasks).toBeUndefined();
+        expect(next?.blockedBy).toBeUndefined();
+        expect(recurrenceLabel(next?.recurrence)).toBe('Monatlich');
+        expect(recurrenceLabel({ frequency: 'weekly', interval: 3 })).toBe('Alle 3 Wochen');
     });
     it('uses calendar days around daylight saving and guards cyclic dates', () => {
         const parent = task(1, { dueDate: '2026-03-30' });

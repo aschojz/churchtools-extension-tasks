@@ -10,10 +10,12 @@
 - persönliche Aufgabenvorlagen pro Projekt
 - CSV-Export der gefilterten Projektauswertung
 - optionale Startdaten in Karten, Kalender, Timeline und Export
+- täglich, wöchentlich oder monatlich wiederkehrende Aufgaben mit frei wählbarem Intervall
+- responsiver Tab-Überlauf und aktivierbare Sammelauswahl in Board-, Listen-, Tag- und Unteraufgabenansichten
 
 ### Betrieb und Daten
 
-- Schema 5 für Aufgabenabhängigkeiten und Startdaten mit getesteten Migrationen
+- Schema 6 für Aufgabenabhängigkeiten, Startdaten und Wiederholungen mit getesteten Migrationen
 - Migrationsvorschau für erkannte Altwerte im Systemstatus
 - korrelierbare Fehler-IDs für sichtbare Schreib- und Anmeldefehler
 

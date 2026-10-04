@@ -1,6 +1,13 @@
 import { cloneDeep, isEqual, pick } from 'lodash-es';
 import type { TaskSort } from '../composables/storeTasks';
-import type { ActivityEntry, Task, TaskPriority, TransformedTask } from './types';
+import type {
+    ActivityEntry,
+    Task,
+    TaskPriority,
+    TaskRecurrence,
+    TaskRecurrenceFrequency,
+    TransformedTask,
+} from './types';
 
 export const TASK_PRIORITIES: Array<{
     id: TaskPriority;
@@ -18,6 +25,20 @@ export const TASK_PRIORITIES: Array<{
 
 export const taskPriority = (priority: TaskPriority | undefined) =>
     TASK_PRIORITIES.find(option => option.id === priority) ?? TASK_PRIORITIES[0];
+
+export const TASK_RECURRENCES: Array<{ id: TaskRecurrenceFrequency; label: string }> = [
+    { id: 'daily', label: 'Täglich' },
+    { id: 'weekly', label: 'Wöchentlich' },
+    { id: 'monthly', label: 'Monatlich' },
+];
+
+export function recurrenceLabel(recurrence: TaskRecurrence | undefined) {
+    if (!recurrence) return '';
+    if (recurrence.interval === 1)
+        return TASK_RECURRENCES.find(option => option.id === recurrence.frequency)?.label ?? 'Wiederkehrend';
+    const unit = { daily: 'Tage', weekly: 'Wochen', monthly: 'Monate' }[recurrence.frequency];
+    return `Alle ${recurrence.interval} ${unit}`;
+}
 
 export function sortTasks(
     tasks: TransformedTask[],
@@ -85,6 +106,7 @@ export function taskDraft(task: Partial<Task> = {}): Task {
             'assignedTo',
             'subTasks',
             'blockedBy',
+            'recurrence',
             'deletedAt',
             'deletedBy',
             'archivedAt',
@@ -97,6 +119,40 @@ export function taskDraft(task: Partial<Task> = {}): Task {
     if (!Array.isArray(draft.blockedBy)) draft.blockedBy = undefined;
     if (!Array.isArray(draft.tags)) draft.tags = undefined;
     return draft;
+}
+
+const shiftDate = (value: string | undefined, recurrence: TaskRecurrence) => {
+    if (!value) return undefined;
+    const [year, month, day] = value.split('-').map(Number);
+    if (!year || !month || !day) return undefined;
+    const date = new Date(year, month - 1, day);
+    if (recurrence.frequency === 'daily') date.setDate(date.getDate() + recurrence.interval);
+    if (recurrence.frequency === 'weekly') date.setDate(date.getDate() + recurrence.interval * 7);
+    if (recurrence.frequency === 'monthly') {
+        const target = new Date(year, month - 1 + recurrence.interval, 1);
+        const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+        target.setDate(Math.min(day, lastDay));
+        date.setFullYear(target.getFullYear(), target.getMonth(), target.getDate());
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+export function nextRecurringTask(task: TransformedTask): Task | undefined {
+    if (!task.recurrence) return undefined;
+    return taskDraft({
+        ...task,
+        fullfilled: false,
+        dueDate: shiftDate(task.dueDate, task.recurrence),
+        startDate: shiftDate(task.startDate, task.recurrence),
+        activity: undefined,
+        subTasks: undefined,
+        blockedBy: undefined,
+        deletedAt: undefined,
+        deletedBy: undefined,
+        archivedAt: undefined,
+        archivedBy: undefined,
+        sortKey: Date.now(),
+    });
 }
 
 export function incompleteTaskBlockers(task: TransformedTask, tasks: Record<number, TransformedTask>) {

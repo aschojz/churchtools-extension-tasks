@@ -1,6 +1,8 @@
 import type { CtColor } from '../platform';
 
 export type TaskPriority = 'none' | 'low' | 'medium' | 'high' | 'urgent';
+export type TaskRecurrenceFrequency = 'daily' | 'weekly' | 'monthly';
+export type TaskRecurrence = { frequency: TaskRecurrenceFrequency; interval: number };
 
 type PersistenceMetadata = {
     schemaVersion?: number;
@@ -52,6 +54,7 @@ export interface Task extends PersistenceMetadata {
     assignedTo?: number[];
     subTasks?: number[];
     blockedBy?: number[];
+    recurrence?: TaskRecurrence;
     deletedAt?: string;
     deletedBy?: number;
     archivedAt?: string;

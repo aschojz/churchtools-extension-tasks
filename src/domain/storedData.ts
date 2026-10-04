@@ -1,9 +1,18 @@
 import { ref } from 'vue';
 import { colorKey, CtColor } from '../platform';
 import { normalizeTaskUrl } from './tasks';
-import type { ActivityEntry, Project, TaskPriority, TransformedList, TransformedTag, TransformedTask } from './types';
+import type {
+    ActivityEntry,
+    Project,
+    TaskPriority,
+    TaskRecurrence,
+    TaskRecurrenceFrequency,
+    TransformedList,
+    TransformedTag,
+    TransformedTask,
+} from './types';
 
-export const CURRENT_SCHEMA_VERSION = 5;
+export const CURRENT_SCHEMA_VERSION = 6;
 
 export type DataIssue = {
     entity: 'project' | 'value';
@@ -103,6 +112,11 @@ export function migrateStoredData(value: unknown): Record<string, unknown> {
             version = 5;
             continue;
         }
+        if (version === 5) {
+            data = { ...data, schemaVersion: 6 };
+            version = 6;
+            continue;
+        }
         throw new Error(`Für Schemaversion ${version} ist keine Migration vorhanden.`);
     }
     return data;
@@ -132,6 +146,15 @@ const persistenceMetadata = (data: Record<string, unknown>) => ({
     revision: storedRevision(data.revision),
     ...(storedUpdatedAt(data.updatedAt) ? { updatedAt: storedUpdatedAt(data.updatedAt) } : {}),
 });
+const taskRecurrence = (value: unknown): TaskRecurrence | undefined => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    const recurrence = value as Record<string, unknown>;
+    const frequencies: TaskRecurrenceFrequency[] = ['daily', 'weekly', 'monthly'];
+    if (!frequencies.includes(recurrence.frequency as TaskRecurrenceFrequency)) return undefined;
+    const interval = positiveInteger(recurrence.interval);
+    if (!interval || interval > 365) return undefined;
+    return { frequency: recurrence.frequency as TaskRecurrenceFrequency, interval };
+};
 
 export function parseStoredValue(value: unknown): TransformedTask | TransformedList | TransformedTag {
     const data = migrateStoredData(value);
@@ -161,6 +184,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
         const assignedTo = numberArray(data.assignedTo);
         const subTasks = numberArray(data.subTasks);
         const blockedBy = numberArray(data.blockedBy);
+        const recurrence = taskRecurrence(data.recurrence);
         const deletedAt = storedUpdatedAt(data.deletedAt);
         const deletedBy = positiveInteger(data.deletedBy);
         const archivedAt = storedUpdatedAt(data.archivedAt);
@@ -187,6 +211,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
             ...(assignedTo === undefined ? {} : { assignedTo }),
             ...(subTasks === undefined ? {} : { subTasks }),
             ...(blockedBy === undefined ? {} : { blockedBy }),
+            ...(recurrence === undefined ? {} : { recurrence }),
             ...(deletedAt === undefined ? {} : { deletedAt }),
             ...(deletedBy === undefined ? {} : { deletedBy }),
             ...(archivedAt === undefined ? {} : { archivedAt }),

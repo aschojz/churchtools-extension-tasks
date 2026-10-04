@@ -304,6 +304,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .insight-metric > * {
     height: 100%;
+    border: 1px solid var(--line) !important;
     transition:
         border-color 140ms ease,
         box-shadow 140ms ease,
@@ -311,7 +312,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .insight-metric:hover > *,
 .insight-metric:focus-visible > * {
-    border-color: #cfc6bb;
+    border-color: #cfc6bb !important;
     box-shadow: 0 5px 18px rgb(48 40 32 / 8%);
     transform: translateY(-1px);
 }

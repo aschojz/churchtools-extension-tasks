@@ -2,7 +2,7 @@
 
 Stand: 04.10.2026
 
-Untersuchter Commit: `06ba394`
+Arbeitsstand: Version 0.4.0 nach dem Stabilitäts- und UI-Ausbau vom 04.10.2026
 
 ## 1. Kurzfazit
 
@@ -12,14 +12,14 @@ Verantwortliche, Fälligkeiten, Kommentare, Prioritäten, kombinierbare Filter,
 Sortierungen, Mehrfachaktionen, Archiv und Papierkorb sind vorhanden.
 
 Die wesentlichen Datenrisiken des ursprünglichen Audits sind clientseitig
-abgesichert: gespeicherte Werte durchlaufen Schema-3-Validierung und Migrationen,
+abgesichert: gespeicherte Werte durchlaufen Schema-6-Validierung und Migrationen,
 Revisionen erkennen konkurrierende Bearbeitungen und mehrstufige Abläufe besitzen
 Kompensationen. Defekte Einzelwerte blockieren keine vollständige Ansicht.
 
 Die verbleibenden Freigaberisiken hängen überwiegend von externen ChurchTools-
 Eigenschaften ab: atomisches Compare-and-swap der CCM-API, die genaue Semantik
 der Sicherheitsstufe und ein realer Store-Upgrade-Test. Produktseitig bleiben
-vor allem Erinnerungen, Wiederholungen, Benachrichtigungen und Projektvorlagen offen.
+vor allem Erinnerungen, Benachrichtigungen und Projektvorlagen offen.
 
 ## 2. Prioritäten
 
@@ -37,7 +37,7 @@ in einem ersten Stabilisierungsschritt bearbeitet:
 
 | Finding | Status                   | Umsetzung                                                                                                                                                                                                                             |
 | ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 4 migriert. Defekte Einzelwerte werden isoliert, Altwerte in einer Vorschau gezählt und beim nächsten regulären Speichern migriert.                            |
+| DATA-02 | **Weitgehend umgesetzt** | Persistierte Entitäten besitzen Laufzeitschemas und werden bis Version 6 migriert. Defekte Einzelwerte werden isoliert, Altwerte in einer Vorschau gezählt und beim nächsten regulären Speichern migriert.                            |
 | PERF-01 | **Umgesetzt**            | Projektübergreifende Aufgaben werden für die globale Suche erst beim Öffnen des Suchdialogs geladen.                                                                                                                                  |
 | PERF-02 | **Umgesetzt**            | Aufgabenkarten verwenden einen gemeinsamen Projektkontext mit Task-, Eltern-, Tag- und Personen-Lookups. Personen werden pro Projekt gebündelt geladen.                                                                               |
 | PERF-03 | **Umgesetzt**            | Die Personensuche wartet 250 ms, ignoriert überholte Antworten und zeigt Lade- sowie Fehlerzustände.                                                                                                                                  |
@@ -59,7 +59,7 @@ nun defensiv normalisiert und durch das zentrale Laufzeitschema geprüft.
 
 - TypeScript-Prüfung erfolgreich
 - ESLint-Prüfung erfolgreich
-- 17 Testdateien mit 74 Tests erfolgreich
+- 17 Testdateien mit 77 Tests erfolgreich
 - Produktions-Build erfolgreich
 - Lokale Board-Route `http://churchtools.test/ccm/tasks/3/board` ohne
   Konsolenwarnungen oder Konsolenfehler geladen
@@ -94,7 +94,7 @@ Store-Upgrade-Test bleiben offen.
 | Bereich       | Vorhanden                                                      | Reifegrad / Einschränkung                                   |
 | ------------- | -------------------------------------------------------------- | ----------------------------------------------------------- |
 | Projekte      | Erstellen, bearbeiten, löschen, Farbe, Icon, Beschreibung      | Gute Basis; Löschen und Fehlerfälle brauchen mehr Schutz    |
-| Aufgaben      | Titel, Beschreibung, URL, Datum, Priorität, Blocker, Abschluss | Zusätzlich Archiv und wiederherstellbarer Papierkorb        |
+| Aufgaben      | Titel, Beschreibung, URL, Datum, Priorität, Blocker, Wiederholung, Abschluss | Zusätzlich Archiv und wiederherstellbarer Papierkorb |
 | Listen        | Mehrere Listen, Sortierung per Drag-and-drop, Ein-/Ausklappen  | Persönliche Anzeigeoptionen werden lokal gespeichert        |
 | Ansichten     | Board, Liste, Kalender, Timeline, Auswertung                   | Filter, Sortierung und benannte Ansichten lokal gespeichert |
 | Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, Löschen/Archivieren | Mehrschrittfehler werden clientseitig kompensiert           |
@@ -135,7 +135,7 @@ Store-Upgrade-Test bleiben offen.
 | I18N-01  | **P2** | Lokalisierung      | Übersetzungsfunktion ist ein Platzhalter; Texte und Farbwerte sind gemischtsprachig |
 | OPS-01   | **P2** | Betrieb            | Keine sichtbare Version, Diagnoseansicht oder korrelierbare Fehlerkennung           |
 | FEAT-01  | **P2** | Feature            | Prioritäten, Filter, Sortierung, gespeicherte Ansichten und Mehrfachaktionen fehlen |
-| FEAT-02  | **P3** | Feature            | Papierkorb und Abhängigkeiten sind umgesetzt; Wiederholungen und Vorlagen fehlen    |
+| FEAT-02  | **P3** | Feature            | Papierkorb, Abhängigkeiten, Wiederholungen und persönliche Vorlagen sind umgesetzt  |
 | FEAT-03  | **P3** | Feature            | Anhänge, Erwähnungen, Abos und ChurchTools-Objektbezüge fehlen                      |
 | FEAT-04  | **P3** | Feature            | Kalender, Timeline und eine kompakte Projektauswertung sind umgesetzt               |
 
@@ -624,12 +624,12 @@ müssen die aktive Locale verwenden.
 - Mehrfachauswahl mit Sammelaktionen für Status und Priorität in der Listenansicht (**umgesetzt**)
 - schnelle Aufgaben- und Projekterfassung mit der Taste `N` (**umgesetzt**)
 - Archiv für abgeschlossene Aufgaben mit Wiederherstellung (**umgesetzt mit Schema 3**)
-- echte kompakte Tabellen-/Listenansicht
+- echte kompakte Tabellen-/Listenansicht (**umgesetzt**)
 - bessere Überfällig-, Heute- und Demnächst-Ansichten
 
 ### P3 · Ausbau nach Stabilisierung
 
-- Wiederholende Aufgaben und Erinnerungen
+- Wiederholende Aufgaben (**umgesetzt mit Schema 6**); Erinnerungen bleiben offen
 - Persönliche Aufgabenvorlagen (**umgesetzt**); Projektvorlagen bleiben offen
 - Papierkorb mit Wiederherstellung
 - Abhängigkeiten und Blocker zwischen Aufgaben (**umgesetzt mit Schema 4**)
@@ -638,8 +638,8 @@ müssen die aktive Locale verwenden.
 - Erwähnungen, Abonnements und Benachrichtigungen
 - Bezüge zu ChurchTools-Personen, Gruppen, Kalenderterminen oder Songs
 - feinere Projektrollen und Sichtbarkeiten
-- Monatskalender für fällige Aufgaben (**umgesetzt**); Timeline bleibt offen
-- Kapazitäts-, Durchsatz- und Fälligkeitsauswertungen
+- Monatskalender für fällige Aufgaben und Timeline (**umgesetzt**)
+- kompakte Kapazitäts-, Durchsatz- und Fälligkeitsauswertungen (**umgesetzt**)
 - CSV-Export der gefilterten Projektauswertung (**umgesetzt**); Import bleibt offen
 
 ## 8. Empfohlene Zielarchitektur

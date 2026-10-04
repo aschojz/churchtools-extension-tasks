@@ -6,7 +6,8 @@ import { searchPersons, usePersonsQueryAllPages } from '../../composables/usePer
 import { useTags } from '../../composables/useTags';
 import { useTaskTemplates } from '../../composables/useTaskTemplates';
 import { useTasks } from '../../composables/useTasks';
-import { TASK_PRIORITIES, taskDraft } from '../../domain/tasks';
+import { TASK_PRIORITIES, TASK_RECURRENCES, taskDraft } from '../../domain/tasks';
+import type { TaskRecurrenceFrequency } from '../../domain/types';
 import { personDisplay } from '../../platform';
 import DialogTag from '../DialogTag.vue';
 
@@ -34,6 +35,20 @@ const tagOptions = computed(() =>
     })),
 );
 const internTask = ref<Task>(taskDraft());
+const recurrenceOptions = [{ id: 'none', label: 'Keine Wiederholung' }, ...TASK_RECURRENCES];
+const recurrenceFrequency = computed({
+    get: () => internTask.value.recurrence?.frequency ?? 'none',
+    set: (frequency: TaskRecurrenceFrequency | 'none') => {
+        if (frequency === 'none') {
+            internTask.value.recurrence = undefined;
+            return;
+        }
+        internTask.value.recurrence = {
+            frequency,
+            interval: internTask.value.recurrence?.interval ?? 1,
+        };
+    },
+});
 const { templates, saveTemplate, removeTemplate } = useTaskTemplates(props.projectId);
 const templateOptions = computed(() => templates().map(template => ({ id: template.id, label: template.name })));
 const selectedTemplateId = ref<string>();
@@ -232,6 +247,24 @@ watch(personSearch, (query, _previous, onCleanup) => {
             </UFormField>
             <UFormField label="Startet am">
                 <UInput v-model="internTask.startDate" class="w-full" type="date" />
+            </UFormField>
+            <UFormField label="Wiederholung">
+                <USelect
+                    v-model="recurrenceFrequency"
+                    class="w-full"
+                    :items="recurrenceOptions"
+                    label-key="label"
+                    value-key="id"
+                />
+            </UFormField>
+            <UFormField v-if="internTask.recurrence" label="Intervall">
+                <UInput
+                    v-model.number="internTask.recurrence.interval"
+                    class="w-full"
+                    max="365"
+                    min="1"
+                    type="number"
+                />
             </UFormField>
             <UFormField label="Priorität">
                 <USelect

@@ -31,7 +31,7 @@ type TaskSelectionContext = {
 const taskSelectionKey: InjectionKey<TaskSelectionContext> = Symbol('task-selection');
 
 export function provideTaskSelection(visibleTasks: MaybeRefOrGetter<TransformedTask[]>) {
-    const { updateTask } = useProjectTaskContext();
+    const { updateTask, toggleTask: toggleTaskCompletion } = useProjectTaskContext();
     const selectionEnabled = ref(false);
     const ids = ref<number[]>([]);
     const saving = ref(false);
@@ -87,17 +87,41 @@ export function provideTaskSelection(visibleTasks: MaybeRefOrGetter<TransformedT
             saving.value = false;
         }
     };
+    const batchCompletion = async (completed: boolean) => {
+        if (!selectedTasks.value.length || saving.value) return;
+        saving.value = true;
+        error.value = '';
+        const compensations: Array<() => Promise<unknown>> = [];
+        try {
+            for (const original of selectedTasks.value) {
+                if (original.fullfilled === completed) continue;
+                const result = await toggleTaskCompletion(original);
+                compensations.push(result.rollback);
+            }
+            ids.value = [];
+        } catch (caught) {
+            await failWithCompensation('Sammelaktion', caught, compensations).catch(compensationError => {
+                error.value = reportOperationalError(
+                    'Sammelaktion',
+                    compensationError,
+                    'Die Sammelaktion konnte nicht abgeschlossen werden.',
+                );
+            });
+        } finally {
+            saving.value = false;
+        }
+    };
     const bulkMenu = computed<DropdownMenuItem[][]>(() => [
         [
             {
                 label: 'Als erledigt markieren',
                 icon: 'i-lucide-circle-check',
-                onSelect: () => batchUpdate(task => ({ ...task, fullfilled: true })),
+                onSelect: () => batchCompletion(true),
             },
             {
                 label: 'Als offen markieren',
                 icon: 'i-lucide-circle',
-                onSelect: () => batchUpdate(task => ({ ...task, fullfilled: false })),
+                onSelect: () => batchCompletion(false),
             },
         ],
         TASK_PRIORITIES.map(priority => ({

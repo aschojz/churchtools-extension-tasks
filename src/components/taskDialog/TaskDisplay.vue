@@ -4,7 +4,7 @@ import { failWithCompensation } from '../../application/compensation';
 import { reportOperationalError } from '../../application/operationalErrors';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
-import { appendComment, incompleteTaskBlockers, taskStartDate } from '../../domain/tasks';
+import { appendComment, incompleteTaskBlockers, recurrenceLabel, taskStartDate } from '../../domain/tasks';
 import { requireCurrentUser, uiColor } from '../../platform';
 import TaskItem from '../TaskItem.vue';
 import Activities from './Activities.vue';
@@ -143,6 +143,15 @@ const createChild = async () => {
                     variant="subtle"
                 />
             </div>
+            <div v-if="task?.recurrence" class="task-view-meta-row">
+                <span>Wiederholung</span>
+                <UBadge
+                    color="neutral"
+                    icon="i-lucide-repeat-2"
+                    :label="recurrenceLabel(task.recurrence)"
+                    variant="subtle"
+                />
+            </div>
             <div v-if="sortedTags.length" class="task-view-meta-group">
                 <span>Tags</span>
                 <div class="flex flex-wrap gap-2">
@@ -194,7 +203,13 @@ const createChild = async () => {
             />
             <p
                 v-if="
-                    !dueDate && !startDate && !sortedTags.length && !assignees.length && !blockers.length && !task?.url
+                    !dueDate &&
+                    !startDate &&
+                    !task?.recurrence &&
+                    !sortedTags.length &&
+                    !assignees.length &&
+                    !blockers.length &&
+                    !task?.url
                 "
                 class="task-view-empty"
             >

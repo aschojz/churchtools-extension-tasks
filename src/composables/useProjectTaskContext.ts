@@ -16,7 +16,7 @@ export type ProjectTaskContext = {
     deleteTask: ReturnType<typeof useTasks>['deleteTask'];
     archiveTaskTree: ReturnType<typeof useTasks>['archiveTaskTree'];
     archiveCompletedTaskTree: ReturnType<typeof useTasks>['archiveCompletedTaskTree'];
-    toggleTask: (task: TransformedTask) => Promise<void>;
+    toggleTask: ReturnType<typeof useTasks>['toggleTask'];
     getSuperParent: (task: TransformedTask | undefined) => TransformedTask | undefined;
     getProgress: (task: TransformedTask | undefined) => number;
     dueColor: (dueDate: Date | undefined) => CtColor;

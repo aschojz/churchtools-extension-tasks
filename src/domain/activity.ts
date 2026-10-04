@@ -6,6 +6,7 @@ const FIELD_LABELS: Record<string, string> = {
     url: 'Link',
     dueDate: 'Fällig am',
     dueDateRelative: 'Tage vor der übergeordneten Aufgabe',
+    recurrence: 'Wiederholung',
     list: 'Liste',
     tags: 'Tags',
     assignedTo: 'Verantwortliche',

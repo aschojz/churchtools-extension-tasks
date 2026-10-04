@@ -177,12 +177,8 @@ onMounted(() => {
 onBeforeUnmount(() => tabResizeObserver?.disconnect());
 const routeNameOf = (item: NavigationMenuItem) =>
     typeof item.to === 'object' && item.to && 'name' in item.to ? String(item.to.name) : '';
-const orderedNavigation = computed(() => {
-    const active = viewNavigation.find(item => routeNameOf(item) === route.name);
-    return active ? [active, ...viewNavigation.filter(item => item !== active)] : viewNavigation;
-});
 const tabLayout = computed(() => {
-    const items = orderedNavigation.value;
+    const items = viewNavigation;
     const widths = items.map(item => String(item.label ?? '').length * 8 + 64);
     if (widths.reduce((sum, width) => sum + width, 0) <= tabBarWidth.value) return { visible: items, overflow: [] };
     const available = Math.max(150, tabBarWidth.value - 96);
@@ -193,7 +189,10 @@ const tabLayout = computed(() => {
         used += width;
         count += 1;
     }
-    return { visible: items.slice(0, count), overflow: items.slice(count) };
+    const visible = items.slice(0, count);
+    const active = items.find(item => routeNameOf(item) === route.name);
+    if (active && !visible.includes(active)) visible.splice(Math.max(0, visible.length - 1), 1, active);
+    return { visible, overflow: items.filter(item => !visible.includes(item)) };
 });
 const overflowMenu = computed<DropdownMenuItem[][]>(() => [
     tabLayout.value.overflow.map(item => ({ label: String(item.label), icon: item.icon, to: item.to })),
