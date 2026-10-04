@@ -25,6 +25,7 @@ const {
     createTask,
     deleteTask,
     archiveTaskTree,
+    archiveCompletedTaskTree,
     toggleTask,
     getSuperParent,
     getProgress,
@@ -148,6 +149,12 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
             label: 'Duplizieren',
             icon: 'i-lucide-copy',
             onSelect: () => runAction(duplicateTask),
+        },
+        {
+            label: 'Archivieren',
+            icon: 'i-lucide-archive',
+            disabled: !task.value.fullfilled,
+            onSelect: () => runAction(() => archiveCompletedTaskTree(task.value)),
         },
         {
             label: 'In Papierkorb',

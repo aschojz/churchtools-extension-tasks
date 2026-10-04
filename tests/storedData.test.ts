@@ -68,7 +68,7 @@ describe('stored data schemas and migrations', () => {
 
     it('migrates version 1 tasks to the priority schema', () => {
         expect(migrateStoredData({ schemaVersion: 1, type: 'task', name: 'Alt', fullfilled: false })).toMatchObject({
-            schemaVersion: 2,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
             priority: 'none',
         });
         expect(
@@ -82,6 +82,25 @@ describe('stored data schemas and migrations', () => {
                 priority: 'urgent',
             }),
         ).toMatchObject({ priority: 'urgent' });
+    });
+
+    it('migrates version 2 tasks and validates archive metadata', () => {
+        expect(migrateStoredData({ schemaVersion: 2, type: 'task' })).toMatchObject({
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+        });
+        expect(
+            parseStoredValue({
+                schemaVersion: CURRENT_SCHEMA_VERSION,
+                id: 9,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Archiviert',
+                fullfilled: true,
+                priority: 'none',
+                archivedAt: '2026-10-04T10:00:00.000Z',
+                archivedBy: 7,
+            }),
+        ).toMatchObject({ archivedAt: '2026-10-04T10:00:00.000Z', archivedBy: 7 });
     });
 
     it('normalizes persistence metadata on legacy and current values', () => {

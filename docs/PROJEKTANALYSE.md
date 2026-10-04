@@ -639,7 +639,7 @@ müssen die aktive Locale verwenden.
 - persönliche, gespeicherte Ansichten
 - Mehrfachauswahl mit Sammelaktionen für Status und Priorität in der Listenansicht (**umgesetzt**)
 - schnelle Aufgaben- und Projekterfassung mit der Taste `N` (**umgesetzt**)
-- Archiv für abgeschlossene Aufgaben
+- Archiv für abgeschlossene Aufgaben mit Wiederherstellung (**umgesetzt mit Schema 3**)
 - echte kompakte Tabellen-/Listenansicht
 - bessere Überfällig-, Heute- und Demnächst-Ansichten
 

@@ -27,4 +27,10 @@ describe('task routes', () => {
         expect(resolved.name).toBe('project-trash');
         expect(resolved.params).toEqual({ projectId: '3' });
     });
+
+    it('resolves the archive without a task dialog parameter', () => {
+        const resolved = createAppRouter(createMemoryHistory('/ccm/tasks/')).resolve('/3/archive');
+        expect(resolved.name).toBe('project-archive');
+        expect(resolved.params).toEqual({ projectId: '3' });
+    });
 });

@@ -149,7 +149,8 @@ const newTaskRoute = computed(() =>
     currentProject.value
         ? {
               name:
-                  typeof route.name === 'string' && !['project', 'project-trash'].includes(route.name)
+                  typeof route.name === 'string' &&
+                  !['project', 'project-trash', 'project-archive'].includes(route.name)
                       ? route.name
                       : 'project-board',
               params: { projectId: currentProject.value.id, taskId: 'new' },

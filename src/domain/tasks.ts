@@ -85,6 +85,8 @@ export function taskDraft(task: Partial<Task> = {}): Task {
             'subTasks',
             'deletedAt',
             'deletedBy',
+            'archivedAt',
+            'archivedBy',
         ]),
     });
     if (!Array.isArray(draft.activity)) draft.activity = undefined;

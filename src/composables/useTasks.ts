@@ -74,8 +74,9 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         );
         return tasks;
     });
-    const tasks = computed(() => allTasks.value.filter(task => !task.deletedAt));
+    const tasks = computed(() => allTasks.value.filter(task => !task.deletedAt && !task.archivedAt));
     const deletedTasks = computed(() => allTasks.value.filter(task => !!task.deletedAt));
+    const archivedTasks = computed(() => allTasks.value.filter(task => !!task.archivedAt && !task.deletedAt));
     const parentByChild = computed(() => {
         const result: Record<number, TransformedTask> = {};
         for (const parent of tasks.value) {
@@ -145,6 +146,65 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
                             revision: (original.revision ?? 0) + 1,
                             deletedAt: original.deletedAt,
                             deletedBy: original.deletedBy,
+                        }),
+                ),
+            );
+        }
+    };
+
+    const archiveCompletedTaskTree = async (root: TransformedTask) => {
+        if (!root.fullfilled) throw new Error('Nur erledigte Aufgaben können archiviert werden.');
+        const originals = descendantIds(root, allTasksMap.value)
+            .map(id => allTasksMap.value[id])
+            .filter(Boolean);
+        const changed: TransformedTask[] = [];
+        try {
+            for (const original of originals) {
+                await updateTask({
+                    ...original,
+                    archivedAt: new Date().toISOString(),
+                    archivedBy: currentUser.id,
+                });
+                changed.push(original);
+            }
+        } catch (error) {
+            await failWithCompensation(
+                'Aufgabe archivieren',
+                error,
+                changed.map(
+                    original => () =>
+                        updateTask({
+                            ...original,
+                            revision: (original.revision ?? 0) + 1,
+                            archivedAt: undefined,
+                            archivedBy: undefined,
+                        }),
+                ),
+            );
+        }
+    };
+
+    const restoreArchivedTaskTree = async (root: TransformedTask) => {
+        const originals = descendantIds(root, allTasksMap.value)
+            .map(id => allTasksMap.value[id])
+            .filter((task): task is TransformedTask => !!task?.archivedAt && !task.deletedAt);
+        const changed: TransformedTask[] = [];
+        try {
+            for (const original of originals) {
+                await updateTask({ ...original, archivedAt: undefined, archivedBy: undefined });
+                changed.push(original);
+            }
+        } catch (error) {
+            await failWithCompensation(
+                'Aufgabe aus dem Archiv wiederherstellen',
+                error,
+                changed.map(
+                    original => () =>
+                        updateTask({
+                            ...original,
+                            revision: (original.revision ?? 0) + 1,
+                            archivedAt: original.archivedAt,
+                            archivedBy: original.archivedBy,
                         }),
                 ),
             );
@@ -229,6 +289,7 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         parentByChild,
         tasks,
         deletedTasks,
+        archivedTasks,
         allTasksMap,
         showTask,
         createTask,
@@ -238,6 +299,8 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         deleteTask,
         archiveTaskTree,
         restoreTaskTree,
+        archiveCompletedTaskTree,
+        restoreArchivedTaskTree,
         isLoading,
         findParent,
         getSuperParent,

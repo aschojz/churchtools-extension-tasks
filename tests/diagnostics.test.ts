@@ -12,7 +12,7 @@ describe('diagnostic snapshot', () => {
         });
 
         expect(snapshot).toEqual({
-            application: { version: '1.2.3', commit: 'abc1234', schemaVersion: 2 },
+            application: { version: '1.2.3', commit: 'abc1234', schemaVersion: 3 },
             runtime: { moduleId: 7, authentication: 'authenticated' },
             dataIssues: [{ entity: 'value', id: 42, categoryId: 3, message: 'Ungültiger Wert' }],
         });

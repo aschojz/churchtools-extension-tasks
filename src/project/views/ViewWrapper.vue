@@ -37,6 +37,7 @@ const projectId = computed(() => props.projectId);
 const { lists } = useLists(projectId);
 const { tagsArray } = useTags(projectId);
 const viewId = computed(() => String(route.name ?? 'project'));
+const taskControlsVisible = computed(() => !['project-archive', 'project-trash'].includes(viewId.value));
 const filters = computed(() => store.filtersForProject(props.projectId));
 const statusFilter = computed({
     get: () => filters.value.status,
@@ -126,6 +127,7 @@ const viewNavigation: NavigationMenuItem[] = [
     { label: 'Liste', icon: 'i-lucide-list', to: { name: 'project-list' } },
     { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags' } },
     { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
+    { label: 'Archiv', icon: 'i-lucide-archive', to: { name: 'project-archive' } },
     { label: 'Papierkorb', icon: 'i-lucide-trash-2', to: { name: 'project-trash' } },
 ];
 </script>
@@ -135,7 +137,7 @@ const viewNavigation: NavigationMenuItem[] = [
         :class="{ 'fixed top-0 left-0 z-[2000] h-screen w-screen bg-gray-100': fullscreen }"
     >
         <div class="project-view-header shrink-0 border-b">
-            <UDashboardToolbar>
+            <UDashboardToolbar v-if="taskControlsVisible">
                 <template #left>
                     <div class="flex flex-wrap items-center gap-2">
                         <UInput
