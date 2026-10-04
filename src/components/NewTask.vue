@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, toRef } from 'vue';
+import { reportOperationalError } from '../application/operationalErrors';
 import { useTasks } from '../composables/useTasks';
 import { taskDraft } from '../domain/tasks';
 
@@ -30,8 +31,12 @@ const onCreateTask = async () => {
         const newTask = await createTask({ ...task.value });
         emit('created', newTask);
         resetTask();
-    } catch {
-        error.value = 'Aufgabe konnte nicht gespeichert werden.';
+    } catch (caught) {
+        error.value = reportOperationalError(
+            'Schnellerfassung speichern',
+            caught,
+            'Aufgabe konnte nicht gespeichert werden.',
+        );
     } finally {
         saving.value = false;
     }

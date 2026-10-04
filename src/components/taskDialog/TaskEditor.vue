@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { reportOperationalError } from '../../application/operationalErrors';
 import { useLists } from '../../composables/useLists';
 import { searchPersons, usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
@@ -116,9 +117,13 @@ watch(personSearch, (query, _previous, onCleanup) => {
             const merged = new Map(selectedPersonOptions().map(person => [person.id, person]));
             for (const person of results) merged.set(person.id, person);
             personOptions.value = [...merged.values()];
-        } catch {
+        } catch (caught) {
             if (sequence === personSearchSequence) {
-                personSearchError.value = 'Personen konnten nicht geladen werden.';
+                personSearchError.value = reportOperationalError(
+                    'Personen suchen',
+                    caught,
+                    'Personen konnten nicht geladen werden.',
+                );
                 personOptions.value = selectedPersonOptions();
             }
         } finally {
