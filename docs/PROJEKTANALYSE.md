@@ -100,7 +100,7 @@ Store-Upgrade-Test bleiben offen.
 | Ansichten     | Board, kompakte Liste, „Meine Aufgaben“, Tags, Unteraufgaben   | Filter und Sortierung werden pro Projekt/Ansicht gespeichert |
 | Unteraufgaben | Verschachtelung, Fortschritt, Duplizieren, Löschen/Archivieren | Mehrschrittfehler werden clientseitig kompensiert            |
 | Tags          | CRUD, Mehrfachauswahl und Filter                               | Löschen bereinigt Aufgabenreferenzen mit Kompensation        |
-| Personen      | Zuweisung, Suche und Filter                                    | Suche ist entprellt und schützt vor alten Antworten          |
+| Personen      | Zuweisung, Suche und Filter                                    | Filtert nach mir, unbesetzt oder einer konkreten Person      |
 | Fälligkeit    | Absolutes und relatives Fälligkeitsdatum                       | Relative Eingabe nur in bestimmten Bearbeitungswegen         |
 | Aktivität     | Kommentare und Änderungsprotokoll                              | Deutsche Anzeige; Kommentare bleiben Teil des Task-Objekts   |
 | Suche         | Projektbezogene und globale Suche                              | Projekt-Fan-out startet erst beim Öffnen                     |

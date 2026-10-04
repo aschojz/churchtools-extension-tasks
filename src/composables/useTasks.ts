@@ -252,7 +252,8 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
         const matchesAssignee =
             filters.assignee === 'all' ||
             (filters.assignee === 'mine' && currentUser.id > 0 && assignees.includes(currentUser.id)) ||
-            (filters.assignee === 'unassigned' && assignees.length === 0);
+            (filters.assignee === 'unassigned' && assignees.length === 0) ||
+            (typeof filters.assignee === 'number' && assignees.includes(filters.assignee));
         const matchesList = filters.list === 'all' || listId === filters.list;
         const taskTags = Array.isArray(task.tags) ? task.tags : [];
         const matchesTag =

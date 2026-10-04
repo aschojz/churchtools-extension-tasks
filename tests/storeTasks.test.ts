@@ -83,4 +83,12 @@ describe('personal task view state', () => {
         restored.resetProjectFilters(3);
         expect(restored.filtersForProject(3)).toEqual(restored.filtersForProject(4));
     });
+
+    it('persists a concrete assignee per project', () => {
+        const store = taskStore();
+        store.updateProjectFilters(3, { assignee: 42 });
+
+        setActivePinia(createPinia());
+        expect(taskStore().filtersForProject(3).assignee).toBe(42);
+    });
 });

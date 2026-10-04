@@ -15,6 +15,7 @@ import {
     type TaskTagFilter,
 } from '../../composables/storeTasks';
 import { useLists } from '../../composables/useLists';
+import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
 import { useTags } from '../../composables/useTags';
 import { firstOrSelf } from '../../platform';
 
@@ -36,6 +37,7 @@ const route = useRoute();
 const projectId = computed(() => props.projectId);
 const { lists } = useLists(projectId);
 const { tagsArray } = useTags(projectId);
+const { people } = useProjectTaskContext();
 const viewId = computed(() => String(route.name ?? 'project'));
 const taskControlsVisible = computed(() => !['project-archive', 'project-trash'].includes(viewId.value));
 const filters = computed(() => store.filtersForProject(props.projectId));
@@ -87,11 +89,14 @@ const dueOptions = [
     { id: 'upcoming', label: 'Fälligkeit: Demnächst' },
     { id: 'none', label: 'Fälligkeit: Ohne Termin' },
 ];
-const assigneeOptions = [
+const assigneeOptions = computed(() => [
     { id: 'all', label: 'Person: Alle' },
     { id: 'mine', label: 'Person: Mir zugewiesen' },
     { id: 'unassigned', label: 'Person: Nicht zugewiesen' },
-];
+    ...Object.entries(people.value)
+        .map(([id, person]) => ({ id: Number(id), label: `Person: ${person.title}` }))
+        .sort((a, b) => a.label.localeCompare(b.label, 'de')),
+]);
 const listOptions = computed(() => [
     { id: 'all' as const, label: 'Alle Listen' },
     ...lists.value.map(list => ({ id: list.id, label: list.name })),
