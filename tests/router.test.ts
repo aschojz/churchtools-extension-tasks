@@ -11,6 +11,7 @@ describe('task routes', () => {
         ['/3/tasks/42', 'project-tasks', '42'],
         ['/3/my-tasks/42', 'my-tasks', '42'],
         ['/3/calendar/42', 'project-calendar', '42'],
+        ['/3/timeline/42', 'project-timeline', '42'],
     ])('resolves the deep link %s', (path, name, taskId) => {
         const resolved = createAppRouter(createMemoryHistory('/ccm/tasks/')).resolve(path);
         expect(resolved.name).toBe(name);

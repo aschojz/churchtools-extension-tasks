@@ -133,6 +133,7 @@ const viewNavigation: NavigationMenuItem[] = [
     { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags' } },
     { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
     { label: 'Kalender', icon: 'i-lucide-calendar-days', to: { name: 'project-calendar' } },
+    { label: 'Timeline', icon: 'i-lucide-gantt-chart', to: { name: 'project-timeline' } },
     { label: 'Archiv', icon: 'i-lucide-archive', to: { name: 'project-archive' } },
     { label: 'Papierkorb', icon: 'i-lucide-trash-2', to: { name: 'project-trash' } },
 ];
