@@ -636,7 +636,7 @@ müssen die aktive Locale verwenden.
 - Erwähnungen, Abonnements und Benachrichtigungen
 - Bezüge zu ChurchTools-Personen, Gruppen, Kalenderterminen oder Songs
 - feinere Projektrollen und Sichtbarkeiten
-- Kalender- und Timeline-Ansicht
+- Monatskalender für fällige Aufgaben (**umgesetzt**); Timeline bleibt offen
 - Kapazitäts-, Durchsatz- und Fälligkeitsauswertungen
 - Export und Import in dokumentierten Formaten
 

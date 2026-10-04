@@ -9,6 +9,7 @@ const TagBoard = () => import('./project/views/TagBoard.vue');
 const TaskBoard = () => import('./project/views/TaskBoard.vue');
 const TrashView = () => import('./project/views/TrashView.vue');
 const ArchiveView = () => import('./project/views/ArchiveView.vue');
+const CalendarView = () => import('./project/views/CalendarView.vue');
 const Overview = () => import('./views/Overview.vue');
 
 export const routes: RouteRecordRaw[] = [
@@ -45,6 +46,12 @@ export const routes: RouteRecordRaw[] = [
                 path: 'my-tasks/:taskId?',
                 name: 'my-tasks',
                 component: MyTasksList,
+                props: true,
+            },
+            {
+                path: 'calendar/:taskId?',
+                name: 'project-calendar',
+                component: CalendarView,
                 props: true,
             },
             {
