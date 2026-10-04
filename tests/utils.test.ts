@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createProjectShorty } from '../src/utils/utils';
+import { createProjectShorty, projectIcon } from '../src/utils/utils';
 
 describe('project identifiers', () => {
     it('uses randomUUID when the browser provides it', () => {
@@ -22,5 +22,13 @@ describe('project identifiers', () => {
         const shorty = createProjectShorty(source);
         expect(shorty).toMatch(/^project_[a-z0-9]+_abababababababab$/);
         expect(shorty.length).toBeLessThanOrEqual(50);
+    });
+});
+
+describe('project icons', () => {
+    it('maps persisted Font Awesome classes and keeps local Lucide names', () => {
+        expect(projectIcon('fas fa-church')).toBe('i-lucide-church');
+        expect(projectIcon('i-lucide-heart')).toBe('i-lucide-heart');
+        expect(projectIcon(undefined)).toBe('i-lucide-folder');
     });
 });

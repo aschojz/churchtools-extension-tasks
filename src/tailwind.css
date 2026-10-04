@@ -101,6 +101,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     align-items: center;
     gap: 10px;
     min-width: 0;
+    color: var(--ink);
 }
 .dashboard-brand.collapsed {
     justify-content: center;
@@ -117,6 +118,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     background: var(--accent-soft);
 }
 .dashboard-brand strong {
+    color: var(--ink) !important;
     font-size: 17px;
 }
 .dashboard-sidebar-label {

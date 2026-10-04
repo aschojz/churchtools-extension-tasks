@@ -16,8 +16,6 @@ export const CtColor = {
 } as const;
 export type CtColor = (typeof CtColor)[keyof typeof CtColor];
 
-export const CtIcon = { ADD: 'fas fa-plus', EDIT: 'fas fa-pen', DELETE: 'fas fa-trash' } as const;
-
 export type Person = { id: number; firstName?: string; lastName?: string; imageUrl?: string };
 export type PersonDisplay = { domainIdentifier: string; title: string; imageUrl?: string; icon?: string };
 
@@ -57,7 +55,7 @@ export const personDisplay = (person: Person): PersonDisplay => ({
     domainIdentifier: String(person.id),
     title: `${person.firstName ?? ''} ${person.lastName ?? ''}`.trim() || `Person ${person.id}`,
     imageUrl: person.imageUrl,
-    icon: 'fas fa-user',
+    icon: 'i-lucide-user',
 });
 export const notNullish = <T>(value: T | null | undefined): value is T => value != null;
 export const firstOrSelf = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);

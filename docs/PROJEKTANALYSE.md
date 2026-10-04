@@ -372,10 +372,10 @@ Ansichts-Chunks; die frühere Warnung für ein einzelnes JavaScript-Bundle über
 
 #### ARCH-01 · P1 · Implizite Font-Awesome-Abhängigkeit
 
-**Status:** Behoben. Das Font-Awesome-Paket und seine Webfonts werden jetzt in
-allen Modi in den Extension-Build aufgenommen. Dynamisch gespeicherte
-Projekticons bleiben kompatibel, ohne CSS oder Fonts des ChurchTools-Hosts zu
-benötigen. Die zuvor ungenutzten lokalen Font- und CSS-Kopien wurden entfernt.
+**Status:** Behoben. Sämtliche Extension-Icons verwenden lokal gebündelte
+Lucide-Icons über Nuxt UI. Alte gespeicherte Font-Awesome-Klassennamen werden
+beim Lesen kompatibel abgebildet. Die Extension lädt keine globalen
+Font-Awesome-Regeln oder Webfonts mehr in das ChurchTools-Hostdokument.
 
 **Beobachtung:** Font-Awesome-CSS wird nur in der Entwicklung importiert. Der
 Produktions-Build verwendete weiterhin Font-Awesome-Klassennamen und verließ

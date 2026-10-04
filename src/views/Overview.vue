@@ -8,6 +8,7 @@ import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
 import { dueDateBucket, type DueDateBucket } from '../domain/tasks';
 import { colorKey, CtColor, uiColor, useCurrentUser } from '../platform';
 import { createOrEditProject } from '../project/projectHelper';
+import { projectIcon } from '../utils/utils';
 
 defineEmits<{ (event: 'edit-project', project: Project): void }>();
 const { moduleId } = usePlugin();
@@ -97,7 +98,9 @@ const tasksBySection = computed(
                                 class="text-muted mb-1 block truncate text-xs"
                                 :to="{ name: 'my-tasks', params: { projectId: item.project.id } }"
                             >
-                                <i class="mr-1" :class="item.project.icon"></i>{{ item.project.name }}
+                                <UIcon class="mr-1 inline-block size-3" :name="projectIcon(item.project.icon)" />{{
+                                    item.project.name
+                                }}
                             </RouterLink>
                             <RouterLink
                                 class="task-item overview-task-item flex min-w-0 items-start gap-3 p-3"
@@ -162,12 +165,12 @@ const tasksBySection = computed(
                                 class="project-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
                                 :data-color="colorKey(project.color)"
                             >
-                                <i :class="project.icon"></i>
+                                <UIcon class="size-5" :name="projectIcon(project.icon)" />
                             </div>
                             <div class="flex-grow text-base font-semibold">
                                 {{ project.name }}
                             </div>
-                            <i class="fas fa-chevron-right text-ter fa-fw"></i>
+                            <UIcon class="text-ter size-4" name="i-lucide-chevron-right" />
                         </div>
                         <div v-if="project.description" class="text-muted mt-3 line-clamp-2 text-sm">
                             {{ project.description }}

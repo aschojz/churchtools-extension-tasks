@@ -45,8 +45,9 @@ Stand: 04.10.2026 · Version 0.4.0
 - Nuxt UI stellt Dashboard, Sidebar, Navbar, Suche, Formulare, Dialoge und Menüs.
   Tailwind-Utilities sind unter `#tasks` gescopt; die Höhe richtet sich nach dem
   tatsächlichen Einbaupunkt im Host.
-- Font Awesome wird einschließlich Webfonts gebündelt. Der Produktionsbuild
-  benötigt keine Host-Styles und keinen benachbarten ChurchTools-Checkout.
+- Icons werden als lokale Lucide-Icons über Nuxt UI gebündelt. Alte gespeicherte
+  Font-Awesome-Projekticons werden kompatibel abgebildet; globale Icon-CSS oder
+  Webfonts greifen nicht mehr in den ChurchTools-Header ein.
 - Routen und große Dialoge werden lazy geladen. Die globale Suche lädt
   Projektaufgaben erst beim Öffnen.
 - Der Systemstatus zeigt Paketversion, Commit, Schema, Modul, Anmeldung und
@@ -59,7 +60,7 @@ Stand: 04.10.2026 · Version 0.4.0
 
 ## Verifikation
 
-- `npm run check`: TypeScript, ESLint, 81 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
+- `npm run check`: TypeScript, ESLint, 82 Vitest-Tests in 17 Dateien und Produktionsbuild grün.
 - `npm run package:verify`: Extension-Key, HTML-Assets, JavaScript, CSS und
   Archivstruktur erfolgreich geprüft.
 - Browser-Smoke-Tests im eingebetteten ChurchTools-Rahmen prüfen Dashboard,

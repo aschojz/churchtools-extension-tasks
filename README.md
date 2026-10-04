@@ -99,10 +99,10 @@ Die Extension verwendet aus dem ChurchTools-Ökosystem ausschließlich
 die aktuelle Person kapselt `src/platform.ts`. Damit hängt der Build weder von
 internen Frontend-Paketen noch von einem benachbarten ChurchTools-Checkout ab.
 
-Font Awesome bleibt für Icons erhalten. Die Projektauswahl nutzt eine kuratierte
-lokale Icon-Liste und der Build bündelt CSS sowie Webfonts; dadurch sind für die
-Oberfläche weder Host-Styles, Apollo, GraphQL noch eine externe Icon-Suche
-erforderlich.
+Die Oberfläche verwendet lokal gebündelte Lucide-Icons über Nuxt UI. Historische
+Font-Awesome-Klassennamen gespeicherter Projekte werden beim Lesen auf passende
+Lucide-Icons abgebildet. Dadurch verändert die Extension weder Icon-Regeln noch
+Webfonts des ChurchTools-Headers.
 
 Offene Themen, Audit-Einordnung und Entwicklungsplan:
 [Projektanalyse](docs/PROJEKTANALYSE.md) und [Umsetzungsstand](docs/UMSETZUNGSSTAND.md).

@@ -3,23 +3,24 @@ import type { Project } from '../domain/types';
 import { ref } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
 import { colorOptions } from '../platform';
+import { projectIcon } from '../utils/utils';
 import useProjects from './useProjects';
 
 const props = defineProps<{ project?: Project }>();
 const emit = defineEmits<{ (event: 'close'): void }>();
 
-const proj = ref({ ...(props.project ?? ({} as Project)) });
+const proj = ref({ ...(props.project ?? ({} as Project)), icon: projectIcon(props.project?.icon) });
 
 const icons = [
-    ['fas fa-folder', 'Ordner'],
-    ['fas fa-list-check', 'Aufgaben'],
-    ['fas fa-users', 'Team'],
-    ['fas fa-calendar', 'Kalender'],
-    ['fas fa-church', 'Gemeinde'],
-    ['fas fa-heart', 'Herz'],
-    ['fas fa-lightbulb', 'Idee'],
-    ['fas fa-music', 'Musik'],
-    ['fas fa-house', 'Haus'],
+    ['i-lucide-folder', 'Ordner'],
+    ['i-lucide-list-checks', 'Aufgaben'],
+    ['i-lucide-users', 'Team'],
+    ['i-lucide-calendar-days', 'Kalender'],
+    ['i-lucide-church', 'Gemeinde'],
+    ['i-lucide-heart', 'Herz'],
+    ['i-lucide-lightbulb', 'Idee'],
+    ['i-lucide-music', 'Musik'],
+    ['i-lucide-house', 'Haus'],
 ].map(([id, nameTranslated]) => ({ id, nameTranslated }));
 
 const { createProject, updateProject } = useProjects();

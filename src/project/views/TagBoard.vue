@@ -98,7 +98,7 @@ const boardlists = computed(() => {
         name: 'Kein Tag',
         nameTranslated: 'Kein Tag',
         color: { key: CtColor.BASIC },
-        icon: 'fas fa-circle',
+        icon: 'i-lucide-circle',
         dataCategoryId: projectId.value,
         sortKey: 0,
         type: 'tag',

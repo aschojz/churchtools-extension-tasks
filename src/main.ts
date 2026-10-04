@@ -1,5 +1,4 @@
 import { churchtoolsClient } from '@churchtools/churchtools-client';
-import '@fortawesome/fontawesome-free/css/all.css';
 import ui from '@nuxt/ui/vue-plugin';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';

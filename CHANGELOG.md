@@ -15,6 +15,7 @@
 
 ### Betrieb und Daten
 
+- vollständig isolierte Lucide-Icons ohne Eingriff in Font Awesome des ChurchTools-Headers
 - Schema 6 für Aufgabenabhängigkeiten, Startdaten und Wiederholungen mit getesteten Migrationen
 - Schutz exportierter CSV-Zellen vor Formelausführung in Tabellenprogrammen
 - Migrationsvorschau für erkannte Altwerte im Systemstatus

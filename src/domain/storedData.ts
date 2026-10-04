@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { colorKey, CtColor } from '../platform';
+import { projectIcon } from '../utils/utils';
 import { normalizeTaskUrl } from './tasks';
 import type {
     ActivityEntry,
@@ -268,7 +269,7 @@ export function parseStoredProject(value: unknown): Project {
         shorty: requiredString(data.shorty, 'Projektkennung'),
         description: optionalString(data.description) ?? '',
         color: validColor(data.color),
-        icon: optionalString(data.icon),
+        icon: projectIcon(optionalString(data.icon)),
         securityLevelId: positiveInteger(data.securityLevelId) ?? 1,
     };
 }

@@ -20,7 +20,7 @@ export function useTags(projectId: MaybeRefOrGetter<number>) {
         Object.values(tags.value).map(tag => ({
             ...tag,
             nameTranslated: tag.name,
-            icon: 'fas fa-circle' as const,
+            icon: 'i-lucide-circle' as const,
             color: { key: tag.color },
         })),
     );

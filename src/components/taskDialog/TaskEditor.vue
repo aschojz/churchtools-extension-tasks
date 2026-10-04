@@ -32,7 +32,7 @@ const tagOptions = computed(() =>
         id: tag.id,
         nameTranslated: tag.name,
         color: tag.color.key,
-        icon: 'fas fa-circle' as const,
+        icon: 'i-lucide-circle' as const,
     })),
 );
 const internTask = ref<Task>(taskDraft());

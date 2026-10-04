@@ -41,7 +41,6 @@
     },
     "dependencies": {
         "@churchtools/churchtools-client": "1.7.3",
-        "@fortawesome/fontawesome-free": "7.3.1",
         "@iconify-json/lucide": "1.2.139",
         "@nuxt/ui": "4.11.3",
         "@tanstack/vue-query": "5.104.1",

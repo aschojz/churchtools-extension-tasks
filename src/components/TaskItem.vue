@@ -194,8 +194,12 @@ const breadcrumbs = computed(() => {
         <div v-if="superParent && !showTask" class="-mb-1 flex items-center gap-2 text-xs text-gray-400">
             <template v-for="(crumb, index) in breadcrumbs" :key="index">
                 <span>{{ crumb }}</span>
-                <i v-if="index === breadcrumbs.length - 1" class="fas fa-arrow-turn-up fa-rotate-270"></i>
-                <i v-else class="fas fa-arrow-left-long"></i>
+                <UIcon
+                    v-if="index === breadcrumbs.length - 1"
+                    class="size-3 rotate-90"
+                    name="i-lucide-corner-up-left"
+                />
+                <UIcon v-else class="size-3" name="i-lucide-arrow-left" />
             </template>
         </div>
         <div class="flex items-start justify-end gap-4">
