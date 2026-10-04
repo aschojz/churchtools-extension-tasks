@@ -106,6 +106,19 @@ describe('stored data schemas and migrations', () => {
         ).toMatchObject({ archivedAt: '2026-10-04T10:00:00.000Z', archivedBy: 7 });
     });
 
+    it('migrates version 3 tasks and keeps dependency ids', () => {
+        expect(
+            parseStoredValue({
+                schemaVersion: 3,
+                id: 10,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Abhängig',
+                blockedBy: [4, 4, -1],
+            }),
+        ).toMatchObject({ schemaVersion: CURRENT_SCHEMA_VERSION, blockedBy: [4] });
+    });
+
     it('normalizes persistence metadata on legacy and current values', () => {
         expect(
             parseStoredValue({

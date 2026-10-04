@@ -10,10 +10,11 @@
 - Archiv für erledigte Aufgaben sowie Papierkorb mit Wiederherstellung
 - Schnellerfassung per Taste `N`
 - datensparsamer Systemstatus mit Version, Commit und Schema
+- Aufgabenblocker mit Abschlussprüfung und Schutz vor zyklischen Abhängigkeiten
 
 ### Stabilität und Architektur
 
-- versionierte Laufzeitschemas und Migrationen bis Schema 3
+- versionierte Laufzeitschemas und Migrationen bis Schema 4
 - clientseitige Revisionen und sichtbare Konflikte bei parallelen Änderungen
 - Kompensation für mehrstufige Projekt-, Aufgaben-, Tag- und Sammeloperationen
 - explizites Domänenmodell ohne `any` in Aktivitätseinträgen

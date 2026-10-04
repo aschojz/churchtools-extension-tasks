@@ -15,6 +15,7 @@ Verantwortliche, Unteraufgaben, Fälligkeiten, Aktivitäten, Archiv und Papierko
 - Archiv für erledigte Aufgaben und wiederherstellbarer Papierkorb
 - globale Suche und Schnellerfassung per Taste `N`
 - Systemstatus mit Version, Commit, Datenschema und datensparsamer Fehlerdiagnose
+- Aufgabenabhängigkeiten mit sichtbaren Blockern und abgesichertem Abschluss
 
 ## Lokal entwickeln
 

@@ -19,8 +19,7 @@ Kompensationen. Defekte Einzelwerte blockieren keine vollständige Ansicht.
 Die verbleibenden Freigaberisiken hängen überwiegend von externen ChurchTools-
 Eigenschaften ab: atomisches Compare-and-swap der CCM-API, die genaue Semantik
 der Sicherheitsstufe und ein realer Store-Upgrade-Test. Produktseitig bleiben
-vor allem Erinnerungen, Wiederholungen, Vorlagen, Benachrichtigungen sowie
-Kalender- und Auswertungsansichten offen.
+vor allem Erinnerungen, Wiederholungen, Vorlagen und Benachrichtigungen offen.
 
 ## 2. Prioritäten
 
@@ -136,7 +135,7 @@ Store-Upgrade-Test bleiben offen.
 | I18N-01  | **P2** | Lokalisierung      | Übersetzungsfunktion ist ein Platzhalter; Texte und Farbwerte sind gemischtsprachig |
 | OPS-01   | **P2** | Betrieb            | Keine sichtbare Version, Diagnoseansicht oder korrelierbare Fehlerkennung           |
 | FEAT-01  | **P2** | Feature            | Prioritäten, Filter, Sortierung, gespeicherte Ansichten und Mehrfachaktionen fehlen |
-| FEAT-02  | **P3** | Feature            | Wiederholungen, Erinnerungen, Vorlagen, Papierkorb und Abhängigkeiten fehlen        |
+| FEAT-02  | **P3** | Feature            | Papierkorb und Abhängigkeiten sind umgesetzt; Wiederholungen und Vorlagen fehlen    |
 | FEAT-03  | **P3** | Feature            | Anhänge, Erwähnungen, Abos und ChurchTools-Objektbezüge fehlen                      |
 | FEAT-04  | **P3** | Feature            | Kalender, Timeline und eine kompakte Projektauswertung sind umgesetzt               |
 
@@ -633,7 +632,7 @@ müssen die aktive Locale verwenden.
 - Wiederholende Aufgaben und Erinnerungen
 - Aufgabenvorlagen und Projektvorlagen
 - Papierkorb mit Wiederherstellung
-- Abhängigkeiten und Blocker zwischen Aufgaben
+- Abhängigkeiten und Blocker zwischen Aufgaben (**umgesetzt mit Schema 4**)
 - Startdatum und optionaler Zeitraum
 - Anhänge und ChurchTools-Dateibezüge
 - Erwähnungen, Abonnements und Benachrichtigungen

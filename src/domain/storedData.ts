@@ -3,7 +3,7 @@ import { colorKey, CtColor } from '../platform';
 import { normalizeTaskUrl } from './tasks';
 import type { ActivityEntry, Project, TaskPriority, TransformedList, TransformedTag, TransformedTask } from './types';
 
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;
 
 export type DataIssue = {
     entity: 'project' | 'value';
@@ -93,6 +93,11 @@ export function migrateStoredData(value: unknown): Record<string, unknown> {
             version = 3;
             continue;
         }
+        if (version === 3) {
+            data = { ...data, schemaVersion: 4 };
+            version = 4;
+            continue;
+        }
         throw new Error(`Für Schemaversion ${version} ist keine Migration vorhanden.`);
     }
     return data;
@@ -149,6 +154,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
         const tags = numberArray(data.tags);
         const assignedTo = numberArray(data.assignedTo);
         const subTasks = numberArray(data.subTasks);
+        const blockedBy = numberArray(data.blockedBy);
         const deletedAt = storedUpdatedAt(data.deletedAt);
         const deletedBy = positiveInteger(data.deletedBy);
         const archivedAt = storedUpdatedAt(data.archivedAt);
@@ -173,6 +179,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
             ...(tags === undefined ? {} : { tags }),
             ...(assignedTo === undefined ? {} : { assignedTo }),
             ...(subTasks === undefined ? {} : { subTasks }),
+            ...(blockedBy === undefined ? {} : { blockedBy }),
             ...(deletedAt === undefined ? {} : { deletedAt }),
             ...(deletedBy === undefined ? {} : { deletedBy }),
             ...(archivedAt === undefined ? {} : { archivedAt }),

@@ -4,7 +4,7 @@ import { failWithCompensation } from '../../application/compensation';
 import { reportOperationalError } from '../../application/operationalErrors';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
-import { appendComment } from '../../domain/tasks';
+import { appendComment, incompleteTaskBlockers } from '../../domain/tasks';
 import { requireCurrentUser, uiColor } from '../../platform';
 import TaskItem from '../TaskItem.vue';
 import Activities from './Activities.vue';
@@ -19,6 +19,14 @@ const subTasks = computed(() =>
 );
 
 const { updateTask, createTask, deleteTask, tasksMap } = useTasks(pId);
+const blockers = computed(() =>
+    task.value
+        ? (Array.isArray(task.value.blockedBy) ? task.value.blockedBy : [])
+              .map(id => tasksMap.value[id])
+              .filter(Boolean)
+        : [],
+);
+const openBlockers = computed(() => (task.value ? incompleteTaskBlockers(task.value, tasksMap.value) : []));
 
 const saveComment = async (value: string) => {
     if (!task.value) {
@@ -147,6 +155,22 @@ const createChild = async () => {
                     </div>
                 </div>
             </div>
+            <div v-if="blockers.length" class="task-view-meta-group">
+                <span>Blockiert durch</span>
+                <div class="flex flex-col gap-2">
+                    <UBadge
+                        v-for="blocker in blockers"
+                        :key="blocker.id"
+                        :color="blocker.fullfilled ? 'success' : 'warning'"
+                        :icon="blocker.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-lock-keyhole'"
+                        :label="blocker.name"
+                        variant="subtle"
+                    />
+                </div>
+                <p v-if="openBlockers.length" class="text-xs text-amber-700">
+                    Abschluss erst möglich, wenn alle Blocker erledigt sind.
+                </p>
+            </div>
             <UButton
                 v-if="task?.url"
                 block
@@ -158,7 +182,10 @@ const createChild = async () => {
                 target="_blank"
                 variant="outline"
             />
-            <p v-if="!dueDate && !sortedTags.length && !assignees.length && !task?.url" class="task-view-empty">
+            <p
+                v-if="!dueDate && !sortedTags.length && !assignees.length && !blockers.length && !task?.url"
+                class="task-view-empty"
+            >
                 Keine weiteren Details
             </p>
         </aside>

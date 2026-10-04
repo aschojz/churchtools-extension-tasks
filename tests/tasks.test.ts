@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
     appendComment,
+    assertTaskCanComplete,
+    assertTaskDependenciesValid,
     descendantIds,
     dueDateBucket,
     normalizeTaskUrl,
@@ -131,5 +133,25 @@ describe('task integrity', () => {
                 entry.dueDate ? new Date(`${entry.dueDate}T00:00:00`) : undefined,
             ).map(entry => entry.id),
         ).toEqual([3, 1, 2]);
+    });
+    it('prevents completion while referenced blockers remain open', () => {
+        const blocker = task(1);
+        const dependent = task(2, { blockedBy: [1, 99] });
+        expect(() => assertTaskCanComplete(dependent, { 1: blocker, 2: dependent })).toThrow('1 offene Aufgabe');
+        expect(() =>
+            assertTaskCanComplete(dependent, { 1: { ...blocker, fullfilled: true }, 2: dependent }),
+        ).not.toThrow();
+    });
+    it('rejects direct and transitive dependency cycles', () => {
+        const first = task(1, { blockedBy: [2] });
+        const second = task(2, { blockedBy: [3] });
+        const third = task(3);
+        const fourth = task(4);
+        expect(() =>
+            assertTaskDependenciesValid({ ...third, blockedBy: [1] }, { 1: first, 2: second, 3: third }),
+        ).toThrow('keinen Kreis');
+        expect(() =>
+            assertTaskDependenciesValid({ ...third, blockedBy: [4] }, { 1: first, 2: second, 3: third, 4: fourth }),
+        ).not.toThrow();
     });
 });

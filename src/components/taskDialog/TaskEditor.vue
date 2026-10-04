@@ -13,6 +13,12 @@ const props = defineProps<{ taskId?: number; projectId: number }>();
 const emit = defineEmits<{ (event: 'change', payload: Task): void }>();
 const projectId = computed(() => props.projectId);
 const { tasksMap, isLoading, findParent } = useTasks(projectId);
+const blockerOptions = computed(() =>
+    Object.values(tasksMap.value)
+        .filter(task => task.id !== props.taskId)
+        .sort((left, right) => left.name.localeCompare(right.name, 'de'))
+        .map(task => ({ id: task.id, label: task.name })),
+);
 const { lists } = useLists(projectId);
 const listOptions = computed(() =>
     [...lists.value].sort((a, b) => a.sortKey - b.sortKey).map(list => ({ id: list.id, label: list.name })),
@@ -208,6 +214,17 @@ watch(personSearch, (query, _previous, onCleanup) => {
                     :loading="personSearchLoading"
                     multiple
                     placeholder="Person suchen …"
+                    value-key="id"
+                />
+            </UFormField>
+            <UFormField hint="Optional" label="Blockiert durch">
+                <USelectMenu
+                    v-model="internTask.blockedBy"
+                    class="w-full"
+                    :items="blockerOptions"
+                    label-key="label"
+                    multiple
+                    placeholder="Blockierende Aufgaben …"
                     value-key="id"
                 />
             </UFormField>

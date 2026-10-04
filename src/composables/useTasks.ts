@@ -3,6 +3,8 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { failWithCompensation } from '../application/compensation';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
 import {
+    assertTaskCanComplete,
+    assertTaskDependenciesValid,
     descendantIds,
     dueDateBucket,
     normalizeTaskUrl,
@@ -39,6 +41,9 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
     const updateTask = async (task: TransformedTask, diff?: ReturnType<typeof taskDiff>) => {
         requireCurrentUser();
         if (!task.name?.trim()) throw new Error('Bitte einen Titel eingeben.');
+        const current = tasksMap.value[task.id];
+        assertTaskDependenciesValid(task, tasksMap.value);
+        if (task.fullfilled && !current?.fullfilled) assertTaskCanComplete(task, tasksMap.value);
         const activity = [...(Array.isArray(task.activity) ? task.activity : [])];
         if (diff && Object.keys(diff).length) {
             activity.push({ personId: currentUser.id, date: new Date().toISOString(), type: 'update', value: diff });

@@ -83,6 +83,7 @@ export function taskDraft(task: Partial<Task> = {}): Task {
             'tags',
             'assignedTo',
             'subTasks',
+            'blockedBy',
             'deletedAt',
             'deletedBy',
             'archivedAt',
@@ -92,8 +93,35 @@ export function taskDraft(task: Partial<Task> = {}): Task {
     if (!Array.isArray(draft.activity)) draft.activity = undefined;
     if (!Array.isArray(draft.assignedTo)) draft.assignedTo = undefined;
     if (!Array.isArray(draft.subTasks)) draft.subTasks = undefined;
+    if (!Array.isArray(draft.blockedBy)) draft.blockedBy = undefined;
     if (!Array.isArray(draft.tags)) draft.tags = undefined;
     return draft;
+}
+
+export function incompleteTaskBlockers(task: TransformedTask, tasks: Record<number, TransformedTask>) {
+    return (Array.isArray(task.blockedBy) ? task.blockedBy : [])
+        .map(id => tasks[id])
+        .filter((blocker): blocker is TransformedTask => !!blocker && !blocker.fullfilled);
+}
+
+export function assertTaskCanComplete(task: TransformedTask, tasks: Record<number, TransformedTask>) {
+    const blockers = incompleteTaskBlockers(task, tasks);
+    if (blockers.length)
+        throw new Error(
+            `Diese Aufgabe ist noch durch ${blockers.length} offene ${blockers.length === 1 ? 'Aufgabe' : 'Aufgaben'} blockiert.`,
+        );
+}
+
+export function assertTaskDependenciesValid(task: TransformedTask, tasks: Record<number, TransformedTask>) {
+    const reachesTask = (taskId: number, visited = new Set<number>()): boolean => {
+        if (taskId === task.id) return true;
+        if (visited.has(taskId)) return false;
+        visited.add(taskId);
+        const candidate = tasks[taskId];
+        return (Array.isArray(candidate?.blockedBy) ? candidate.blockedBy : []).some(id => reachesTask(id, visited));
+    };
+    if ((Array.isArray(task.blockedBy) ? task.blockedBy : []).some(id => reachesTask(id)))
+        throw new Error('Aufgabenabhängigkeiten dürfen keinen Kreis bilden.');
 }
 export function taskDiff(next: Partial<Task>, previous: Partial<Task>) {
     const result: Record<string, { from: unknown; to: unknown }> = {};

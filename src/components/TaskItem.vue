@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import { failWithCompensation } from '../application/compensation';
 import { reportOperationalError } from '../application/operationalErrors';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
-import { taskPriority } from '../domain/tasks';
+import { incompleteTaskBlockers, taskPriority } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
 
@@ -42,6 +42,7 @@ const percentFullfilled = computed(() => getProgress(task.value));
 const assignees = computed(() => taskAssignees(task.value, people.value));
 const dueDate = computed(() => calculateDueDate(task.value));
 const priority = computed(() => taskPriority(task.value.priority));
+const openBlockers = computed(() => incompleteTaskBlockers(task.value, tasksMap.value));
 const comments = computed(() =>
     (Array.isArray(task.value.activity) ? task.value.activity : []).filter(entry => entry.type === 'comment'),
 );
@@ -67,7 +68,8 @@ const showLastRow = computed(
         task.value.priority !== 'none' ||
         comments.value.length ||
         (Array.isArray(task.value.tags) && task.value.tags.length) ||
-        task.value.url,
+        task.value.url ||
+        openBlockers.value.length,
 );
 
 const createTaskOrSubtask = async ({ id: taskId, ...data }: TransformedTask) => {
@@ -243,6 +245,15 @@ const breadcrumbs = computed(() => {
         </div>
         <div v-if="showLastRow" class="flex flex-wrap justify-end gap-2">
             <div class="flex flex-grow items-center gap-3 text-gray-400">
+                <UBadge
+                    v-if="openBlockers.length"
+                    color="warning"
+                    icon="i-lucide-lock-keyhole"
+                    :label="String(openBlockers.length)"
+                    size="sm"
+                    title="Offene Blocker"
+                    variant="subtle"
+                />
                 <UBadge
                     v-if="task.priority !== 'none'"
                     :color="priority.color"

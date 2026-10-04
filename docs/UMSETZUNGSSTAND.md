@@ -19,8 +19,8 @@ Stand: 04.10.2026 · Version 0.3.0
 
 - Alle gespeicherten Entitäten werden gegen Laufzeitschemas geprüft. Defekte
   Einzelwerte werden isoliert und im Systemstatus gemeldet.
-- Schema 3 migriert unversionierte Daten, normalisiert das historische
-  `fulfilled`-Feld, ergänzt Prioritäten und unterstützt Archivmetadaten.
+- Schema 4 migriert unversionierte Daten, normalisiert das historische
+  `fulfilled`-Feld, ergänzt Prioritäten, Archivmetadaten und Aufgabenblocker.
 - Revision und Änderungszeitpunkt schützen clientseitig vor unbemerktem
   Überschreiben. Ohne serverseitiges Compare-and-swap bleibt ein kleines
   Zeitfenster zwischen Prüfung und Schreiben.

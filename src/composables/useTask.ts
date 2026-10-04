@@ -1,6 +1,7 @@
 import { sortBy } from 'lodash-es';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useCustomModuleDataValuesMutations } from '../data/ccm';
+import { assertTaskCanComplete } from '../domain/tasks';
 import { CtColor, notNullish, personDisplay, requireCurrentUser, useCurrentUser } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
 import { usePlugin } from './usePlugin';
@@ -46,6 +47,7 @@ export function useTask(projectId: MaybeRefOrGetter<number>, taskId: MaybeRefOrG
     const toggleTask = async () => {
         requireCurrentUser();
         if (!task.value) return;
+        if (!task.value.fullfilled) assertTaskCanComplete(task.value, tasksMap.value);
         const activity = [...(Array.isArray(task.value.activity) ? task.value.activity : [])];
         activity.push({
             personId: currentUser.id,

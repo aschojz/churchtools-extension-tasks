@@ -1,5 +1,5 @@
 import { computed, inject, provide, type ComputedRef, type InjectionKey, type MaybeRefOrGetter } from 'vue';
-import { taskProgress } from '../domain/tasks';
+import { assertTaskCanComplete, taskProgress } from '../domain/tasks';
 import { CtColor, notNullish, personDisplay, useCurrentUser, type PersonDisplay } from '../platform';
 import { usePersonsQueryAllPages } from './usePersons';
 import { useTags } from './useTags';
@@ -36,6 +36,7 @@ export function provideProjectTaskContext(projectId: MaybeRefOrGetter<number>) {
     );
     const currentUser = useCurrentUser();
     const toggleTask = async (task: TransformedTask) => {
+        if (!task.fullfilled) assertTaskCanComplete(task, taskData.tasksMap.value);
         const activity = [...(Array.isArray(task.activity) ? task.activity : [])];
         activity.push({
             personId: currentUser.id,

@@ -50,6 +50,7 @@ export interface Task extends PersistenceMetadata {
     tags?: number[];
     assignedTo?: number[];
     subTasks?: number[];
+    blockedBy?: number[];
     deletedAt?: string;
     deletedBy?: number;
     archivedAt?: string;
