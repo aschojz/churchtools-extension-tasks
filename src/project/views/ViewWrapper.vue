@@ -32,6 +32,8 @@ const projectSearch = computed({
     set: value => store.setSearchForProject(props.projectId, value),
 });
 const listIsOpen = ref(false);
+const savedViewName = ref('');
+const selectedSavedViewId = ref<string>();
 
 const route = useRoute();
 const projectId = computed(() => props.projectId);
@@ -69,6 +71,23 @@ const sortMode = computed({
     get: () => store.sortForView(props.projectId, viewId.value),
     set: (sort: TaskSort) => store.setSortForView(props.projectId, viewId.value, sort),
 });
+const savedViews = computed(() => store.savedViewsForProject(props.projectId));
+const savedViewOptions = computed(() => savedViews.value.map(view => ({ id: view.id, label: view.name })));
+const saveCurrentView = () => {
+    const saved = store.saveProjectView(props.projectId, savedViewName.value, filters.value, sortMode.value);
+    if (!saved) return;
+    selectedSavedViewId.value = saved.id;
+    savedViewName.value = '';
+};
+const applySelectedView = () => {
+    const saved = savedViews.value.find(view => view.id === selectedSavedViewId.value);
+    if (saved) store.applySavedView(props.projectId, viewId.value, saved);
+};
+const removeSelectedView = () => {
+    if (!selectedSavedViewId.value) return;
+    store.removeSavedView(props.projectId, selectedSavedViewId.value);
+    selectedSavedViewId.value = undefined;
+};
 const statusOptions = [
     { id: 'default', label: 'Status: Je Liste' },
     { id: 'open', label: 'Status: Offen' },
@@ -224,6 +243,46 @@ const viewNavigation: NavigationMenuItem[] = [
                                             label="Filter zurücksetzen"
                                             variant="ghost"
                                             @click="resetFilters"
+                                        />
+                                    </div>
+                                    <USeparator class="sm:col-span-2" label="Gespeicherte Ansichten" />
+                                    <div class="flex gap-2 sm:col-span-2">
+                                        <USelect
+                                            v-model="selectedSavedViewId"
+                                            class="min-w-0 flex-1"
+                                            :items="savedViewOptions"
+                                            label-key="label"
+                                            placeholder="Ansicht auswählen …"
+                                            value-key="id"
+                                        />
+                                        <UButton
+                                            :disabled="!selectedSavedViewId"
+                                            icon="i-lucide-play"
+                                            label="Anwenden"
+                                            variant="outline"
+                                            @click="applySelectedView"
+                                        />
+                                        <UButton
+                                            aria-label="Gespeicherte Ansicht löschen"
+                                            color="error"
+                                            :disabled="!selectedSavedViewId"
+                                            icon="i-lucide-trash-2"
+                                            variant="ghost"
+                                            @click="removeSelectedView"
+                                        />
+                                    </div>
+                                    <div class="flex gap-2 sm:col-span-2">
+                                        <UInput
+                                            v-model="savedViewName"
+                                            class="min-w-0 flex-1"
+                                            placeholder="Name der neuen Ansicht"
+                                            @keydown.enter="saveCurrentView"
+                                        />
+                                        <UButton
+                                            :disabled="!savedViewName.trim()"
+                                            icon="i-lucide-bookmark-plus"
+                                            label="Speichern"
+                                            @click="saveCurrentView"
                                         />
                                     </div>
                                 </div>

@@ -91,4 +91,23 @@ describe('personal task view state', () => {
         setActivePinia(createPinia());
         expect(taskStore().filtersForProject(3).assignee).toBe(42);
     });
+
+    it('saves and reapplies named personal views', () => {
+        const store = taskStore();
+        const saved = store.saveProjectView(
+            3,
+            'Dringend',
+            { ...store.filtersForProject(3), priority: 'urgent', due: 'overdue' },
+            'priority',
+        );
+        expect(saved?.name).toBe('Dringend');
+
+        store.resetProjectFilters(3);
+        store.applySavedView(3, 'project-list', saved!);
+        expect(store.filtersForProject(3)).toMatchObject({ priority: 'urgent', due: 'overdue' });
+        expect(store.sortForView(3, 'project-list')).toBe('priority');
+
+        setActivePinia(createPinia());
+        expect(taskStore().savedViewsForProject(3)).toHaveLength(1);
+    });
 });

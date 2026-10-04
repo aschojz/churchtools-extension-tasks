@@ -13,7 +13,7 @@ export type TaskAssigneeFilter = 'all' | 'mine' | 'unassigned' | number;
 export type TaskListFilter = 'all' | number;
 export type TaskTagFilter = 'all' | 'none' | number;
 export type TaskSort = 'manual' | 'dueDate' | 'priority' | 'name' | 'updatedAt';
-type ProjectFilters = {
+export type ProjectFilters = {
     status: TaskStatusFilter;
     priority: TaskPriorityFilter;
     due: TaskDueFilter;
@@ -21,12 +21,19 @@ type ProjectFilters = {
     list: TaskListFilter;
     tag: TaskTagFilter;
 };
+export type SavedProjectView = {
+    id: string;
+    name: string;
+    filters: ProjectFilters;
+    sort: TaskSort;
+};
 
 const STORAGE_KEY = 'extension-tasks:view-preferences';
 const PROJECT_VIEW_STORAGE_KEY = 'extension-tasks:project-views';
 type StoredProjectViews = {
     filters?: Record<number, Partial<ProjectFilters>>;
     sorting?: Record<string, TaskSort>;
+    savedViews?: Record<number, SavedProjectView[]>;
 };
 const loadPreferences = (): Record<string, ListPreferences> => {
     try {
@@ -50,13 +57,18 @@ export const taskStore = defineStore('tasks', () => {
     const searchByProject = ref<Record<number, string>>({}),
         listPreferences = ref<Record<string, ListPreferences>>(loadPreferences()),
         filtersByProject = ref<Record<number, Partial<ProjectFilters>>>(storedProjectViews.filters ?? {}),
-        sortingByView = ref<Record<string, TaskSort>>(storedProjectViews.sorting ?? {});
+        sortingByView = ref<Record<string, TaskSort>>(storedProjectViews.sorting ?? {}),
+        savedViewsByProject = ref<Record<number, SavedProjectView[]>>(storedProjectViews.savedViews ?? {});
 
     const persistProjectViews = () => {
         try {
             localStorage.setItem(
                 PROJECT_VIEW_STORAGE_KEY,
-                JSON.stringify({ filters: filtersByProject.value, sorting: sortingByView.value }),
+                JSON.stringify({
+                    filters: filtersByProject.value,
+                    sorting: sortingByView.value,
+                    savedViews: savedViewsByProject.value,
+                }),
             );
         } catch {
             // The view remains usable when storage is disabled or full.
@@ -89,6 +101,36 @@ export const taskStore = defineStore('tasks', () => {
         sortingByView.value[sortingKey(projectId, view)] ?? (view === 'project-board' ? 'manual' : 'dueDate');
     const setSortForView = (projectId: number, view: string, sort: TaskSort) => {
         sortingByView.value = { ...sortingByView.value, [sortingKey(projectId, view)]: sort };
+        persistProjectViews();
+    };
+    const savedViewsForProject = (projectId: number) => savedViewsByProject.value[projectId] ?? [];
+    const saveProjectView = (projectId: number, name: string, filters: ProjectFilters, sort: TaskSort) => {
+        const normalizedName = name.trim();
+        if (!normalizedName) return;
+        const existing = savedViewsForProject(projectId).find(view => view.name === normalizedName);
+        const saved: SavedProjectView = {
+            id: existing?.id ?? `view-${Date.now().toString(36)}`,
+            name: normalizedName,
+            filters: { ...filters },
+            sort,
+        };
+        savedViewsByProject.value = {
+            ...savedViewsByProject.value,
+            [projectId]: [...savedViewsForProject(projectId).filter(view => view.id !== saved.id), saved],
+        };
+        persistProjectViews();
+        return saved;
+    };
+    const applySavedView = (projectId: number, viewId: string, saved: SavedProjectView) => {
+        filtersByProject.value = { ...filtersByProject.value, [projectId]: { ...saved.filters } };
+        sortingByView.value = { ...sortingByView.value, [sortingKey(projectId, viewId)]: saved.sort };
+        persistProjectViews();
+    };
+    const removeSavedView = (projectId: number, savedViewId: string) => {
+        savedViewsByProject.value = {
+            ...savedViewsByProject.value,
+            [projectId]: savedViewsForProject(projectId).filter(view => view.id !== savedViewId),
+        };
         persistProjectViews();
     };
 
@@ -129,6 +171,10 @@ export const taskStore = defineStore('tasks', () => {
         resetProjectFilters,
         sortForView,
         setSortForView,
+        savedViewsForProject,
+        saveProjectView,
+        applySavedView,
+        removeSavedView,
         searchForProject,
         setSearchForProject,
         preferencesForList,

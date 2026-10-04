@@ -621,7 +621,7 @@ müssen die aktive Locale verwenden.
 - kombinierbare Filter für Status, Priorität, Fälligkeit, eigene/nicht zugewiesene Aufgaben,
   Liste und Tag (**umgesetzt und lokal pro Projekt gespeichert**); freie Personenauswahl bleibt offen
 - Sortierung nach Fälligkeit, Priorität, Titel und Änderungsdatum (**umgesetzt und lokal pro Ansicht gespeichert**)
-- persönliche, gespeicherte Ansichten
+- persönliche, gespeicherte Ansichten (**umgesetzt im lokalen Nutzerprofil**)
 - Mehrfachauswahl mit Sammelaktionen für Status und Priorität in der Listenansicht (**umgesetzt**)
 - schnelle Aufgaben- und Projekterfassung mit der Taste `N` (**umgesetzt**)
 - Archiv für abgeschlossene Aufgaben mit Wiederherstellung (**umgesetzt mit Schema 3**)
