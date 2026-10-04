@@ -1,5 +1,22 @@
 import { cloneDeep, isEqual, pick } from 'lodash-es';
 
+export const TASK_PRIORITIES: Array<{
+    id: TaskPriority;
+    label: string;
+    icon: string;
+    color: 'neutral' | 'info' | 'warning' | 'error';
+    weight: number;
+}> = [
+    { id: 'none', label: 'Keine Priorität', icon: 'i-lucide-minus', color: 'neutral', weight: 0 },
+    { id: 'low', label: 'Niedrig', icon: 'i-lucide-chevrons-down', color: 'info', weight: 1 },
+    { id: 'medium', label: 'Mittel', icon: 'i-lucide-equal', color: 'warning', weight: 2 },
+    { id: 'high', label: 'Hoch', icon: 'i-lucide-chevrons-up', color: 'warning', weight: 3 },
+    { id: 'urgent', label: 'Dringend', icon: 'i-lucide-siren', color: 'error', weight: 4 },
+];
+
+export const taskPriority = (priority: TaskPriority | undefined) =>
+    TASK_PRIORITIES.find(option => option.id === priority) ?? TASK_PRIORITIES[0];
+
 export function normalizeTaskUrl(value: string | undefined): string | undefined {
     const input = value?.trim();
     if (!input) return undefined;
@@ -31,11 +48,13 @@ export function taskDraft(task: Partial<Task> = {}): Task {
         type: 'task',
         name: '',
         fullfilled: false,
+        priority: 'none',
         sortKey: Date.now(),
         ...pick(task, [
             'name',
             'description',
             'fullfilled',
+            'priority',
             'sortKey',
             'url',
             'dueDate',

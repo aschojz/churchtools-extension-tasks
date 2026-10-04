@@ -2,6 +2,7 @@ const FIELD_LABELS: Record<string, string> = {
     name: 'Titel',
     description: 'Beschreibung',
     fullfilled: 'Erledigt',
+    priority: 'Priorität',
     url: 'Link',
     dueDate: 'Fällig am',
     dueDateRelative: 'Tage vor der übergeordneten Aufgabe',

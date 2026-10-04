@@ -5,7 +5,7 @@ import { useLists } from '../../composables/useLists';
 import { usePersonsQueryAllPages } from '../../composables/usePersons';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
-import { taskDraft } from '../../domain/tasks';
+import { TASK_PRIORITIES, taskDraft } from '../../domain/tasks';
 import { type PersonDisplay, personDisplay } from '../../platform';
 import DialogTag from '../DialogTag.vue';
 
@@ -164,6 +164,15 @@ watch(personSearch, (query, _previous, onCleanup) => {
             </UFormField>
             <UFormField label="Fällig am">
                 <UInput v-model="internTask.dueDate" class="w-full" type="date" />
+            </UFormField>
+            <UFormField label="Priorität">
+                <USelect
+                    v-model="internTask.priority"
+                    class="w-full"
+                    :items="TASK_PRIORITIES"
+                    label-key="label"
+                    value-key="id"
+                />
             </UFormField>
             <UFormField v-if="parent" label="Tage vor der übergeordneten Aufgabe">
                 <UInput v-model.number="internTask.dueDateRelative" class="w-full" min="0" type="number" />

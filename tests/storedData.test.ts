@@ -15,8 +15,9 @@ beforeEach(() => {
 describe('stored data schemas and migrations', () => {
     it('migrates an unversioned legacy task and normalizes arrays', () => {
         expect(migrateStoredData({ type: 'task', fulfilled: true })).toMatchObject({
-            schemaVersion: 1,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
             fullfilled: true,
+            priority: 'none',
         });
         const migrated = parseStoredValue({
             id: 12,
@@ -36,6 +37,7 @@ describe('stored data schemas and migrations', () => {
             type: 'task',
             name: 'Legacy',
             fullfilled: true,
+            priority: 'none',
             assignedTo: [8],
             activity: [{ personId: 0, date: '2026-10-03T10:00:00Z', type: 'comment', value: 'Hallo' }],
         });
@@ -51,17 +53,35 @@ describe('stored data schemas and migrations', () => {
             name: 'Offen',
             sortKey: 'invalid',
         });
-        expect(list).toMatchObject({ schemaVersion: 1, sortKey: 40_000 });
+        expect(list).toMatchObject({ schemaVersion: CURRENT_SCHEMA_VERSION, sortKey: 40_000 });
         expect(list).not.toHaveProperty('showCompleted');
         expect(
             parseStoredValue({ id: 5, dataCategoryId: 3, type: 'tag', name: 'Wichtig', color: 'invalid' }),
-        ).toMatchObject({ schemaVersion: 1, color: 'basic', sortKey: 50_000 });
+        ).toMatchObject({ schemaVersion: CURRENT_SCHEMA_VERSION, color: 'basic', sortKey: 50_000 });
         expect(parseStoredProject({ id: 3, customModuleId: 2, name: 'Projekt', shorty: 'project-3' })).toMatchObject({
-            schemaVersion: 1,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
             description: '',
             color: 'basic',
             securityLevelId: 1,
         });
+    });
+
+    it('migrates version 1 tasks to the priority schema', () => {
+        expect(migrateStoredData({ schemaVersion: 1, type: 'task', name: 'Alt', fullfilled: false })).toMatchObject({
+            schemaVersion: 2,
+            priority: 'none',
+        });
+        expect(
+            parseStoredValue({
+                schemaVersion: 2,
+                id: 8,
+                dataCategoryId: 3,
+                type: 'task',
+                name: 'Dringend',
+                fullfilled: false,
+                priority: 'urgent',
+            }),
+        ).toMatchObject({ priority: 'urgent' });
     });
 
     it('normalizes persistence metadata on legacy and current values', () => {

@@ -12,7 +12,7 @@ import {
     useCustomModuleDataValuesQuery,
 } from '../src/data/ccm';
 import { queryClient } from '../src/data/queryClient';
-import { dataIssues } from '../src/domain/storedData';
+import { CURRENT_SCHEMA_VERSION, dataIssues } from '../src/domain/storedData';
 const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), deleteApi: vi.fn() }));
 vi.mock('@churchtools/churchtools-client', () => ({ churchtoolsClient: api }));
 
@@ -61,7 +61,7 @@ describe('CCM repository', () => {
             },
         ]);
         await expect(fetchCustomModuleDataValues<Task>(7, 3)).resolves.toEqual([
-            expect.objectContaining({ id: 2, schemaVersion: 1, type: 'task', name: 'Valid' }),
+            expect.objectContaining({ id: 2, schemaVersion: CURRENT_SCHEMA_VERSION, type: 'task', name: 'Valid' }),
         ]);
         expect(dataIssues.value).toEqual([expect.objectContaining({ entity: 'value', id: 1, categoryId: 3 })]);
         api.get.mockResolvedValue([
@@ -110,7 +110,7 @@ describe('CCM repository', () => {
         expect(JSON.parse(api.put.mock.calls[0][1].value)).toMatchObject({
             name: 'Edited',
             revision: 1,
-            schemaVersion: 1,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
         });
         expect(invalidate).toHaveBeenCalledWith({ queryKey: ccmKeys.values(7, 1) });
         wrapper.unmount();
@@ -131,11 +131,12 @@ describe('CCM repository', () => {
             type: 'task',
             name: 'Versioned',
             fullfilled: false,
+            priority: 'none',
             sortKey: 1,
         });
         const body = api.post.mock.calls[0][1] as { value: string };
         expect(JSON.parse(body.value)).toMatchObject({
-            schemaVersion: 1,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
             revision: 1,
             type: 'task',
             name: 'Versioned',

@@ -623,7 +623,7 @@ müssen die aktive Locale verwenden.
 
 ### P2 · Nächster sinnvoller Produktumfang
 
-- Priorität mit klarer visueller, filterbarer Darstellung
+- Priorität mit klarer visueller Darstellung (**umgesetzt mit Schema 2**)
 - kombinierbare Filter für Status, Person, Tag, Fälligkeit und Liste
 - Sortierung nach Fälligkeit, Priorität, Erstellungs- und Änderungsdatum
 - persönliche, gespeicherte Ansichten

@@ -29,6 +29,7 @@ interface Task {
     updatedAt?: string;
     type: 'task';
     fullfilled: boolean;
+    priority: TaskPriority;
     name: string;
     description?: string;
     url?: string;
@@ -45,6 +46,7 @@ interface Task {
     deletedAt?: string;
     deletedBy?: number;
 }
+type TaskPriority = 'none' | 'low' | 'medium' | 'high' | 'urgent';
 interface Tag {
     schemaVersion?: number;
     revision?: number;

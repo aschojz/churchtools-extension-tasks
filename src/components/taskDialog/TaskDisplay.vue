@@ -43,6 +43,7 @@ const createChild = async () => {
             type: 'task',
             name: childName.value.trim(),
             fullfilled: false,
+            priority: 'none',
             sortKey: Date.now(),
             list: parent.list,
         });

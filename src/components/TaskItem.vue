@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { failWithCompensation } from '../application/compensation';
 import { taskAssignees, useProjectTaskContext } from '../composables/useProjectTaskContext';
+import { taskPriority } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
 
@@ -38,6 +39,7 @@ const hasSubTasks = computed(() =>
 const percentFullfilled = computed(() => getProgress(task.value));
 const assignees = computed(() => taskAssignees(task.value, people.value));
 const dueDate = computed(() => calculateDueDate(task.value));
+const priority = computed(() => taskPriority(task.value.priority));
 const comments = computed(() =>
     (Array.isArray(task.value.activity) ? task.value.activity : []).filter(entry => entry.type === 'comment'),
 );
@@ -60,6 +62,7 @@ const openTask = () => {
 const showLastRow = computed(
     () =>
         dueDate.value ||
+        task.value.priority !== 'none' ||
         comments.value.length ||
         (Array.isArray(task.value.tags) && task.value.tags.length) ||
         task.value.url,
@@ -231,6 +234,14 @@ const breadcrumbs = computed(() => {
         </div>
         <div v-if="showLastRow" class="flex flex-wrap justify-end gap-2">
             <div class="flex flex-grow items-center gap-3 text-gray-400">
+                <UBadge
+                    v-if="task.priority !== 'none'"
+                    :color="priority.color"
+                    :icon="priority.icon"
+                    :label="priority.label"
+                    size="sm"
+                    variant="soft"
+                />
                 <UBadge
                     v-if="dueDate"
                     :color="uiColor(dueColor(dueDate))"

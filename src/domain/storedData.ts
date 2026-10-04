@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { colorKey, CtColor } from '../platform';
 import { normalizeTaskUrl } from './tasks';
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export type DataIssue = {
     entity: 'project' | 'value';
@@ -63,6 +63,17 @@ export function migrateStoredData(value: unknown): Record<string, unknown> {
             version = 1;
             continue;
         }
+        if (version === 1) {
+            data = {
+                ...data,
+                ...(data.type === 'task' && !['none', 'low', 'medium', 'high', 'urgent'].includes(String(data.priority))
+                    ? { priority: 'none' }
+                    : {}),
+                schemaVersion: 2,
+            };
+            version = 2;
+            continue;
+        }
         throw new Error(`Für Schemaversion ${version} ist keine Migration vorhanden.`);
     }
     return data;
@@ -103,6 +114,9 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
 
     if (data.type === 'task') {
         const fullfilled = data.fullfilled === true;
+        const priority = ['low', 'medium', 'high', 'urgent'].includes(String(data.priority))
+            ? (data.priority as TaskPriority)
+            : 'none';
         const description = optionalString(data.description);
         let url: string | undefined;
         try {
@@ -128,6 +142,7 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
             dataCategoryId,
             name: requiredString(data.name, 'Aufgabentitel'),
             fullfilled,
+            priority,
             sortKey: sortKey(data.sortKey, id),
             ...(description === undefined ? {} : { description }),
             ...(url === undefined ? {} : { url }),
