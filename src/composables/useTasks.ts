@@ -2,7 +2,15 @@ import Fuse from 'fuse.js';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { failWithCompensation } from '../application/compensation';
 import { useCustomModuleDataValuesMutations, useCustomModuleDataValuesQuery } from '../data/ccm';
-import { descendantIds, normalizeTaskUrl, taskDiff, taskDraft, taskDueDate, taskProgress } from '../domain/tasks';
+import {
+    descendantIds,
+    dueDateBucket,
+    normalizeTaskUrl,
+    taskDiff,
+    taskDraft,
+    taskDueDate,
+    taskProgress,
+} from '../domain/tasks';
 import { requireCurrentUser, useCurrentUser } from '../platform';
 import { taskStore } from './storeTasks';
 import { useLists } from './useLists';
@@ -179,10 +187,18 @@ export function useTasks(projectId: MaybeRefOrGetter<number>) {
             (filters.status === 'completed' && task.fullfilled) ||
             (filters.status === 'default' && (showCompleted || !task.fullfilled));
         const matchesPriority = filters.priority === 'all' || task.priority === filters.priority;
+        const matchesDue = filters.due === 'all' || dueDateBucket(calculateDueDate(task)) === filters.due;
+        const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [];
+        const matchesAssignee =
+            filters.assignee === 'all' ||
+            (filters.assignee === 'mine' && currentUser.id > 0 && assignees.includes(currentUser.id)) ||
+            (filters.assignee === 'unassigned' && assignees.length === 0);
         return (
             tasksInSearch.value[task.id] &&
             matchesStatus &&
             matchesPriority &&
+            matchesDue &&
+            matchesAssignee &&
             ((!showSubTasks && !parent) || showSubTasks)
         );
     };

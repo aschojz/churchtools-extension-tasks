@@ -38,17 +38,37 @@ describe('personal task view state', () => {
 
     it('persists project filters and keeps sorting separate per view', () => {
         const store = taskStore();
-        expect(store.filtersForProject(3)).toEqual({ status: 'default', priority: 'all' });
+        expect(store.filtersForProject(3)).toEqual({
+            status: 'default',
+            priority: 'all',
+            due: 'all',
+            assignee: 'all',
+        });
         expect(store.sortForView(3, 'project-board')).toBe('manual');
         expect(store.sortForView(3, 'project-list')).toBe('dueDate');
 
-        store.updateProjectFilters(3, { status: 'completed', priority: 'urgent' });
+        store.updateProjectFilters(3, {
+            status: 'completed',
+            priority: 'urgent',
+            due: 'overdue',
+            assignee: 'mine',
+        });
         store.setSortForView(3, 'project-board', 'priority');
 
         setActivePinia(createPinia());
         const restored = taskStore();
-        expect(restored.filtersForProject(3)).toEqual({ status: 'completed', priority: 'urgent' });
-        expect(restored.filtersForProject(4)).toEqual({ status: 'default', priority: 'all' });
+        expect(restored.filtersForProject(3)).toEqual({
+            status: 'completed',
+            priority: 'urgent',
+            due: 'overdue',
+            assignee: 'mine',
+        });
+        expect(restored.filtersForProject(4)).toEqual({
+            status: 'default',
+            priority: 'all',
+            due: 'all',
+            assignee: 'all',
+        });
         expect(restored.sortForView(3, 'project-board')).toBe('priority');
         expect(restored.sortForView(3, 'project-list')).toBe('dueDate');
     });

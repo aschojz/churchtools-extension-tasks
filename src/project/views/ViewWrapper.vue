@@ -4,7 +4,14 @@ import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
 import DialogTask from '../../components/taskDialog/DialogTask.vue';
-import { taskStore, type TaskPriorityFilter, type TaskSort, type TaskStatusFilter } from '../../composables/storeTasks';
+import {
+    taskStore,
+    type TaskAssigneeFilter,
+    type TaskDueFilter,
+    type TaskPriorityFilter,
+    type TaskSort,
+    type TaskStatusFilter,
+} from '../../composables/storeTasks';
 import { firstOrSelf } from '../../platform';
 
 const props = defineProps<{ projectId: number }>();
@@ -32,6 +39,14 @@ const priorityFilter = computed({
     get: () => filters.value.priority,
     set: (priority: TaskPriorityFilter) => store.updateProjectFilters(props.projectId, { priority }),
 });
+const dueFilter = computed({
+    get: () => filters.value.due,
+    set: (due: TaskDueFilter) => store.updateProjectFilters(props.projectId, { due }),
+});
+const assigneeFilter = computed({
+    get: () => filters.value.assignee,
+    set: (assignee: TaskAssigneeFilter) => store.updateProjectFilters(props.projectId, { assignee }),
+});
 const sortMode = computed({
     get: () => store.sortForView(props.projectId, viewId.value),
     set: (sort: TaskSort) => store.setSortForView(props.projectId, viewId.value, sort),
@@ -48,6 +63,18 @@ const priorityOptions = [
     { id: 'high', label: 'Priorität: Hoch' },
     { id: 'medium', label: 'Priorität: Mittel' },
     { id: 'low', label: 'Priorität: Niedrig' },
+];
+const dueOptions = [
+    { id: 'all', label: 'Fälligkeit: Alle' },
+    { id: 'overdue', label: 'Fälligkeit: Überfällig' },
+    { id: 'today', label: 'Fälligkeit: Heute' },
+    { id: 'upcoming', label: 'Fälligkeit: Demnächst' },
+    { id: 'none', label: 'Fälligkeit: Ohne Termin' },
+];
+const assigneeOptions = [
+    { id: 'all', label: 'Person: Alle' },
+    { id: 'mine', label: 'Person: Mir zugewiesen' },
+    { id: 'unassigned', label: 'Person: Nicht zugewiesen' },
 ];
 const sortOptions = [
     { id: 'manual', label: 'Sortierung: Manuell' },
@@ -92,6 +119,20 @@ const viewNavigation: NavigationMenuItem[] = [
                             v-model="priorityFilter"
                             class="w-44"
                             :items="priorityOptions"
+                            label-key="label"
+                            value-key="id"
+                        />
+                        <USelect
+                            v-model="dueFilter"
+                            class="w-48"
+                            :items="dueOptions"
+                            label-key="label"
+                            value-key="id"
+                        />
+                        <USelect
+                            v-model="assigneeFilter"
+                            class="w-52"
+                            :items="assigneeOptions"
                             label-key="label"
                             value-key="id"
                         />
