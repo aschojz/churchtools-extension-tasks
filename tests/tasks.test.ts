@@ -78,6 +78,9 @@ describe('task integrity', () => {
                 activity: [],
                 id: 12,
                 dataCategoryId: 4,
+                revision: 5,
+                schemaVersion: 1,
+                updatedAt: '2026-10-08T20:00:00Z',
             } as TransformedTask),
         ).toEqual({
             fullfilled: { from: true, to: false },

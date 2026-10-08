@@ -21,10 +21,12 @@ const { data } = usePersonsQueryAllPages(filter, { enabled: () => !!filter.value
 const personMap = computed(() => Object.fromEntries((data.value ?? []).map(p => [p.id, personDisplay(p)])));
 
 const transformedActivities = computed(() => {
-    const array = props.activities.map(e => {
-        const person = personMap.value[e.personId];
-        return { ...e, dateDisplay: formatDateTime(new Date(e.date)), person };
-    });
+    const array = props.activities
+        .filter(entry => entry.type !== 'update' || formatActivityChanges(entry.value))
+        .map(e => {
+            const person = personMap.value[e.personId];
+            return { ...e, dateDisplay: formatDateTime(new Date(e.date)), person };
+        });
     return sortBy(array, 'date').reverse();
 });
 

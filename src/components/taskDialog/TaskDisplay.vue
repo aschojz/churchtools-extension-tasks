@@ -188,7 +188,7 @@ const createChild = async () => {
                         v-for="blocker in blockers"
                         :key="blocker.id"
                         :color="blocker.fullfilled ? 'success' : 'warning'"
-                        :icon="blocker.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-lock-keyhole'"
+                        :icon="blocker.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-ban'"
                         :label="blocker.name"
                         variant="subtle"
                     />

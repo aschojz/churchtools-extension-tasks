@@ -563,6 +563,18 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-markdown-display .tiptap {
     padding: 0;
 }
+.task-markdown-display .tiptap strong,
+.task-markdown-display .tiptap em,
+.task-markdown-display .tiptap h1,
+.task-markdown-display .tiptap h2,
+.task-markdown-display .tiptap h3,
+.task-markdown-editor .tiptap strong,
+.task-markdown-editor .tiptap em,
+.task-markdown-editor .tiptap h1,
+.task-markdown-editor .tiptap h2,
+.task-markdown-editor .tiptap h3 {
+    color: #242322 !important;
+}
 .task-markdown-display .tiptap p,
 .task-markdown-editor .tiptap p {
     margin: 0 0 0.6em;
@@ -636,9 +648,9 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .task-view-meta-row > span,
 .task-view-meta-group > span {
-    color: var(--muted);
+    color: var(--muted, #7a746d);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 400;
 }
 .task-view-meta-group {
     display: flex;

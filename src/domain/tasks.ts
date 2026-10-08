@@ -180,11 +180,19 @@ export function assertTaskDependenciesValid(task: TransformedTask, tasks: Record
     if ((Array.isArray(task.blockedBy) ? task.blockedBy : []).some(id => reachesTask(id)))
         throw new Error('Aufgabenabhängigkeiten dürfen keinen Kreis bilden.');
 }
+export const TASK_TECHNICAL_FIELDS = new Set([
+    'activity',
+    'id',
+    'dataCategoryId',
+    'schemaVersion',
+    'revision',
+    'updatedAt',
+]);
+
 export function taskDiff(next: Partial<Task>, previous: Partial<Task>) {
     const result: Record<string, { from: unknown; to: unknown }> = {};
-    const technicalFields = new Set(['activity', 'id', 'dataCategoryId']);
     for (const key of new Set([...Object.keys(next), ...Object.keys(previous)])) {
-        if (technicalFields.has(key)) continue;
+        if (TASK_TECHNICAL_FIELDS.has(key)) continue;
         const field = key as keyof Task;
         if (!isEqual(next[field], previous[field])) result[key] = { from: previous[field], to: next[field] };
     }
