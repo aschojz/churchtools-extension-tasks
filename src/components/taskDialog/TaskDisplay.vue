@@ -118,10 +118,13 @@ const createChild = async () => {
                         @keydown.enter="createChild"
                     />
                     <UButton
+                        aria-label="Unteraufgabe anlegen"
+                        color="neutral"
                         :disabled="childSaving || !childName.trim()"
                         icon="i-lucide-plus"
-                        label="Anlegen"
                         :loading="childSaving"
+                        square
+                        variant="outline"
                         @click="createChild"
                     />
                 </div>
@@ -184,17 +187,16 @@ const createChild = async () => {
             </div>
             <div v-if="blockers.length" class="task-view-meta-group">
                 <span>Blockiert durch</span>
-                <div class="flex flex-col gap-2">
-                    <UBadge
-                        v-for="blocker in blockers"
-                        :key="blocker.id"
-                        :color="blocker.fullfilled ? 'success' : 'warning'"
-                        :icon="blocker.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-ban'"
-                        :label="blocker.name"
-                        variant="subtle"
-                    />
+                <div class="task-view-blockers flex flex-col gap-2">
+                    <div v-for="blocker in blockers" :key="blocker.id" class="flex items-start gap-1.5">
+                        <UIcon
+                            class="mt-0.5 size-3.5 shrink-0"
+                            :name="blocker.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-ban'"
+                        />
+                        <span>{{ blocker.name }}</span>
+                    </div>
                 </div>
-                <p v-if="openBlockers.length" class="text-xs text-amber-700">
+                <p v-if="openBlockers.length" class="task-view-blocker-hint">
                     Abschluss erst möglich, wenn alle Blocker erledigt sind.
                 </p>
             </div>

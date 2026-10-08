@@ -128,7 +128,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     -webkit-text-fill-color: var(--ink);
 }
 .dashboard-sidebar-label {
-    margin: 10px 10px 6px;
+    margin: 4px 10px 6px;
     color: var(--muted);
     font-size: 11px;
     font-weight: 700;
@@ -731,6 +731,20 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     color: #68635d;
     font-size: 12px;
     font-weight: 400;
+}
+.dashboard-sidebar-search > button {
+    width: 100%;
+}
+.task-view-blockers {
+    color: #7a746d;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.task-view-blocker-hint {
+    margin: 0;
+    color: #7a746d !important;
+    font-size: 11px !important;
+    line-height: 1.5;
 }
 .task-activities {
     padding: 16px 0 0;

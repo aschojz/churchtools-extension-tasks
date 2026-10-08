@@ -163,6 +163,7 @@ const newTaskRoute = computed(() =>
                     :max-size="24"
                     :min-size="15"
                     resizable
+                    :ui="{ header: 'h-[49px] min-h-[49px]', body: 'pt-0 gap-2' }"
                 >
                     <template #header="{ collapsed }">
                         <RouterLink class="dashboard-brand" :class="{ collapsed }" :to="{ name: 'overview' }">
@@ -172,11 +173,13 @@ const newTaskRoute = computed(() =>
                     </template>
 
                     <template #default="{ collapsed }">
-                        <UDashboardSearchButton
-                            :collapsed="collapsed"
-                            label="Projekte und Aufgaben suchen"
-                            @click="searchOpen = true"
-                        />
+                        <div class="dashboard-sidebar-search flex h-12 shrink-0 items-center">
+                            <UDashboardSearchButton
+                                :collapsed="collapsed"
+                                label="Projekte und Aufgaben suchen"
+                                @click="searchOpen = true"
+                            />
+                        </div>
                         <UNavigationMenu
                             :collapsed="collapsed"
                             highlight
@@ -184,7 +187,7 @@ const newTaskRoute = computed(() =>
                             orientation="vertical"
                             tooltip
                         />
-                        <div class="mt-2 min-h-0 flex-1 overflow-y-auto">
+                        <div class="min-h-0 flex-1 overflow-y-auto">
                             <p v-if="!collapsed" class="dashboard-sidebar-label">Projekte</p>
                             <div class="flex flex-col gap-1">
                                 <div
