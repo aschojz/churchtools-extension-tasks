@@ -124,7 +124,7 @@ const onSave = async () => {
         :title="dialogTitle"
         :ui="{
             body: 'tasks-modal-body',
-            content: 'tasks-modal-content',
+            content: showEditor ? 'tasks-modal-content tasks-modal-editor' : 'tasks-modal-content',
             footer: 'tasks-modal-footer',
             header: 'tasks-modal-header',
             overlay: 'tasks-modal-overlay',

@@ -59,9 +59,13 @@ const { templates, saveTemplate, removeTemplate } = useTaskTemplates(props.proje
 const templateOptions = computed(() => templates().map(template => ({ id: template.id, label: template.name })));
 const selectedTemplateId = ref<string>();
 const templateName = ref('');
+const templatesOpen = ref(false);
 const applyTemplate = () => {
     const template = templates().find(item => item.id === selectedTemplateId.value);
-    if (template) internTask.value = taskDraft({ ...internTask.value, ...template.task });
+    if (template) {
+        internTask.value = taskDraft({ ...internTask.value, ...template.task });
+        templatesOpen.value = false;
+    }
 };
 const saveCurrentTemplate = () => {
     const saved = saveTemplate(templateName.value, internTask.value);
@@ -171,57 +175,64 @@ watch(personSearch, (query, _previous, onCleanup) => {
     <UAlert v-else-if="missing" color="warning" title="Diese Aufgabe wurde nicht gefunden." />
     <div v-else class="task-editor-layout">
         <section class="task-editor-main">
-            <UCard v-if="!taskId" variant="subtle">
-                <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-                    <USelect
-                        v-model="selectedTemplateId"
-                        :items="templateOptions"
-                        label-key="label"
-                        placeholder="Vorlage auswählen …"
-                        value-key="id"
-                    />
-                    <UButton
-                        :disabled="!selectedTemplateId"
-                        icon="i-lucide-wand-sparkles"
-                        label="Anwenden"
-                        variant="outline"
-                        @click="applyTemplate"
-                    />
-                    <UButton
-                        aria-label="Vorlage löschen"
-                        color="error"
-                        :disabled="!selectedTemplateId"
-                        icon="i-lucide-trash-2"
-                        variant="ghost"
-                        @click="removeSelectedTemplate"
-                    />
-                </div>
-                <div class="mt-3 flex gap-2">
-                    <UInput
-                        v-model="templateName"
-                        class="min-w-0 flex-1"
-                        placeholder="Aktuelle Werte als Vorlage speichern"
-                        @keydown.enter="saveCurrentTemplate"
-                    />
-                    <UButton
-                        :disabled="!templateName.trim()"
-                        icon="i-lucide-save"
-                        label="Vorlage speichern"
-                        @click="saveCurrentTemplate"
-                    />
-                </div>
-            </UCard>
+            <div v-if="!taskId" class="task-editor-tools">
+                <UPopover v-model:open="templatesOpen" :content="{ align: 'end' }">
+                    <UButton color="neutral" label="Vorlagen" size="sm" variant="ghost" />
+                    <template #content>
+                        <div class="task-template-popover">
+                            <div class="flex items-center gap-2">
+                                <USelect
+                                    v-model="selectedTemplateId"
+                                    class="min-w-0 flex-1"
+                                    :items="templateOptions"
+                                    label-key="label"
+                                    placeholder="Vorlage auswählen …"
+                                    value-key="id"
+                                />
+                                <UButton
+                                    :disabled="!selectedTemplateId"
+                                    icon="i-lucide-wand-sparkles"
+                                    label="Anwenden"
+                                    variant="outline"
+                                    @click="applyTemplate"
+                                />
+                                <UButton
+                                    aria-label="Vorlage löschen"
+                                    color="error"
+                                    :disabled="!selectedTemplateId"
+                                    icon="i-lucide-trash-2"
+                                    variant="ghost"
+                                    @click="removeSelectedTemplate"
+                                />
+                            </div>
+                            <div class="mt-3 flex gap-2">
+                                <UInput
+                                    v-model="templateName"
+                                    class="min-w-0 flex-1"
+                                    placeholder="Aktuelle Werte als Vorlage speichern"
+                                    @keydown.enter="saveCurrentTemplate"
+                                />
+                                <UButton
+                                    :disabled="!templateName.trim()"
+                                    icon="i-lucide-save"
+                                    label="Vorlage speichern"
+                                    @click="saveCurrentTemplate"
+                                />
+                            </div>
+                        </div>
+                    </template>
+                </UPopover>
+            </div>
             <UFormField label="Titel" required>
                 <UInput
                     v-model="internTask.name"
                     autofocus
                     class="w-full"
-                    icon="i-lucide-type"
                     placeholder="Was soll erledigt werden?"
                     size="lg"
                 />
             </UFormField>
-            <UFormField hint="Optional" label="Beschreibung">
+            <UFormField label="Beschreibung">
                 <UTextarea
                     v-model="internTask.description"
                     autoresize
@@ -231,22 +242,12 @@ watch(personSearch, (query, _previous, onCleanup) => {
                     :rows="9"
                 />
             </UFormField>
-            <UFormField hint="Optional" label="Link">
-                <UInput
-                    v-model="internTask.url"
-                    class="w-full"
-                    icon="i-lucide-link"
-                    placeholder="https://…"
-                    type="url"
-                />
+            <UFormField label="Link">
+                <UInput v-model="internTask.url" class="w-full" placeholder="https://…" type="url" />
             </UFormField>
         </section>
 
         <aside class="task-editor-meta">
-            <div class="task-editor-meta-heading">
-                <UIcon name="i-lucide-settings-2" />
-                <span>Details</span>
-            </div>
             <UFormField label="Liste">
                 <USelect
                     v-model="internTask.list"
@@ -294,28 +295,30 @@ watch(personSearch, (query, _previous, onCleanup) => {
                 <UInput v-model.number="internTask.dueDateRelative" class="w-full" min="0" type="number" />
             </UFormField>
             <UFormField label="Tags">
-                <USelectMenu
-                    v-model="internTask.tags"
-                    class="w-full"
-                    :items="tagOptions"
-                    label-key="nameTranslated"
-                    multiple
-                    placeholder="Tags auswählen …"
-                    value-key="id"
-                />
+                <div class="flex items-center gap-2">
+                    <USelectMenu
+                        v-model="internTask.tags"
+                        class="min-w-0 flex-1"
+                        :items="tagOptions"
+                        label-key="nameTranslated"
+                        multiple
+                        placeholder="Tags auswählen …"
+                        value-key="id"
+                    />
+                    <UButton
+                        aria-label="Neuen Tag anlegen"
+                        color="neutral"
+                        icon="i-lucide-plus"
+                        square
+                        title="Neuen Tag anlegen"
+                        variant="outline"
+                        @click="createTagIsOpen = true"
+                    />
+                </div>
             </UFormField>
-            <UButton
-                block
-                color="neutral"
-                icon="i-lucide-plus"
-                label="Neuen Tag anlegen"
-                size="sm"
-                variant="outline"
-                @click="createTagIsOpen = true"
-            />
             <UFormField
+                description="Personen aus diesem Projekt oder weitere Personen suchen"
                 :error="personSearchError || undefined"
-                hint="Personen aus diesem Projekt oder weitere Personen suchen"
                 label="Verantwortliche"
             >
                 <USelectMenu
@@ -337,7 +340,7 @@ watch(personSearch, (query, _previous, onCleanup) => {
                 :disabled="!internTask.assignedTo?.length"
                 label="Verantwortliche per E-Mail benachrichtigen"
             />
-            <UFormField hint="Optional" label="Blockiert durch">
+            <UFormField label="Blockiert durch">
                 <USelectMenu
                     v-model="internTask.blockedBy"
                     class="w-full"

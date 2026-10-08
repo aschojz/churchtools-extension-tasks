@@ -424,6 +424,39 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     padding: 14px 20px !important;
     background: #fff;
 }
+.tasks-modal-editor {
+    height: min(820px, calc(100dvh - 128px));
+    display: flex;
+    flex-direction: column;
+}
+.tasks-modal-editor .tasks-modal-header,
+.tasks-modal-editor .tasks-modal-footer {
+    flex: 0 0 auto;
+}
+.tasks-modal-editor .tasks-modal-body {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+.tasks-modal-editor .task-editor-layout {
+    height: 100%;
+    min-height: 0;
+}
+.tasks-modal-editor .task-editor-main,
+.tasks-modal-editor .task-editor-meta {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.task-editor-tools {
+    display: flex;
+    justify-content: flex-end;
+}
+.task-template-popover {
+    width: min(460px, calc(100vw - 48px));
+    padding: 16px;
+    color: var(--ink);
+}
 .task-editor-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.65fr) minmax(270px, 0.8fr);
@@ -561,6 +594,19 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     }
     .task-editor-layout {
         grid-template-columns: 1fr;
+    }
+    .tasks-modal-editor {
+        height: calc(100dvh - 128px);
+    }
+    .tasks-modal-editor .tasks-modal-body {
+        overflow-y: auto;
+    }
+    .tasks-modal-editor .task-editor-layout {
+        height: auto;
+    }
+    .tasks-modal-editor .task-editor-main,
+    .tasks-modal-editor .task-editor-meta {
+        overflow: visible;
     }
     .task-editor-meta {
         border-top: 1px solid var(--line);
