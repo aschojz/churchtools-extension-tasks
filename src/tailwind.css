@@ -312,6 +312,35 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-item-tag {
     border-radius: 4px !important;
 }
+.task-item-timeline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) fit-content(45%);
+    gap: 6px 12px;
+}
+.task-item-timeline .task-item-heading {
+    min-width: 0;
+    grid-column: 1;
+    grid-row: 1;
+}
+.task-item-timeline .task-item-tags {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    justify-content: flex-end;
+}
+.task-item-timeline .task-item-footer,
+.task-item-timeline > [role='alert'] {
+    grid-column: 1 / -1;
+    margin-top: 0;
+}
+.task-item-timeline .task-item-breadcrumbs {
+    grid-column: 1 / -1;
+    grid-row: 1;
+}
+.task-item-timeline:has(.task-item-breadcrumbs) .task-item-heading,
+.task-item-timeline:has(.task-item-breadcrumbs) .task-item-tags {
+    grid-row: 2;
+}
 .task-item-heading + .task-item-description,
 .task-item-tags + .task-item-footer {
     margin-top: -4px;

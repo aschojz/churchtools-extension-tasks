@@ -61,7 +61,7 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
                 <div class="timeline-track relative ml-7 flex flex-col gap-3">
                     <div v-for="task in group.tasks" :key="task.id" class="timeline-item relative pl-7">
                         <span aria-hidden="true" class="timeline-dot"></span>
-                        <TaskItem :item="task" :project-id="projectId" />
+                        <TaskItem density="timeline" :item="task" :project-id="projectId" />
                     </div>
                 </div>
             </section>

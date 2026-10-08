@@ -16,7 +16,7 @@ const props = defineProps<{
     item: TransformedTask;
     showTask?: boolean;
     projectId: number;
-    density?: 'card' | 'row';
+    density?: 'card' | 'row' | 'timeline';
 }>();
 
 const id = computed(() => props.item.id);
@@ -194,10 +194,13 @@ const breadcrumbs = computed(() => {
 <template>
     <div
         class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3"
-        :class="{ 'task-item-row': density === 'row' }"
+        :class="{ 'task-item-row': density === 'row', 'task-item-timeline': density === 'timeline' }"
         @click="onCardClick"
     >
-        <div v-if="superParent && !showTask" class="-mb-1 flex items-center gap-2 text-xs text-gray-400">
+        <div
+            v-if="superParent && !showTask"
+            class="task-item-breadcrumbs -mb-1 flex items-center gap-2 text-xs text-gray-400"
+        >
             <template v-for="(crumb, index) in breadcrumbs" :key="index">
                 <span>{{ crumb }}</span>
                 <UIcon
@@ -243,7 +246,7 @@ const breadcrumbs = computed(() => {
             </div>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
-        <MarkdownPreview v-if="task.description" :source="task.description" />
+        <MarkdownPreview v-if="task.description && density !== 'timeline'" :source="task.description" />
         <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
             <UBadge
                 v-for="tag in sortedTags"
