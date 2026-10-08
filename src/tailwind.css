@@ -513,7 +513,53 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     border-radius: 10px;
     background: #faf9f7;
     line-height: 1.55;
-    white-space: pre-line;
+}
+.task-markdown-editor {
+    border: 1px solid #d8d4ce;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+.task-markdown-editor [contenteditable] {
+    min-height: 200px;
+    padding: 12px;
+    outline: none;
+}
+.task-markdown-editor:focus-within {
+    border-color: #9c8c7a;
+}
+.task-markdown-editor [data-slot='root'] {
+    flex-wrap: wrap;
+}
+.task-markdown-display .tiptap,
+.task-markdown-editor .tiptap {
+    color: #242322;
+    overflow-wrap: anywhere;
+}
+.task-markdown-display .tiptap {
+    padding: 0;
+}
+.task-markdown-display .tiptap p,
+.task-markdown-editor .tiptap p {
+    margin: 0 0 0.6em;
+}
+.task-markdown-display .tiptap :last-child {
+    margin-bottom: 0;
+}
+.task-markdown-display .tiptap ul,
+.task-markdown-editor .tiptap ul {
+    list-style: disc;
+    padding-left: 1.4em;
+}
+.task-markdown-display .tiptap ol,
+.task-markdown-editor .tiptap ol {
+    list-style: decimal;
+    padding-left: 1.4em;
+}
+.task-markdown-display .tiptap a,
+.task-markdown-editor .tiptap a {
+    color: #8b5c35;
+    text-decoration: underline;
 }
 .task-view-section {
     display: flex;

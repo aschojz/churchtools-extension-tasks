@@ -28,7 +28,7 @@ vi.mock('../src/composables/usePersons', () => ({
 
 describe('project assignee suggestions', () => {
     it('offers previously assigned project members before typing a search', () => {
-        const wrapper = shallowMount(TaskEditor, { props: { projectId: 17 } });
+        const wrapper = shallowMount(TaskEditor, { props: { projectId: 17 }, global: { stubs: { UEditor: true } } });
         expect((wrapper.vm as unknown as { personOptions: unknown[] }).personOptions).toEqual([
             { id: 1, label: 'Armin Test' },
             { id: 2, label: 'Birte Test' },

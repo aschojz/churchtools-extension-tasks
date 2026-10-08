@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Task } from '../../domain/types';
+import type { EditorToolbarItem } from '@nuxt/ui';
 import { computed, ref, watch } from 'vue';
 import { reportOperationalError } from '../../application/operationalErrors';
 import { useLists } from '../../composables/useLists';
@@ -41,6 +42,29 @@ const tagOptions = computed(() =>
     })),
 );
 const internTask = ref<Task>(taskDraft());
+const description = computed({
+    get: () => internTask.value.description ?? '',
+    set: value => {
+        internTask.value.description = value;
+    },
+});
+const descriptionToolbar: EditorToolbarItem[][] = [
+    [
+        { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', 'aria-label': 'Fett' },
+        { kind: 'mark', mark: 'italic', icon: 'i-lucide-italic', 'aria-label': 'Kursiv' },
+        { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', 'aria-label': 'Überschrift' },
+    ],
+    [
+        { kind: 'bulletList', icon: 'i-lucide-list', 'aria-label': 'Aufzählung' },
+        { kind: 'orderedList', icon: 'i-lucide-list-ordered', 'aria-label': 'Nummerierte Liste' },
+        { kind: 'blockquote', icon: 'i-lucide-quote', 'aria-label': 'Zitat' },
+        { kind: 'link', icon: 'i-lucide-link', 'aria-label': 'Link' },
+    ],
+    [
+        { kind: 'undo', icon: 'i-lucide-undo-2', 'aria-label': 'Rückgängig' },
+        { kind: 'redo', icon: 'i-lucide-redo-2', 'aria-label': 'Wiederholen' },
+    ],
+];
 const recurrenceOptions = [{ id: 'none', label: 'Keine Wiederholung' }, ...TASK_RECURRENCES];
 const recurrenceFrequency = computed({
     get: () => internTask.value.recurrence?.frequency ?? 'none',
@@ -233,14 +257,18 @@ watch(personSearch, (query, _previous, onCleanup) => {
                 />
             </UFormField>
             <UFormField label="Beschreibung">
-                <UTextarea
-                    v-model="internTask.description"
-                    autoresize
-                    class="w-full"
-                    :maxrows="14"
+                <UEditor
+                    v-slot="{ editor }"
+                    v-model="description"
+                    aria-label="Beschreibung"
+                    class="task-markdown-editor"
+                    content-type="markdown"
+                    :image="false"
+                    :mention="false"
                     placeholder="Notizen, Details oder nächste Schritte …"
-                    :rows="9"
-                />
+                >
+                    <UEditorToolbar :editor="editor" :items="descriptionToolbar" />
+                </UEditor>
             </UFormField>
             <UFormField label="Link">
                 <UInput v-model="internTask.url" class="w-full" placeholder="https://…" type="url" />

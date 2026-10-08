@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
-import DialogTask from '../../components/taskDialog/DialogTask.vue';
 import {
     taskStore,
     type TaskAssigneeFilter,
@@ -20,6 +19,7 @@ import { useTags } from '../../composables/useTags';
 import { authState, firstOrSelf } from '../../platform';
 
 const props = defineProps<{ projectId: number }>();
+const DialogTask = defineAsyncComponent(() => import('../../components/taskDialog/DialogTask.vue'));
 
 const fullscreen = ref(false);
 const onFullscreen = () => {

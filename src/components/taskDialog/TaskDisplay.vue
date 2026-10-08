@@ -88,7 +88,17 @@ const createChild = async () => {
     <div class="task-view-layout">
         <main class="task-view-main">
             <section v-if="task?.description" class="task-view-description">
-                {{ task.description }}
+                <UEditor
+                    class="task-markdown-display"
+                    content-type="markdown"
+                    :editable="false"
+                    :image="false"
+                    :mention="false"
+                    :model-value="task.description"
+                    :starter-kit="{
+                        link: { openOnClick: true, HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' } },
+                    }"
+                />
             </section>
 
             <section class="task-view-section">

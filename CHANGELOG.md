@@ -2,6 +2,9 @@
 
 ## Unveröffentlicht
 
+- Markdown-Beschreibungen mit Nuxt-UI-Editor, Formatierungsleiste und formatierter Aufgabenansicht
+- Aufgabendialog und Editor werden erst beim Öffnen geladen
+
 - Getrennte Kartenaktionen ohne Überlagerung von Menü und Abschlussknopf
 - Aufgaben lassen sich über die gesamte freie Kartenfläche öffnen
 - Verantwortlichen-Auswahl schlägt bisher zugewiesene Projektmitglieder sofort vor
