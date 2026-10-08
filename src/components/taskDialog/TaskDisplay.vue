@@ -99,16 +99,14 @@ const createChild = async () => {
                 <div v-if="subTasks.length" class="flex flex-col gap-2">
                     <TaskItem v-for="subtask in subTasks" :key="subtask.id" :item="subtask" :project-id="projectId" />
                 </div>
-                <p v-else class="task-view-empty">Noch keine Unteraufgaben</p>
                 <div class="flex items-end gap-2">
-                    <UFormField class="flex-1" label="Neue Unteraufgabe">
-                        <UInput
-                            v-model="childName"
-                            class="w-full"
-                            placeholder="Titel der Unteraufgabe …"
-                            @keydown.enter="createChild"
-                        />
-                    </UFormField>
+                    <UInput
+                        v-model="childName"
+                        aria-label="Neue Unteraufgabe"
+                        class="min-w-0 flex-1"
+                        placeholder="Titel der Unteraufgabe …"
+                        @keydown.enter="createChild"
+                    />
                     <UButton
                         :disabled="childSaving || !childName.trim()"
                         icon="i-lucide-plus"
@@ -127,7 +125,6 @@ const createChild = async () => {
 
         <aside class="task-view-meta">
             <div class="task-editor-meta-heading">
-                <UIcon name="i-lucide-info" />
                 <span>Details</span>
             </div>
             <div v-if="dueDate" class="task-view-meta-row">

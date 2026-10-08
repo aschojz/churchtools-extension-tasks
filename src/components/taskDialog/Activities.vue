@@ -52,20 +52,21 @@ const onComment = async () => {
 const onCancelComment = () => (newComment.value = '');
 </script>
 <template>
-    <div class="flex flex-col gap-4">
+    <div class="task-activities flex flex-col gap-4">
         <div>
             <div class="task-view-heading">Aktivitäten</div>
         </div>
         <div class="group flex flex-col gap-2">
             <UTextarea
                 v-model="newComment"
+                class="w-full"
                 :disabled="commentSaving"
                 placeholder="Kommentar hinzufügen"
-                :rows="1"
+                :rows="2"
                 @keydown.enter.meta.stop="onComment"
                 @keydown.escape.stop="onCancelComment"
             />
-            <div class="flex gap-2">
+            <div class="flex justify-end gap-2">
                 <UButton
                     color="neutral"
                     :disabled="!newComment.trim()"
@@ -98,34 +99,37 @@ const onCancelComment = () => (newComment.value = '');
                             <span>·</span>
                             <div>{{ entry.dateDisplay }}</div>
                         </div>
-                        <div class="whitespace-pre">
+                        <div class="break-words whitespace-pre-wrap">
                             {{ entry.value }}
                         </div>
                     </div>
                 </div>
                 <div
                     v-else-if="entry.type === 'fullfilled'"
-                    class="text-basic-secondary flex items-baseline gap-1 text-xs"
+                    class="task-activity-event flex flex-wrap items-baseline gap-1 text-xs"
                 >
                     <span class="font-bold">
                         {{ entry.person?.title ?? 'Unbekannter Benutzer' }}
                     </span>
                     <span>{{ entry.value ? 'erledigte die Aufgabe' : 'öffnete die Aufgabe wieder' }}</span>
-                    <span class="text-basic-tertiary"> am {{ entry.dateDisplay }} </span>
+                    <span> am {{ entry.dateDisplay }} </span>
                 </div>
-                <div v-else-if="entry.type === 'create'" class="text-basic-secondary flex items-baseline gap-1 text-xs">
+                <div
+                    v-else-if="entry.type === 'create'"
+                    class="task-activity-event flex flex-wrap items-baseline gap-1 text-xs"
+                >
                     <span class="font-bold">
                         {{ entry.person?.title ?? 'Unbekannter Benutzer' }}
                     </span>
                     <span> erstellte die Aufgabe </span>
-                    <span class="text-basic-tertiary"> am {{ entry.dateDisplay }} </span>
+                    <span> am {{ entry.dateDisplay }} </span>
                 </div>
-                <div v-else class="text-basic-tertiary flex flex-wrap items-baseline gap-x-2 text-xs">
+                <div v-else class="task-activity-event flex flex-wrap items-baseline gap-x-2 text-xs">
                     <span class="font-bold">
                         {{ entry.person?.title ?? 'Unbekannter Benutzer' }}
                     </span>
                     <span>änderte {{ formatActivityChanges(entry.value) }}</span>
-                    <span class="text-basic-tertiary">
+                    <span>
                         {{ entry.dateDisplay }}
                     </span>
                 </div>

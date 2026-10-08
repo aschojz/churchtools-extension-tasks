@@ -541,9 +541,22 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .task-view-meta-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+.task-view-meta strong {
+    color: var(--ink, #242322) !important;
+}
+.task-activities {
+    padding: 16px;
+    border: 1px solid var(--line, #e1ddd7);
+    border-radius: 10px;
+    background: #faf9f7;
+}
+.task-activity-event,
+.task-activity-event span {
+    color: var(--muted, #7a746d) !important;
 }
 .task-view-meta-row > span,
 .task-view-meta-group > span {
