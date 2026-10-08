@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht
 
+- Timeline mit denselben Aufgabenkarten wie das Board, Sammelauswahl und exakt zentrierten Zeitlinienpunkten
 - Markdown-Vorschau auf Aufgabenkarten, Kürzung am rechten Zeilenende und unten ausgerichtete Metadaten
 - Lesbare Aktivitätswerte für Wiederholungen und verschachtelte Änderungen; technische Speicherfelder werden ausgeblendet
 - Korrigierte Markdown-Textfarben, ruhigere Detail-Labels und einheitliches Blocker-Symbol

@@ -2,7 +2,10 @@
 import type { TransformedTask } from '../../domain/types';
 import { computed } from 'vue';
 import { useTasks } from '../../composables/useTasks';
-import { sortTasks, taskPriority, taskStartDate } from '../../domain/tasks';
+import { sortTasks, taskStartDate } from '../../domain/tasks';
+import TaskItem from '../../components/TaskItem.vue';
+import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
+import { provideTaskSelection } from '../../composables/useTaskSelection';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
@@ -36,46 +39,30 @@ const groups = computed(() => {
     ];
 });
 
-const dateLabel = (task: TransformedTask) => {
-    const date = planningDate(task);
-    return date ? date.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' }) : '–';
-};
+const selection = provideTaskSelection(computed(() => groups.value.flatMap(group => group.tasks)));
 </script>
 
 <template>
     <ViewWrapper :project-id="projectId">
         <template #actions><span /></template>
+        <template #extra-actions><TaskSelectionActions /></template>
+        <UAlert
+            v-if="selection.error.value"
+            class="mb-3"
+            color="error"
+            :title="selection.error.value"
+            variant="subtle"
+        />
         <div v-if="groups.length" class="mx-auto flex w-full max-w-4xl flex-col gap-8 pb-6">
             <section v-for="group in groups" :key="group.key" :aria-labelledby="`timeline-${group.key}`">
                 <h2 :id="`timeline-${group.key}`" class="mb-3 text-lg font-semibold capitalize">
                     {{ group.label }}
                 </h2>
-                <div class="timeline-track relative ml-7 border-l pl-7">
-                    <RouterLink
-                        v-for="task in group.tasks"
-                        :key="task.id"
-                        class="timeline-item group relative mb-3 flex min-h-16 items-center gap-4 rounded-xl border px-4 py-3 transition hover:shadow-sm"
-                        :to="{ name: 'project-timeline', params: { projectId, taskId: task.id } }"
-                    >
-                        <span
-                            class="timeline-dot absolute top-1/2 -left-[2.05rem] size-3 -translate-y-1/2 rounded-full border-2 ring-1"
-                        ></span>
-                        <time class="timeline-date w-16 shrink-0 text-sm font-medium">
-                            {{ dateLabel(task) }}
-                        </time>
-                        <span class="timeline-title min-w-0 flex-1 font-medium">
-                            {{ task.name }}
-                        </span>
-                        <UBadge
-                            v-if="task.priority !== 'none'"
-                            :color="taskPriority(task.priority).color"
-                            :icon="taskPriority(task.priority).icon"
-                            :label="taskPriority(task.priority).label"
-                            size="sm"
-                            variant="subtle"
-                        />
-                        <UIcon class="timeline-chevron shrink-0" name="i-lucide-chevron-right" />
-                    </RouterLink>
+                <div class="timeline-track relative ml-7 flex flex-col gap-3">
+                    <div v-for="task in group.tasks" :key="task.id" class="timeline-item relative pl-7">
+                        <span aria-hidden="true" class="timeline-dot"></span>
+                        <TaskItem :item="task" :project-id="projectId" />
+                    </div>
                 </div>
             </section>
         </div>
@@ -89,29 +76,25 @@ const dateLabel = (task: TransformedTask) => {
     </ViewWrapper>
 </template>
 <style scoped>
-.timeline-track {
-    border-color: var(--line);
-}
-.timeline-item {
-    border-color: var(--line);
-    background: var(--surface);
-}
-.timeline-item:hover {
-    border-color: #cbc5bd;
+.timeline-track::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: var(--line, #e1ddd7);
+    content: '';
 }
 .timeline-dot {
-    border-color: var(--surface);
+    position: absolute;
+    top: 50%;
+    left: 0.5px;
+    width: 12px;
+    height: 12px;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--surface, #fff);
+    border-radius: 50%;
     background: #8b8781;
-    --tw-ring-color: #d9d4cd;
-}
-.timeline-date,
-.timeline-chevron {
-    color: var(--muted);
-}
-.timeline-title {
-    color: var(--ink);
-}
-.timeline-item:hover .timeline-title {
-    color: #9d4919;
+    box-shadow: 0 0 0 1px #d9d4cd;
 }
 </style>
