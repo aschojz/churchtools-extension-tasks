@@ -658,6 +658,9 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     padding: 12px;
     outline: none;
 }
+.task-editor-toolbar {
+    border-bottom: 1px solid #d8d4ce;
+}
 .task-markdown-editor:focus-within {
     border-color: #9c8c7a;
 }

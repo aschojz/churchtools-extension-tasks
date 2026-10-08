@@ -269,7 +269,7 @@ watch(personSearch, (query, _previous, onCleanup) => {
                     :mention="false"
                     placeholder="Notizen, Details oder nächste Schritte …"
                 >
-                    <UEditorToolbar :editor="editor" :items="descriptionToolbar" />
+                    <UEditorToolbar class="task-editor-toolbar" :editor="editor" :items="descriptionToolbar" />
                 </UEditor>
             </UFormField>
             <UFormField label="Link">

@@ -1,6 +1,13 @@
 # Changelog
 
-## Unveröffentlicht
+## 0.6.0 · 09.10.2026
+
+- Kompaktere Projektsteuerung mit Sortier-Icon, CSV-Menü und vereinfachten Filterwerten
+- Kompakte Timeline-Karten ohne Beschreibung und mit rechtsbündigen Tags
+- Kleinere Kennzahlen, vollbreite Fortschritts- und Auslastungskarten sowie Personenavatare in der Auswertung
+- Lesbare Aufgabenübersicht mit Tags und Metadaten statt Beschreibungen
+- Einheitliche warmgraue Icons und Platzhalter, dezentere Kommentare und Blocker-Hinweise
+- Aufgabenvorlagen im Dialogkopf und Trennlinie unter der Editor-Toolbar
 
 - Timeline mit denselben Aufgabenkarten wie das Board, Sammelauswahl und exakt zentrierten Zeitlinienpunkten
 - Markdown-Vorschau auf Aufgabenkarten, Kürzung am rechten Zeilenende und unten ausgerichtete Metadaten
