@@ -71,13 +71,12 @@ const onCardClick = (event: MouseEvent) => {
     openTask();
 };
 
-const showLastRow = computed(
+const showMetadata = computed(
     () =>
         dueDate.value ||
         startDate.value ||
-        task.value.priority !== 'none' ||
+        priority.value.id !== 'none' ||
         comments.value.length ||
-        (Array.isArray(task.value.tags) && task.value.tags.length) ||
         task.value.url ||
         task.value.recurrence ||
         openBlockers.value.length,
@@ -219,20 +218,6 @@ const breadcrumbs = computed(() => {
                 </button>
             </div>
             <div class="task-item-controls flex shrink-0 items-center gap-1">
-                <div v-if="Array.isArray(task.assignedTo) && task.assignedTo.length" class="flex shrink-0 -space-x-1">
-                    <UAvatar
-                        v-for="assignee in assignees"
-                        :key="assignee.domainIdentifier"
-                        :alt="assignee.title"
-                        size="xs"
-                        :src="assignee.imageUrl"
-                    />
-                </div>
-                <ProgressRing
-                    v-if="hasSubTasks"
-                    class="progress-icon relative shrink-0 text-[20px] text-gray-500"
-                    :percent="percentFullfilled"
-                />
                 <UCheckbox
                     v-if="selection?.enabled.value"
                     :aria-label="`${task.name} auswählen`"
@@ -241,16 +226,6 @@ const breadcrumbs = computed(() => {
                     :ui="{ base: 'rounded-[4px]' }"
                     @click.stop
                     @update:model-value="(value: boolean | 'indeterminate') => selection?.toggleTask(task.id, value)"
-                />
-                <UButton
-                    v-else-if="!hasSubTasks"
-                    :aria-label="task.fullfilled ? 'Als unerledigt markieren' : 'Als erledigt markieren'"
-                    color="neutral"
-                    :icon="task.fullfilled ? 'i-lucide-square-check-big' : 'i-lucide-square'"
-                    size="xs"
-                    square
-                    variant="ghost"
-                    @click.stop="runAction(() => toggleTask(task))"
                 />
                 <UDropdownMenu :items="contextMenu"
                     ><UButton
@@ -270,8 +245,22 @@ const breadcrumbs = computed(() => {
         <div v-if="task.description" class="line-clamp-1 text-sm text-gray-600">
             {{ task.description }}
         </div>
-        <div v-if="showLastRow" class="flex flex-col gap-2">
-            <div class="task-item-metadata flex flex-wrap items-center gap-1.5 text-gray-400">
+        <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
+            <UBadge
+                v-for="tag in sortedTags"
+                :key="tag.id"
+                class="task-item-tag"
+                :color="uiColor(tag.color)"
+                :label="tag.name"
+                size="sm"
+                variant="outline"
+            />
+        </div>
+        <div
+            v-if="showMetadata || assignees.length || hasSubTasks"
+            class="task-item-footer flex items-end justify-between gap-2"
+        >
+            <div v-if="showMetadata" class="task-item-metadata flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                 <UBadge
                     v-if="startDate"
                     color="neutral"
@@ -290,16 +279,16 @@ const breadcrumbs = computed(() => {
                 />
                 <UBadge
                     v-if="openBlockers.length"
-                    color="warning"
-                    icon="i-lucide-lock-keyhole"
+                    color="neutral"
+                    icon="i-lucide-ban"
                     :label="String(openBlockers.length)"
                     size="sm"
                     title="Offene Blocker"
                     variant="subtle"
                 />
                 <UBadge
-                    v-if="task.priority !== 'none'"
-                    :color="priority.color"
+                    v-if="priority.id !== 'none'"
+                    color="neutral"
                     :icon="priority.icon"
                     :label="priority.label"
                     size="sm"
@@ -307,7 +296,9 @@ const breadcrumbs = computed(() => {
                 />
                 <UBadge
                     v-if="dueDate"
-                    :color="uiColor(dueColor(dueDate))"
+                    class="task-item-due"
+                    :class="{ 'task-item-overdue': !task.fullfilled && uiColor(dueColor(dueDate)) === 'error' }"
+                    color="neutral"
                     icon="i-lucide-clock"
                     :label="
                         task.dueDateRelative ? `${toDayMonth(dueDate)} (${task.dueDateRelative})` : toDayMonth(dueDate)
@@ -336,16 +327,20 @@ const breadcrumbs = computed(() => {
                     @click.stop
                 />
             </div>
-            <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
-                <UBadge
-                    v-for="tag in sortedTags"
-                    :key="tag.id"
-                    class="task-item-tag"
-                    :color="uiColor(tag.color)"
-                    :label="tag.name"
-                    size="sm"
-                    variant="outline"
-                />
+            <div
+                v-if="assignees.length || hasSubTasks"
+                class="task-item-people ml-auto flex shrink-0 items-center gap-1.5"
+            >
+                <div v-if="assignees.length" class="flex -space-x-1">
+                    <UAvatar
+                        v-for="assignee in assignees"
+                        :key="assignee.domainIdentifier"
+                        :alt="assignee.title"
+                        size="xs"
+                        :src="assignee.imageUrl"
+                    />
+                </div>
+                <ProgressRing v-if="hasSubTasks" :percent="percentFullfilled" />
             </div>
         </div>
     </div>

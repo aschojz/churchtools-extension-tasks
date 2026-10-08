@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, ref } from 'vue';
 import TaskItem from '../src/components/TaskItem.vue';
 
-const mocks = vi.hoisted(() => ({ push: vi.fn() }));
+const mocks = vi.hoisted(() => ({ push: vi.fn(), toggleTask: vi.fn() }));
 
 vi.mock('vue-router', () => ({
     useRouter: () => ({ currentRoute: ref({ name: 'project-board', params: { projectId: '3' } }), push: mocks.push }),
@@ -19,7 +19,7 @@ vi.mock('../src/composables/useProjectTaskContext', () => ({
         createTask: vi.fn(),
         deleteTask: vi.fn(),
         archiveTaskTree: vi.fn(),
-        toggleTask: vi.fn(),
+        toggleTask: mocks.toggleTask,
         getSuperParent: vi.fn(),
         getProgress: () => 0,
         dueColor: () => 'neutral',
@@ -53,12 +53,19 @@ const render = () =>
                 UAvatar: true,
                 UBadge: true,
                 UButton: ButtonStub,
-                UDropdownMenu: { template: '<div><slot /></div>' },
+                UDropdownMenu: {
+                    name: 'UDropdownMenu',
+                    props: ['items'],
+                    template: '<div><slot /></div>',
+                },
             },
         },
     });
 
-beforeEach(() => mocks.push.mockReset());
+beforeEach(() => {
+    mocks.push.mockReset();
+    mocks.toggleTask.mockReset();
+});
 
 describe('task card semantics', () => {
     it('opens through the card surface and the semantic title button', async () => {
@@ -83,14 +90,18 @@ describe('task card semantics', () => {
     it('does not open the task when its action controls are clicked', async () => {
         const wrapper = render();
         await wrapper.get('[aria-label="Aufgabenaktionen"]').trigger('click');
-        await wrapper.get('[aria-label="Als erledigt markieren"]').trigger('click');
         expect(mocks.push).not.toHaveBeenCalled();
         expect(wrapper.get('[aria-label="Aufgabenaktionen"]').classes()).not.toContain('absolute');
     });
 
-    it('gives status and action controls accessible names', () => {
+    it('keeps completion in the context menu without a permanent card checkbox', async () => {
         const wrapper = render();
-        expect(wrapper.get('[aria-label="Als erledigt markieren"]').element.tagName).toBe('BUTTON');
+        expect(wrapper.find('[aria-label="Als erledigt markieren"]').exists()).toBe(false);
         expect(wrapper.get('[aria-label="Aufgabenaktionen"]').element.tagName).toBe('BUTTON');
+        const menu = wrapper.getComponent({ name: 'UDropdownMenu' }).props('items');
+        expect(menu[0][0].label).toBe('Abhaken');
+        await menu[0][0].onSelect();
+        expect(mocks.toggleTask).toHaveBeenCalledWith(wrapper.props('item'));
+        expect(mocks.push).not.toHaveBeenCalled();
     });
 });

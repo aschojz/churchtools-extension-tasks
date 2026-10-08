@@ -5,7 +5,9 @@
 - Markdown-Beschreibungen mit Nuxt-UI-Editor, Formatierungsleiste und formatierter Aufgabenansicht
 - Aufgabendialog und Editor werden erst beim Öffnen geladen
 
-- Getrennte Kartenaktionen ohne Überlagerung von Menü und Abschlussknopf
+- Ruhigere Aufgabenkarten mit separaten Tags, grauen Metadaten ohne Hintergrund und Avataren unten rechts
+- Nur überfällige Termine werden rot hervorgehoben; offene Blocker erhalten ein Blockierungssymbol
+- Aufgabenabschluss über Kontextmenü und Dialog; Kartencheckboxen erscheinen nur im Sammelauswahlmodus
 - Aufgaben lassen sich über die gesamte freie Kartenfläche öffnen
 - Verantwortlichen-Auswahl schlägt bisher zugewiesene Projektmitglieder sofort vor
 - Optionale E-Mail-Benachrichtigung beim Erstellen einer Aufgabe, inklusive Aufgabenlink

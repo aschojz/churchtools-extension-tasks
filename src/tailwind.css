@@ -312,6 +312,26 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-item-tag {
     border-radius: 4px !important;
 }
+.task-title-button {
+    color: var(--ink, #242322) !important;
+    font-weight: 600 !important;
+    line-height: 1.35;
+}
+.task-item-metadata > span {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #7a746d !important;
+    font-size: 11px;
+    font-weight: 400;
+}
+.task-item-metadata > span.task-item-overdue {
+    color: #c44242 !important;
+}
+.task-item-metadata > span svg {
+    color: inherit !important;
+}
 .task-item-controls [data-slot='base'] {
     flex-shrink: 0;
 }
