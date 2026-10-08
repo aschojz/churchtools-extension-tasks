@@ -10,6 +10,7 @@ import { useTaskSelection } from '../composables/useTaskSelection';
 import { incompleteTaskBlockers, recurrenceLabel, taskPriority, taskStartDate } from '../domain/tasks';
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
+import MarkdownPreview from './MarkdownPreview';
 
 const props = defineProps<{
     item: TransformedTask;
@@ -242,9 +243,7 @@ const breadcrumbs = computed(() => {
             </div>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
-        <div v-if="task.description" class="task-item-description line-clamp-1 text-sm text-gray-600">
-            {{ task.description }}
-        </div>
+        <MarkdownPreview v-if="task.description" :source="task.description" />
         <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
             <UBadge
                 v-for="tag in sortedTags"
@@ -258,7 +257,7 @@ const breadcrumbs = computed(() => {
         </div>
         <div
             v-if="showMetadata || assignees.length || hasSubTasks"
-            class="task-item-footer flex items-center justify-between gap-2"
+            class="task-item-footer flex items-end justify-between gap-2"
         >
             <div v-if="showMetadata" class="task-item-metadata flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                 <UBadge

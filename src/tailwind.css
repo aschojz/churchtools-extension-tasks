@@ -316,6 +316,28 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-item-tags + .task-item-footer {
     margin-top: -4px;
 }
+.task-item-description {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #68635d;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.markdown-preview strong,
+.markdown-preview em,
+.markdown-preview del,
+.markdown-preview code {
+    color: inherit !important;
+}
+.markdown-preview strong {
+    font-weight: 600;
+}
+.markdown-preview-link {
+    text-decoration: underline;
+}
 .task-title-button {
     color: var(--ink, #242322) !important;
     font-weight: 600 !important;
