@@ -372,6 +372,9 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     font-weight: 600 !important;
     line-height: 1.35;
 }
+.task-item-metadata {
+    padding-top: 12px;
+}
 .task-item-metadata > span {
     padding: 0 !important;
     border: 0 !important;
