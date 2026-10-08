@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import type { DropdownMenuItem } from '@nuxt/ui';
 import { useRouter } from 'vue-router';
 import { downloadTextFile } from '../../application/download';
 import { useLists } from '../../composables/useLists';
@@ -64,6 +65,21 @@ const exportTasks = () => {
         'text/csv;charset=utf-8',
     );
 };
+const csvMenu = computed<DropdownMenuItem[]>(() => [
+    {
+        label: 'CSV importieren',
+        icon: 'i-lucide-upload',
+        onSelect: () => {
+            importOpen.value = true;
+        },
+    },
+    {
+        label: 'CSV exportieren',
+        icon: 'i-lucide-download',
+        disabled: !visibleTasks.value.length,
+        onSelect: exportTasks,
+    },
+]);
 const router = useRouter();
 const store = taskStore();
 const openTaskList = async (filters: Partial<ProjectFilters>) => {
@@ -113,21 +129,15 @@ const metrics = computed(() => [
 <template>
     <ViewWrapper :project-id="projectId">
         <template #actions>
-            <UButton
-                color="neutral"
-                icon="i-lucide-upload"
-                label="CSV importieren"
-                variant="outline"
-                @click="importOpen = true"
-            />
-            <UButton
-                color="neutral"
-                :disabled="!visibleTasks.length"
-                icon="i-lucide-download"
-                label="CSV exportieren"
-                variant="outline"
-                @click="exportTasks"
-            />
+            <UDropdownMenu :items="csvMenu">
+                <UButton
+                    aria-label="CSV-Aktionen"
+                    color="neutral"
+                    icon="i-lucide-arrow-left-right"
+                    label="CSV"
+                    variant="outline"
+                />
+            </UDropdownMenu>
         </template>
         <div class="insights-layout flex w-full flex-col gap-6 pb-6">
             <div class="insight-metrics grid gap-3">

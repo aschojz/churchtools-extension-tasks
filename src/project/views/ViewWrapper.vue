@@ -138,13 +138,26 @@ const activeFilterCount = computed(
         ].filter(Boolean).length,
 );
 const resetFilters = () => store.resetProjectFilters(props.projectId);
-const sortOptions = [
-    { id: 'manual', label: 'Sortierung: Manuell' },
-    { id: 'dueDate', label: 'Sortierung: Fälligkeit' },
-    { id: 'priority', label: 'Sortierung: Priorität' },
-    { id: 'name', label: 'Sortierung: Titel' },
-    { id: 'updatedAt', label: 'Sortierung: Zuletzt geändert' },
+const sortOptions: { id: TaskSort; label: string }[] = [
+    { id: 'manual', label: 'Manuell' },
+    { id: 'dueDate', label: 'Fälligkeit' },
+    { id: 'priority', label: 'Priorität' },
+    { id: 'name', label: 'Titel' },
+    { id: 'updatedAt', label: 'Zuletzt geändert' },
 ];
+const sortMenu = computed<DropdownMenuItem[]>(() =>
+    sortOptions.map(option => ({
+        label: option.label,
+        icon: sortMode.value === option.id ? 'i-lucide-check' : undefined,
+        ui: { itemLeadingIcon: sortMode.value === option.id ? 'task-menu-option-active' : undefined },
+        onSelect: () => {
+            sortMode.value = option.id;
+        },
+    })),
+);
+const sortLabel = computed(
+    () => `Sortierung: ${sortOptions.find(option => option.id === sortMode.value)?.label ?? 'Manuell'}`,
+);
 const taskIsOpen = computed(() => !!firstOrSelf(route.params.taskId));
 const newTaskRoute = computed(() => ({
     name: typeof route.name === 'string' ? route.name : 'project-board',
@@ -328,13 +341,16 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
                                 </div>
                             </template>
                         </UPopover>
-                        <USelect
-                            v-model="sortMode"
-                            class="w-52"
-                            :items="sortOptions"
-                            label-key="label"
-                            value-key="id"
-                        />
+                        <UDropdownMenu :items="sortMenu">
+                            <UButton
+                                :aria-label="sortLabel"
+                                color="neutral"
+                                icon="i-lucide-arrow-down-wide-narrow"
+                                square
+                                :title="sortLabel"
+                                variant="outline"
+                            />
+                        </UDropdownMenu>
                     </div>
                 </template>
                 <template #right>

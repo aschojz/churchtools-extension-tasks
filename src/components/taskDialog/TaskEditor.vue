@@ -365,6 +365,7 @@ watch(personSearch, (query, _previous, onCleanup) => {
             <UCheckbox
                 v-if="!taskId"
                 v-model="notifyAssignees"
+                class="task-editor-checkbox"
                 :disabled="!internTask.assignedTo?.length"
                 label="Verantwortliche per E-Mail benachrichtigen"
             />
