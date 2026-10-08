@@ -42,7 +42,12 @@ const workload = computed(() => {
         }
     }
     return [...counts.entries()]
-        .map(([personId, count]) => ({ personId, count, name: people.value[personId]?.title ?? `Person ${personId}` }))
+        .map(([personId, count]) => ({
+            personId,
+            count,
+            name: people.value[personId]?.title ?? `Person ${personId}`,
+            imageUrl: people.value[personId]?.imageUrl,
+        }))
         .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'de'));
 });
 const maxWorkload = computed(() => Math.max(1, ...workload.value.map(person => person.count)));
@@ -124,8 +129,8 @@ const metrics = computed(() => [
                 @click="exportTasks"
             />
         </template>
-        <div class="flex w-full flex-col gap-6 pb-6">
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div class="insights-layout flex w-full flex-col gap-6 pb-6">
+            <div class="insight-metrics grid gap-3">
                 <button
                     v-for="metric in metrics"
                     :key="metric.label"
@@ -133,19 +138,19 @@ const metrics = computed(() => [
                     type="button"
                     @click="openTaskList(metric.filters)"
                 >
-                    <UCard variant="subtle">
+                    <UCard :ui="{ body: 'p-3 sm:p-3' }" variant="subtle">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <p class="text-sm text-gray-500">{{ metric.label }}</p>
-                                <strong class="insight-value text-2xl">{{ metric.value }}</strong>
+                                <strong class="insight-value text-xl">{{ metric.value }}</strong>
                             </div>
-                            <UIcon class="size-6" :class="metric.colorClass" :name="metric.icon" />
+                            <UIcon class="size-5" :class="metric.colorClass" :name="metric.icon" />
                         </div>
                     </UCard>
                 </button>
             </div>
 
-            <div class="grid gap-4 lg:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4">
                 <UCard>
                     <template #header>
                         <div class="flex items-center justify-between gap-3">
@@ -172,12 +177,15 @@ const metrics = computed(() => [
                     <div v-if="workload.length" class="space-y-4">
                         <div v-for="person in workload" :key="person.personId" class="grid gap-1">
                             <div class="flex items-center justify-between gap-3 text-sm">
-                                <span class="truncate font-medium">{{ person.name }}</span>
+                                <span class="flex min-w-0 items-center gap-2">
+                                    <UAvatar :alt="person.name" size="xs" :src="person.imageUrl" />
+                                    <span class="truncate font-medium">{{ person.name }}</span>
+                                </span>
                                 <span class="text-gray-500">{{ person.count }}</span>
                             </div>
-                            <div class="h-2 overflow-hidden rounded-full bg-gray-100">
+                            <div class="insight-workload-track h-2 overflow-hidden rounded-full">
                                 <div
-                                    class="bg-primary-500 h-full rounded-full"
+                                    class="insight-workload-fill h-full rounded-full"
                                     :style="{ width: `${(person.count / maxWorkload) * 100}%` }"
                                 ></div>
                             </div>
@@ -189,6 +197,7 @@ const metrics = computed(() => [
 
             <UAlert
                 v-if="overdueTasks.length || unassignedTasks.length"
+                class="insights-attention"
                 color="warning"
                 :description="`${overdueTasks.length} überfällige und ${unassignedTasks.length} unbesetzte offene Aufgaben brauchen Aufmerksamkeit.`"
                 icon="i-lucide-sparkles"

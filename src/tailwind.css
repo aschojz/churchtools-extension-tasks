@@ -370,6 +370,45 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     border-radius: 12px;
     background: transparent;
 }
+.insights-layout {
+    container-type: inline-size;
+}
+.insight-metrics {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+@container (min-width: 420px) {
+    .insight-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@container (min-width: 640px) {
+    .insight-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@container (min-width: 1000px) {
+    .insight-metrics {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+.insight-workload-track {
+    background: #e9e4dd;
+}
+.insight-workload-fill {
+    background: #70675e;
+}
+.insights-attention {
+    background: #fff9ed !important;
+    border: 1px solid #e6d4b5;
+    box-shadow: none !important;
+}
+.insights-attention [data-slot='title'],
+.insights-attention [data-slot='icon'] {
+    color: #6b4922 !important;
+}
+.insights-attention [data-slot='description'] {
+    color: #68635d !important;
+}
 .insight-metric > * {
     height: 100%;
     border: 1px solid var(--line) !important;
