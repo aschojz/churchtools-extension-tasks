@@ -658,15 +658,20 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-view-meta strong {
     color: var(--ink, #242322) !important;
 }
+.task-view-assignees {
+    color: #68635d;
+    font-size: 12px;
+    font-weight: 400;
+}
 .task-activities {
-    padding: 16px;
-    border: 1px solid var(--line, #e1ddd7);
-    border-radius: 10px;
-    background: #faf9f7;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--line, #e1ddd7);
 }
 .task-activity-event,
 .task-activity-event span {
     color: var(--muted, #7a746d) !important;
+    font-size: 11px !important;
+    line-height: 1.5;
 }
 .task-view-meta-row > span,
 .task-view-meta-group > span {

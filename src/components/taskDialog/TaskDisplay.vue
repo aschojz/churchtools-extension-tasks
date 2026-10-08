@@ -161,23 +161,24 @@ const createChild = async () => {
             </div>
             <div v-if="sortedTags.length" class="task-view-meta-group">
                 <span>Tags</span>
-                <div class="flex flex-wrap gap-2">
+                <div class="task-item-tags flex flex-wrap gap-1.5">
                     <UBadge
                         v-for="tag in sortedTags"
                         :key="tag.id"
+                        class="task-item-tag"
                         :color="uiColor(tag.color)"
                         :label="tag.name"
                         size="sm"
-                        variant="soft"
+                        variant="outline"
                     />
                 </div>
             </div>
             <div v-if="assignees.length" class="task-view-meta-group">
                 <span>Verantwortliche</span>
-                <div class="flex flex-col gap-2">
+                <div class="task-view-assignees flex flex-col gap-1.5">
                     <div v-for="assignee in assignees" :key="assignee.domainIdentifier" class="flex items-center gap-2">
-                        <UAvatar :alt="assignee.title" size="sm" :src="assignee.imageUrl" />
-                        <strong>{{ assignee.title }}</strong>
+                        <UAvatar :alt="assignee.title" size="xs" :src="assignee.imageUrl" />
+                        <span>{{ assignee.title }}</span>
                     </div>
                 </div>
             </div>
