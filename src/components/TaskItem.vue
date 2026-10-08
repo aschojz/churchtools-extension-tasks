@@ -231,7 +231,7 @@ const breadcrumbs = computed(() => {
                 <UDropdownMenu :items="contextMenu"
                     ><UButton
                         aria-label="Aufgabenaktionen"
-                        class="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+                        class="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100"
                         color="neutral"
                         icon="i-lucide-ellipsis"
                         size="xs"
