@@ -309,6 +309,12 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     outline-offset: 2px;
     border-radius: 3px;
 }
+.task-item-tag {
+    border-radius: 4px !important;
+}
+.task-item-controls [data-slot='base'] {
+    flex-shrink: 0;
+}
 .task-selection-checkbox [data-slot='base'] {
     border-radius: 6px !important;
 }

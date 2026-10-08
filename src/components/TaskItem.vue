@@ -208,8 +208,8 @@ const breadcrumbs = computed(() => {
                 <UIcon v-else class="size-3" name="i-lucide-arrow-left" />
             </template>
         </div>
-        <div class="flex items-start justify-end gap-4">
-            <div class="flex flex-grow items-start gap-2">
+        <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
                 <button
                     class="task-title-button appearance-none border-0 bg-transparent p-0 text-left font-bold"
                     type="button"
@@ -218,58 +218,60 @@ const breadcrumbs = computed(() => {
                     {{ task.name }}
                 </button>
             </div>
-            <div v-if="Array.isArray(task.assignedTo) && task.assignedTo.length" class="flex flex-shrink-0 gap-1">
-                <UAvatar
-                    v-for="assignee in assignees"
-                    :key="assignee.domainIdentifier"
-                    :alt="assignee.title"
-                    size="xs"
-                    :src="assignee.imageUrl"
+            <div class="task-item-controls flex shrink-0 items-center gap-1">
+                <div v-if="Array.isArray(task.assignedTo) && task.assignedTo.length" class="flex shrink-0 -space-x-1">
+                    <UAvatar
+                        v-for="assignee in assignees"
+                        :key="assignee.domainIdentifier"
+                        :alt="assignee.title"
+                        size="xs"
+                        :src="assignee.imageUrl"
+                    />
+                </div>
+                <ProgressRing
+                    v-if="hasSubTasks"
+                    class="progress-icon relative shrink-0 text-[20px] text-gray-500"
+                    :percent="percentFullfilled"
                 />
-            </div>
-            <ProgressRing
-                v-if="hasSubTasks"
-                class="progress-icon relative shrink-0 text-[20px] text-gray-500"
-                :percent="percentFullfilled"
-            />
-            <UCheckbox
-                v-if="selection?.enabled.value"
-                :aria-label="`${task.name} auswählen`"
-                class="task-selection-checkbox mt-1 shrink-0"
-                :model-value="selection.selectedIds.value.has(task.id)"
-                :ui="{ base: 'rounded-[4px]' }"
-                @click.stop
-                @update:model-value="(value: boolean | 'indeterminate') => selection?.toggleTask(task.id, value)"
-            />
-            <UButton
-                v-else-if="!hasSubTasks"
-                :aria-label="task.fullfilled ? 'Als unerledigt markieren' : 'Als erledigt markieren'"
-                color="neutral"
-                :icon="task.fullfilled ? 'i-lucide-square-check-big' : 'i-lucide-square'"
-                size="sm"
-                square
-                variant="ghost"
-                @click.stop="runAction(() => toggleTask(task))"
-            />
-            <UDropdownMenu :items="contextMenu"
-                ><UButton
-                    aria-label="Aufgabenaktionen"
-                    class="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+                <UCheckbox
+                    v-if="selection?.enabled.value"
+                    :aria-label="`${task.name} auswählen`"
+                    class="task-selection-checkbox mt-1 shrink-0"
+                    :model-value="selection.selectedIds.value.has(task.id)"
+                    :ui="{ base: 'rounded-[4px]' }"
+                    @click.stop
+                    @update:model-value="(value: boolean | 'indeterminate') => selection?.toggleTask(task.id, value)"
+                />
+                <UButton
+                    v-else-if="!hasSubTasks"
+                    :aria-label="task.fullfilled ? 'Als unerledigt markieren' : 'Als erledigt markieren'"
                     color="neutral"
-                    icon="i-lucide-ellipsis"
-                    size="sm"
+                    :icon="task.fullfilled ? 'i-lucide-square-check-big' : 'i-lucide-square'"
+                    size="xs"
                     square
                     variant="ghost"
-                    @click.stop
-                    @pointerdown.stop
-            /></UDropdownMenu>
+                    @click.stop="runAction(() => toggleTask(task))"
+                />
+                <UDropdownMenu :items="contextMenu"
+                    ><UButton
+                        aria-label="Aufgabenaktionen"
+                        class="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+                        color="neutral"
+                        icon="i-lucide-ellipsis"
+                        size="xs"
+                        square
+                        variant="ghost"
+                        @click.stop
+                        @pointerdown.stop
+                /></UDropdownMenu>
+            </div>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <div v-if="task.description" class="line-clamp-1 text-sm text-gray-600">
             {{ task.description }}
         </div>
-        <div v-if="showLastRow" class="flex flex-wrap justify-end gap-2">
-            <div class="flex flex-grow items-center gap-3 text-gray-400">
+        <div v-if="showLastRow" class="flex flex-col gap-2">
+            <div class="task-item-metadata flex flex-wrap items-center gap-1.5 text-gray-400">
                 <UBadge
                     v-if="startDate"
                     color="neutral"
@@ -334,14 +336,15 @@ const breadcrumbs = computed(() => {
                     @click.stop
                 />
             </div>
-            <div class="flex gap-2">
+            <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
                 <UBadge
                     v-for="tag in sortedTags"
                     :key="tag.id"
+                    class="task-item-tag"
                     :color="uiColor(tag.color)"
                     :label="tag.name"
                     size="sm"
-                    variant="soft"
+                    variant="outline"
                 />
             </div>
         </div>
