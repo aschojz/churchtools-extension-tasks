@@ -27,6 +27,11 @@
 }
 body:has(#tasks) {
     --ui-primary: #292826;
+    --ui-text: #242322;
+    --ui-text-highlighted: #242322;
+    --ui-text-toned: #68635d;
+    --ui-text-muted: #73706c;
+    --ui-text-dimmed: #8a847d;
     --ui-text-inverted: #fff;
     --ui-bg-muted: #f7f5f2;
     --ui-bg-elevated: #f1eee9;
