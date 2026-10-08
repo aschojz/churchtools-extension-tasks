@@ -28,7 +28,7 @@ provideTaskSelection(filteredTasks);
 <template>
     <ViewWrapper :project-id="projectId">
         <template #extra-actions><TaskSelectionActions /></template>
-        <div v-if="filteredTasks.length" class="flex w-full flex-col">
+        <div v-if="filteredTasks.length" class="task-list flex w-full flex-col">
             <TaskItem
                 v-for="task in filteredTasks"
                 :key="task.id"
