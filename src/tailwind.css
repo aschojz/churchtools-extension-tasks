@@ -630,6 +630,9 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     font-size: 13px;
     text-align: center;
 }
+.task-menu-option-active {
+    color: var(--accent, #ea7a35) !important;
+}
 .text-basic-tertiary,
 .text-ter,
 .text-sec,

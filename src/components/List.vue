@@ -88,6 +88,7 @@ const listContextMenu = computed<DropdownMenuItem[][]>(() => {
             {
                 label: 'Unteraufgaben anzeigen',
                 icon: preferences.value.showSubTasks ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+                ui: { itemLeadingIcon: preferences.value.showSubTasks ? 'task-menu-option-active' : undefined },
                 onSelect: () => {
                     updatePreferences({ showSubTasks: !preferences.value.showSubTasks });
                 },
@@ -95,6 +96,7 @@ const listContextMenu = computed<DropdownMenuItem[][]>(() => {
             {
                 label: 'Erledigte Aufgaben anzeigen',
                 icon: preferences.value.showCompleted ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+                ui: { itemLeadingIcon: preferences.value.showCompleted ? 'task-menu-option-active' : undefined },
                 onSelect: () => {
                     updatePreferences({ showCompleted: !preferences.value.showCompleted });
                 },
