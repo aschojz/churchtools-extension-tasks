@@ -2,6 +2,7 @@
 
 ## 0.6.0 · 09.10.2026
 
+- Aktualisierte Node-Typdefinitionen und Sicherheitskorrektur für source-map-js
 - Kompaktere Projektsteuerung mit Sortier-Icon, CSV-Menü und vereinfachten Filterwerten
 - Kompakte Timeline-Karten ohne Beschreibung und mit rechtsbündigen Tags
 - Kleinere Kennzahlen, vollbreite Fortschritts- und Auslastungskarten sowie Personenavatare in der Auswertung
