@@ -769,6 +769,18 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     font-size: 11px !important;
     line-height: 1.5;
 }
+.task-comment {
+    border-color: #e8e4de !important;
+    background: #faf9f7;
+}
+.task-comment-meta,
+.task-comment-meta > span,
+.task-comment-meta > div {
+    color: #8a847d !important;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+}
 .task-view-meta-row > span,
 .task-view-meta-group > span {
     color: var(--muted, #7a746d);

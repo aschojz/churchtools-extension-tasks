@@ -84,20 +84,18 @@ const onCancelComment = () => (newComment.value = '');
         <div class="flex flex-col gap-3">
             <div v-for="(entry, index) in transformedActivities" :key="index">
                 <div v-if="entry.type === 'comment'" class="flex flex-col items-end">
-                    <div
-                        class="border-basic-divider bg-foreground-secondary flex w-full flex-grow flex-col gap-2 rounded-lg border px-3 py-2"
-                    >
-                        <div v-if="entry.person" class="text-basic-tertiary flex items-center gap-2">
-                            <UAvatar :alt="entry.person.title" size="xs" :src="entry.person.imageUrl" />
-                            <span class="text-basic-secondary font-bold">
+                    <div class="task-comment flex w-full flex-grow flex-col gap-1.5 rounded-lg border px-3 py-2">
+                        <div v-if="entry.person" class="task-comment-meta flex flex-wrap items-center gap-1.5">
+                            <UAvatar :alt="entry.person.title" size="2xs" :src="entry.person.imageUrl" />
+                            <span>
                                 {{ entry.person?.title }}
                             </span>
                             <span>·</span>
                             <div>{{ entry.dateDisplay }}</div>
                         </div>
-                        <div v-else class="text-basic-tertiary flex items-center gap-2">
-                            <UAvatar icon="i-lucide-user" size="xs" />
-                            <span class="text-basic-secondary font-bold"> Unbekannter Benutzer </span>
+                        <div v-else class="task-comment-meta flex flex-wrap items-center gap-1.5">
+                            <UAvatar icon="i-lucide-user" size="2xs" />
+                            <span> Unbekannter Benutzer </span>
                             <span>·</span>
                             <div>{{ entry.dateDisplay }}</div>
                         </div>
