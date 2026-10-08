@@ -5,7 +5,7 @@ import { computed } from 'vue';
 import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProjectTasks';
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
-import { dueDateBucket, type DueDateBucket } from '../domain/tasks';
+import { dueDateBucket, recurrenceLabel, taskPriority, type DueDateBucket } from '../domain/tasks';
 import { colorKey, CtColor, uiColor, useCurrentUser } from '../platform';
 import { createOrEditProject } from '../project/projectHelper';
 import { projectIcon } from '../utils/utils';
@@ -103,23 +103,60 @@ const tasksBySection = computed(
                                 }}
                             </RouterLink>
                             <RouterLink
-                                class="task-item overview-task-item flex min-w-0 items-start gap-3 p-3"
+                                class="task-item overview-task-item flex min-w-0 flex-col gap-2 p-3"
                                 :to="{
                                     name: 'project-board',
                                     params: { projectId: item.project.id, taskId: item.task.id },
                                 }"
                             >
-                                <UIcon
-                                    class="mt-0.5 size-5 shrink-0 text-gray-400"
-                                    :name="item.task.fullfilled ? 'i-lucide-circle-check' : 'i-lucide-circle'"
-                                />
-                                <span class="min-w-0 flex-1">
-                                    <strong class="block truncate">{{ item.task.name }}</strong>
-                                    <span v-if="item.task.description" class="text-muted mt-1 block truncate text-sm">
-                                        {{ item.task.description }}
-                                    </span>
-                                </span>
-                                <UIcon class="mt-1 size-4 shrink-0 text-gray-400" name="i-lucide-chevron-right" />
+                                <div class="flex min-w-0 items-start gap-2">
+                                    <strong class="overview-task-title line-clamp-2 min-w-0 flex-1">{{
+                                        item.task.name
+                                    }}</strong>
+                                    <UIcon class="mt-1 size-4 shrink-0 text-gray-400" name="i-lucide-chevron-right" />
+                                </div>
+                                <div v-if="item.tags.length" class="task-item-tags flex flex-wrap gap-1.5">
+                                    <UBadge
+                                        v-for="tag in item.tags"
+                                        :key="tag.id"
+                                        class="task-item-tag"
+                                        :color="uiColor(tag.color)"
+                                        :label="tag.name"
+                                        size="sm"
+                                        variant="outline"
+                                    />
+                                </div>
+                                <div
+                                    class="task-item-metadata overview-task-metadata flex flex-wrap items-center gap-x-2.5 gap-y-1"
+                                >
+                                    <UBadge
+                                        v-if="taskPriority(item.task.priority).id !== 'none'"
+                                        color="neutral"
+                                        :icon="taskPriority(item.task.priority).icon"
+                                        :label="taskPriority(item.task.priority).label"
+                                        size="sm"
+                                        variant="soft"
+                                    />
+                                    <UBadge
+                                        v-if="item.task.recurrence"
+                                        color="neutral"
+                                        icon="i-lucide-repeat-2"
+                                        :label="recurrenceLabel(item.task.recurrence)"
+                                        size="sm"
+                                        variant="soft"
+                                    />
+                                    <UBadge
+                                        v-if="item.dueDate"
+                                        :class="{ 'task-item-overdue': section.id === 'overdue' }"
+                                        color="neutral"
+                                        icon="i-lucide-clock"
+                                        :label="
+                                            item.dueDate.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })
+                                        "
+                                        size="sm"
+                                        variant="soft"
+                                    />
+                                </div>
                             </RouterLink>
                         </div>
                         <p v-if="!tasksBySection[section.id].length" class="text-muted py-6 text-center text-sm">

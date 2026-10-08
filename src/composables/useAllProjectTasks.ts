@@ -3,7 +3,7 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { ccmKeys, fetchCustomModuleDataValues } from '../data/ccm';
 import { queryClient } from '../data/queryClient';
 import { taskDueDate } from '../domain/tasks';
-import type { Project, Task, TransformedTask } from '../domain/types';
+import type { Project, Tag, Task, TransformedTag, TransformedTask } from '../domain/types';
 import useProjects from '../project/useProjects';
 import { usePlugin } from './usePlugin';
 
@@ -11,6 +11,7 @@ export type ProjectTask = {
     project: Project;
     task: TransformedTask;
     dueDate?: Date;
+    tags: TransformedTag[];
 };
 
 export function useAllProjectTasks(options: { enabled?: MaybeRefOrGetter<boolean> } = {}) {
@@ -22,7 +23,7 @@ export function useAllProjectTasks(options: { enabled?: MaybeRefOrGetter<boolean
                 projects.value.map(project => ({
                     queryKey: ccmKeys.values(moduleId.value, project.id),
                     enabled: !!moduleId.value && (options.enabled === undefined || toValue(options.enabled)),
-                    queryFn: () => fetchCustomModuleDataValues<Task>(moduleId.value!, project.id),
+                    queryFn: () => fetchCustomModuleDataValues<Task | Tag>(moduleId.value!, project.id),
                 })),
         },
         queryClient,
@@ -30,15 +31,25 @@ export function useAllProjectTasks(options: { enabled?: MaybeRefOrGetter<boolean
 
     const tasks = computed<ProjectTask[]>(() =>
         projects.value.flatMap((project, index) => {
-            const projectTasks = (taskQueries.value[index]?.data ?? []).filter(
-                (value): value is TransformedTask => value.type === 'task',
+            const values = taskQueries.value[index]?.data ?? [];
+            const tags = Object.fromEntries(
+                values.filter((value): value is TransformedTag => value.type === 'tag').map(tag => [tag.id, tag]),
             );
+            const projectTasks = values.filter((value): value is TransformedTask => value.type === 'task');
             const taskMap = Object.fromEntries(projectTasks.map(task => [task.id, task]));
             const findParent = (task: TransformedTask) =>
                 Object.values(taskMap).find(
                     candidate => Array.isArray(candidate.subTasks) && candidate.subTasks.includes(task.id),
                 );
-            return projectTasks.map(task => ({ project, task, dueDate: taskDueDate(task, findParent) }));
+            return projectTasks.map(task => ({
+                project,
+                task,
+                dueDate: taskDueDate(task, findParent),
+                tags: (Array.isArray(task.tags) ? task.tags : [])
+                    .map(id => tags[id])
+                    .filter((tag): tag is TransformedTag => !!tag)
+                    .sort((a, b) => a.name.localeCompare(b.name, 'de')),
+            }));
         }),
     );
     const isEnabled = computed(() => options.enabled === undefined || toValue(options.enabled));
