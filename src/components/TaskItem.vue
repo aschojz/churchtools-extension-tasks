@@ -207,7 +207,7 @@ const breadcrumbs = computed(() => {
                 <UIcon v-else class="size-3" name="i-lucide-arrow-left" />
             </template>
         </div>
-        <div class="flex items-start justify-between gap-2">
+        <div class="task-item-heading flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1">
                 <button
                     class="task-title-button appearance-none border-0 bg-transparent p-0 text-left font-bold"
@@ -242,7 +242,7 @@ const breadcrumbs = computed(() => {
             </div>
         </div>
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
-        <div v-if="task.description" class="line-clamp-1 text-sm text-gray-600">
+        <div v-if="task.description" class="task-item-description line-clamp-1 text-sm text-gray-600">
             {{ task.description }}
         </div>
         <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
@@ -258,7 +258,7 @@ const breadcrumbs = computed(() => {
         </div>
         <div
             v-if="showMetadata || assignees.length || hasSubTasks"
-            class="task-item-footer flex items-end justify-between gap-2"
+            class="task-item-footer flex items-center justify-between gap-2"
         >
             <div v-if="showMetadata" class="task-item-metadata flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                 <UBadge

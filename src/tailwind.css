@@ -312,6 +312,10 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-item-tag {
     border-radius: 4px !important;
 }
+.task-item-heading + .task-item-description,
+.task-item-tags + .task-item-footer {
+    margin-top: -4px;
+}
 .task-title-button {
     color: var(--ink, #242322) !important;
     font-weight: 600 !important;
