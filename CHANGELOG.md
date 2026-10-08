@@ -1,5 +1,13 @@
 # Changelog
 
+## Unveröffentlicht
+
+- Getrennte Kartenaktionen ohne Überlagerung von Menü und Abschlussknopf
+- Aufgaben lassen sich über die gesamte freie Kartenfläche öffnen
+- Verantwortlichen-Auswahl schlägt bisher zugewiesene Projektmitglieder sofort vor
+- Optionale E-Mail-Benachrichtigung beim Erstellen einer Aufgabe, inklusive Aufgabenlink
+- Versandfehler werden separat gemeldet; die erstellte Aufgabe bleibt gespeichert
+
 ## 0.5.0 · 04.10.2026
 
 ### Neu

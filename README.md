@@ -18,6 +18,13 @@ Unteraufgaben, Blocker, Wiederholungen, Vorlagen, Archiv und Papierkorb.
 - Aufgabenabhängigkeiten mit sichtbaren Blockern und abgesichertem Abschluss
 - Kalender, Timeline und Projektauswertung mit lokalem CSV-Export und geprüftem CSV-Import
 - persönliche gespeicherte Ansichten und Aufgabenvorlagen
+- Projektmitglieder als Vorschläge bei der Auswahl von Verantwortlichen
+- optionale E-Mail-Benachrichtigung an Verantwortliche beim Erstellen im Aufgabendialog
+
+Die E-Mail-Option nutzt den ChurchTools-Versand unter den Rechten des angemeldeten
+Benutzers. Zustellung setzt eine E-Mail-Adresse bei den Empfängern und einen
+funktionierenden Mailversand der Instanz voraus. Ein Fehler beim Versand lässt
+die bereits erstellte Aufgabe bestehen und wird separat angezeigt.
 
 ## Lokal entwickeln
 

@@ -65,6 +65,11 @@ const openTask = () => {
     const name = currentRoute.params.projectId ? currentRoute.name! : 'my-tasks';
     router.push({ name, params: { projectId: props.projectId, taskId: props.item.id } });
 };
+const onCardClick = (event: MouseEvent) => {
+    const target = event.target;
+    if (target instanceof Element && target.closest('button, a, input, [role="menu"], [role="checkbox"]')) return;
+    openTask();
+};
 
 const showLastRow = computed(
     () =>
@@ -188,8 +193,9 @@ const breadcrumbs = computed(() => {
 </script>
 <template>
     <div
-        class="task-item group relative flex flex-col justify-between gap-2 p-3"
+        class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3"
         :class="{ 'task-item-row': density === 'row' }"
+        @click="onCardClick"
     >
         <div v-if="superParent && !showTask" class="-mb-1 flex items-center gap-2 text-xs text-gray-400">
             <template v-for="(crumb, index) in breadcrumbs" :key="index">
@@ -248,12 +254,12 @@ const breadcrumbs = computed(() => {
             <UDropdownMenu :items="contextMenu"
                 ><UButton
                     aria-label="Aufgabenaktionen"
-                    class="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                    class="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
                     color="neutral"
                     icon="i-lucide-ellipsis"
                     size="sm"
                     square
-                    variant="outline"
+                    variant="ghost"
                     @click.stop
                     @pointerdown.stop
             /></UDropdownMenu>

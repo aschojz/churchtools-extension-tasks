@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { Task } from '../../domain/types';
+import { useToast } from '@nuxt/ui/composables';
 import { computed, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { reportOperationalError } from '../../application/operationalErrors';
+import { notifyTaskAssignees } from '../../application/taskNotifications';
 import { useTask } from '../../composables/useTask';
 import { useTasks } from '../../composables/useTasks';
 import { useProject } from '../../project/useProject';
@@ -47,6 +49,8 @@ const primaryLabel = computed(() =>
 );
 
 const internTask = ref<Task>();
+const notifyAssignees = ref(false);
+const toast = useToast();
 const isSaving = ref(false);
 const saveError = ref('');
 const onTaskChange = (updatedTask: Task) => {
@@ -58,7 +62,32 @@ const onSave = async () => {
     saveError.value = '';
     try {
         if (isCreate.value && internTask.value) {
-            await createTask(internTask.value);
+            const draft = internTask.value;
+            const created = await createTask(draft);
+            if (notifyAssignees.value && draft.assignedTo?.length) {
+                try {
+                    const taskUrl = new URL(
+                        router.resolve({
+                            name: 'project-board',
+                            params: { projectId: props.projectId, taskId: created.id },
+                        }).href,
+                        window.location.origin,
+                    ).href;
+                    await notifyTaskAssignees(draft, project.value?.name ?? 'Aufgaben', taskUrl);
+                    toast.add({ title: 'E-Mail-Benachrichtigung an ChurchTools übergeben.', color: 'success' });
+                } catch (error) {
+                    toast.add({
+                        title: 'Aufgabe erstellt, E-Mail-Benachrichtigung fehlgeschlagen.',
+                        description: reportOperationalError(
+                            'Aufgabenbenachrichtigung',
+                            error,
+                            'E-Mail konnte nicht versendet werden.',
+                        ),
+                        color: 'warning',
+                        duration: 0,
+                    });
+                }
+            }
             resetRoute();
         } else if (isEdit.value && internTask.value && task.value) {
             const diff = getObjectDiff(internTask.value, task.value);
@@ -136,7 +165,11 @@ const onSave = async () => {
                 v-if="showEditor"
                 :project-id="projectId"
                 :task-id="taskId"
-                @change="onTaskChange" /><TaskDisplay v-else-if="taskId" :project-id="projectId" :task-id="taskId"
+                @change="onTaskChange"
+                @notify="notifyAssignees = $event" /><TaskDisplay
+                v-else-if="taskId"
+                :project-id="projectId"
+                :task-id="taskId"
         /></template>
         <template #footer
             ><div class="flex w-full justify-end gap-2">

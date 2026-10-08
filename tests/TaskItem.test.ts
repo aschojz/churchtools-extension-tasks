@@ -31,7 +31,7 @@ const ButtonStub = defineComponent({
     props: ['ariaLabel', 'label'],
     emits: ['click'],
     template:
-        '<button v-bind="$attrs" :aria-label="ariaLabel" type="button" @click="$emit(\'click\')">{{ label }}</button>',
+        '<button v-bind="$attrs" :aria-label="ariaLabel" type="button" @click="$emit(\'click\', $event)">{{ label }}</button>',
 });
 
 const render = () =>
@@ -61,14 +61,15 @@ const render = () =>
 beforeEach(() => mocks.push.mockReset());
 
 describe('task card semantics', () => {
-    it('opens only through the semantic title button', async () => {
+    it('opens through the card surface and the semantic title button', async () => {
         const wrapper = render();
         const card = wrapper.get('.task-item');
         expect(card.element.tagName).toBe('DIV');
-        expect(card.classes()).not.toContain('cursor-pointer');
+        expect(card.classes()).toContain('cursor-pointer');
 
         await card.trigger('click');
-        expect(mocks.push).not.toHaveBeenCalled();
+        expect(mocks.push).toHaveBeenCalledOnce();
+        mocks.push.mockReset();
 
         const title = wrapper.get('button.task-title-button');
         expect(title.text()).toBe('Tastaturtest');
@@ -77,6 +78,14 @@ describe('task card semantics', () => {
             name: 'project-board',
             params: { projectId: 3, taskId: 42 },
         });
+    });
+
+    it('does not open the task when its action controls are clicked', async () => {
+        const wrapper = render();
+        await wrapper.get('[aria-label="Aufgabenaktionen"]').trigger('click');
+        await wrapper.get('[aria-label="Als erledigt markieren"]').trigger('click');
+        expect(mocks.push).not.toHaveBeenCalled();
+        expect(wrapper.get('[aria-label="Aufgabenaktionen"]').classes()).not.toContain('absolute');
     });
 
     it('gives status and action controls accessible names', () => {

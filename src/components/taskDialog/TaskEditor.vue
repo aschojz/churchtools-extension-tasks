@@ -13,7 +13,12 @@ import { personDisplay } from '../../platform';
 import DialogTag from '../DialogTag.vue';
 
 const props = defineProps<{ taskId?: number; projectId: number }>();
-const emit = defineEmits<{ (event: 'change', payload: Task): void }>();
+const emit = defineEmits<{
+    (event: 'change', payload: Task): void;
+    (event: 'notify', value: boolean): void;
+}>();
+const notifyAssignees = ref(false);
+watch(notifyAssignees, value => emit('notify', value));
 const projectId = computed(() => props.projectId);
 const { tasksMap, isLoading, findParent } = useTasks(projectId);
 const blockerOptions = computed(() =>
@@ -92,7 +97,14 @@ watch(internTask, () => emit('change', internTask.value), {
     flush: 'sync',
 });
 const parent = computed(() => (props.taskId ? findParent(tasksMap.value[props.taskId]) : undefined));
-const filter = computed(() => ({ ids: internTask.value.assignedTo ?? [] }));
+const filter = computed(() => ({
+    ids: [
+        ...new Set([
+            ...(internTask.value.assignedTo ?? []),
+            ...Object.values(tasksMap.value).flatMap(task => task.assignedTo ?? []),
+        ]),
+    ],
+}));
 const { data } = usePersonsQueryAllPages(filter);
 const assignees = computed(() =>
     (data.value ?? []).map(p => ({
@@ -105,7 +117,9 @@ const personSearch = ref('');
 const personOptions = ref<Array<{ id: number; label: string }>>([]);
 const personSearchLoading = ref(false);
 const personSearchError = ref('');
-const selectedPersonOptions = () => assignees.value.map(person => ({ id: person.id, label: person.nameTranslated }));
+const projectPersonOptions = () => assignees.value.map(person => ({ id: person.id, label: person.nameTranslated }));
+const selectedPersonOptions = () =>
+    projectPersonOptions().filter(person => internTask.value.assignedTo?.includes(person.id));
 watch(
     assignees,
     value => {
@@ -122,7 +136,7 @@ watch(personSearch, (query, _previous, onCleanup) => {
     personSearchError.value = '';
     if (normalizedQuery.length < 2) {
         personSearchLoading.value = false;
-        personOptions.value = selectedPersonOptions();
+        personOptions.value = projectPersonOptions();
         return;
     }
     personSearchLoading.value = true;
@@ -299,7 +313,11 @@ watch(personSearch, (query, _previous, onCleanup) => {
                 variant="outline"
                 @click="createTagIsOpen = true"
             />
-            <UFormField :error="personSearchError || undefined" label="Verantwortliche">
+            <UFormField
+                :error="personSearchError || undefined"
+                hint="Personen aus diesem Projekt oder weitere Personen suchen"
+                label="Verantwortliche"
+            >
                 <USelectMenu
                     v-model="internTask.assignedTo"
                     v-model:search-term="personSearch"
@@ -313,6 +331,12 @@ watch(personSearch, (query, _previous, onCleanup) => {
                     value-key="id"
                 />
             </UFormField>
+            <UCheckbox
+                v-if="!taskId"
+                v-model="notifyAssignees"
+                :disabled="!internTask.assignedTo?.length"
+                label="Verantwortliche per E-Mail benachrichtigen"
+            />
             <UFormField hint="Optional" label="Blockiert durch">
                 <USelectMenu
                     v-model="internTask.blockedBy"
