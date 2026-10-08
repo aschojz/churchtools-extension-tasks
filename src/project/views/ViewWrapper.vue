@@ -89,32 +89,32 @@ const removeSelectedView = () => {
     selectedSavedViewId.value = undefined;
 };
 const statusOptions = [
-    { id: 'default', label: 'Status: Je Liste' },
-    { id: 'open', label: 'Status: Offen' },
-    { id: 'completed', label: 'Status: Erledigt' },
-    { id: 'all', label: 'Status: Alle' },
+    { id: 'default', label: 'Je Liste' },
+    { id: 'open', label: 'Offen' },
+    { id: 'completed', label: 'Erledigt' },
+    { id: 'all', label: 'Alle' },
 ];
 const priorityOptions = [
-    { id: 'all', label: 'Priorität: Alle' },
-    { id: 'urgent', label: 'Priorität: Dringend' },
-    { id: 'high', label: 'Priorität: Hoch' },
-    { id: 'medium', label: 'Priorität: Mittel' },
-    { id: 'low', label: 'Priorität: Niedrig' },
+    { id: 'all', label: 'Alle' },
+    { id: 'urgent', label: 'Dringend' },
+    { id: 'high', label: 'Hoch' },
+    { id: 'medium', label: 'Mittel' },
+    { id: 'low', label: 'Niedrig' },
 ];
 const dueOptions = [
-    { id: 'all', label: 'Fälligkeit: Alle' },
-    { id: 'overdue', label: 'Fälligkeit: Überfällig' },
-    { id: 'today', label: 'Fälligkeit: Heute' },
-    { id: 'week', label: 'Fälligkeit: Nächste 7 Tage' },
-    { id: 'upcoming', label: 'Fälligkeit: Demnächst' },
-    { id: 'none', label: 'Fälligkeit: Ohne Termin' },
+    { id: 'all', label: 'Alle' },
+    { id: 'overdue', label: 'Überfällig' },
+    { id: 'today', label: 'Heute' },
+    { id: 'week', label: 'Nächste 7 Tage' },
+    { id: 'upcoming', label: 'Demnächst' },
+    { id: 'none', label: 'Ohne Termin' },
 ];
 const assigneeOptions = computed(() => [
-    { id: 'all', label: 'Person: Alle' },
-    { id: 'mine', label: 'Person: Mir zugewiesen' },
-    { id: 'unassigned', label: 'Person: Nicht zugewiesen' },
+    { id: 'all', label: 'Alle' },
+    { id: 'mine', label: 'Mir zugewiesen' },
+    { id: 'unassigned', label: 'Nicht zugewiesen' },
     ...Object.entries(people.value)
-        .map(([id, person]) => ({ id: Number(id), label: `Person: ${person.title}` }))
+        .map(([id, person]) => ({ id: Number(id), label: person.title }))
         .sort((a, b) => a.label.localeCompare(b.label, 'de')),
 ]);
 const listOptions = computed(() => [
@@ -148,8 +148,7 @@ const sortOptions: { id: TaskSort; label: string }[] = [
 const sortMenu = computed<DropdownMenuItem[]>(() =>
     sortOptions.map(option => ({
         label: option.label,
-        icon: sortMode.value === option.id ? 'i-lucide-check' : undefined,
-        ui: { itemLeadingIcon: sortMode.value === option.id ? 'task-menu-option-active' : undefined },
+        checked: sortMode.value === option.id,
         onSelect: () => {
             sortMode.value = option.id;
         },
@@ -342,6 +341,13 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
                             </template>
                         </UPopover>
                         <UDropdownMenu :items="sortMenu">
+                            <template #item-trailing="{ item }">
+                                <UIcon
+                                    v-if="item.checked"
+                                    class="task-menu-option-active size-4"
+                                    name="i-lucide-check"
+                                />
+                            </template>
                             <UButton
                                 :aria-label="sortLabel"
                                 color="neutral"
