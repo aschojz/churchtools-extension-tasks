@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Task } from '../../domain/types';
 import { useToast } from '@nuxt/ui/composables';
-import { computed, ref, toRef } from 'vue';
+import { computed, ref, toRef, useId } from 'vue';
 import { useRouter } from 'vue-router';
 import { reportOperationalError } from '../../application/operationalErrors';
 import { notifyTaskAssignees } from '../../application/taskNotifications';
@@ -12,6 +12,7 @@ import TaskDisplay from './TaskDisplay.vue';
 import TaskEditor from './TaskEditor.vue';
 
 const props = defineProps<{ taskId: string; projectId: number }>();
+const editorToolsId = `task-editor-tools-${useId()}`;
 const projectId = computed(() => props.projectId);
 const taskId = computed(() => (isCreate.value ? undefined : parseInt(props.taskId)));
 
@@ -138,6 +139,7 @@ const onSave = async () => {
                     <p v-if="project?.name">{{ project.name }}</p>
                 </div>
                 <div class="task-dialog-header-actions">
+                    <div :id="editorToolsId"></div>
                     <UButton
                         v-if="!isCreate && !isEdit"
                         aria-label="Aufgabe bearbeiten"
@@ -165,6 +167,7 @@ const onSave = async () => {
                 v-if="showEditor"
                 :project-id="projectId"
                 :task-id="taskId"
+                :tools-target="`#${editorToolsId}`"
                 @change="onTaskChange"
                 @notify="notifyAssignees = $event" /><TaskDisplay
                 v-else-if="taskId"

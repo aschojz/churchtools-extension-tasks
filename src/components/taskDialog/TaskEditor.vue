@@ -13,7 +13,7 @@ import type { TaskRecurrenceFrequency } from '../../domain/types';
 import { personDisplay } from '../../platform';
 import DialogTag from '../DialogTag.vue';
 
-const props = defineProps<{ taskId?: number; projectId: number }>();
+const props = defineProps<{ taskId?: number; projectId: number; toolsTarget?: string }>();
 const emit = defineEmits<{
     (event: 'change', payload: Task): void;
     (event: 'notify', value: boolean): void;
@@ -199,54 +199,56 @@ watch(personSearch, (query, _previous, onCleanup) => {
     <UAlert v-else-if="missing" color="warning" title="Diese Aufgabe wurde nicht gefunden." />
     <div v-else class="task-editor-layout">
         <section class="task-editor-main">
-            <div v-if="!taskId" class="task-editor-tools">
-                <UPopover v-model:open="templatesOpen" :content="{ align: 'end' }">
-                    <UButton color="neutral" label="Vorlagen" size="sm" variant="ghost" />
-                    <template #content>
-                        <div class="task-template-popover">
-                            <div class="flex items-center gap-2">
-                                <USelect
-                                    v-model="selectedTemplateId"
-                                    class="min-w-0 flex-1"
-                                    :items="templateOptions"
-                                    label-key="label"
-                                    placeholder="Vorlage auswählen …"
-                                    value-key="id"
-                                />
-                                <UButton
-                                    :disabled="!selectedTemplateId"
-                                    icon="i-lucide-wand-sparkles"
-                                    label="Anwenden"
-                                    variant="outline"
-                                    @click="applyTemplate"
-                                />
-                                <UButton
-                                    aria-label="Vorlage löschen"
-                                    color="error"
-                                    :disabled="!selectedTemplateId"
-                                    icon="i-lucide-trash-2"
-                                    variant="ghost"
-                                    @click="removeSelectedTemplate"
-                                />
+            <Teleport v-if="!taskId" defer :disabled="!toolsTarget" :to="toolsTarget ?? 'body'">
+                <div class="task-editor-tools">
+                    <UPopover v-model:open="templatesOpen" :content="{ align: 'end' }">
+                        <UButton color="neutral" label="Vorlagen" size="sm" variant="ghost" />
+                        <template #content>
+                            <div class="task-template-popover">
+                                <div class="flex items-center gap-2">
+                                    <USelect
+                                        v-model="selectedTemplateId"
+                                        class="min-w-0 flex-1"
+                                        :items="templateOptions"
+                                        label-key="label"
+                                        placeholder="Vorlage auswählen …"
+                                        value-key="id"
+                                    />
+                                    <UButton
+                                        :disabled="!selectedTemplateId"
+                                        icon="i-lucide-wand-sparkles"
+                                        label="Anwenden"
+                                        variant="outline"
+                                        @click="applyTemplate"
+                                    />
+                                    <UButton
+                                        aria-label="Vorlage löschen"
+                                        color="error"
+                                        :disabled="!selectedTemplateId"
+                                        icon="i-lucide-trash-2"
+                                        variant="ghost"
+                                        @click="removeSelectedTemplate"
+                                    />
+                                </div>
+                                <div class="mt-3 flex gap-2">
+                                    <UInput
+                                        v-model="templateName"
+                                        class="min-w-0 flex-1"
+                                        placeholder="Aktuelle Werte als Vorlage speichern"
+                                        @keydown.enter="saveCurrentTemplate"
+                                    />
+                                    <UButton
+                                        :disabled="!templateName.trim()"
+                                        icon="i-lucide-save"
+                                        label="Vorlage speichern"
+                                        @click="saveCurrentTemplate"
+                                    />
+                                </div>
                             </div>
-                            <div class="mt-3 flex gap-2">
-                                <UInput
-                                    v-model="templateName"
-                                    class="min-w-0 flex-1"
-                                    placeholder="Aktuelle Werte als Vorlage speichern"
-                                    @keydown.enter="saveCurrentTemplate"
-                                />
-                                <UButton
-                                    :disabled="!templateName.trim()"
-                                    icon="i-lucide-save"
-                                    label="Vorlage speichern"
-                                    @click="saveCurrentTemplate"
-                                />
-                            </div>
-                        </div>
-                    </template>
-                </UPopover>
-            </div>
+                        </template>
+                    </UPopover>
+                </div>
+            </Teleport>
             <UFormField label="Titel" required>
                 <UInput
                     v-model="internTask.name"
