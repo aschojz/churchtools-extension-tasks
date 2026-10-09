@@ -1,9 +1,17 @@
 # Changelog
 
-## Unveröffentlicht
+## 0.7.0 · 09.10.2026
 
 - Sammelaktionen für Listen, Tags, Verantwortliche, Fälligkeits- und Startdaten sowie Papierkorb
+- Tags und Verantwortliche gesammelt hinzufügen, entfernen oder ersetzen; weitere Personen über die Suche auswählen
+- Klick auf die gesamte Aufgabenkarte wählt im Bulk-Modus aus oder ab, ohne den Dialog zu öffnen
+- Runde Auswahlfelder ganz rechts; Einzelaktionsmenüs sind im Bulk-Modus ausgeblendet
 - Zusätzliche Aufgaben-Properties bleiben beim Einlesen und Bearbeiten erhalten
+- Aufgaben im Editor mit Cmd+Enter oder Ctrl+Enter speichern
+- Fälligkeits- und Startdatum mit einem Klick vollständig leeren
+- Aufgabendialog schließt nach erfolgreichem Erledigen und bleibt bei Fehlern offen
+- Überfällige Fälligkeitstermine werden auch im Aufgabendialog rot angezeigt
+- Fortschrittskreise haben dieselbe Größe wie Personenavatare
 
 ## 0.6.0 · 09.10.2026
 
