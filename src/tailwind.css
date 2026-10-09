@@ -795,6 +795,10 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     font-size: 12px;
     font-weight: 400;
 }
+.task-view-meta-row > span.task-view-overdue,
+.task-view-overdue svg {
+    color: #c44242 !important;
+}
 .task-view-meta-group {
     display: flex;
     flex-direction: column;

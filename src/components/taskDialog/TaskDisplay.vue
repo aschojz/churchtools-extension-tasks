@@ -13,7 +13,7 @@ const props = defineProps<{ taskId: number; projectId: number }>();
 const tId = computed(() => props.taskId);
 const pId = computed(() => props.projectId);
 
-const { task, sortedTags, assignees, dueDate, toDayMonth } = useTask(pId, tId);
+const { task, sortedTags, assignees, dueDate, dueColor, toDayMonth } = useTask(pId, tId);
 const startDate = computed(() => taskStartDate(task.value));
 const subTasks = computed(() =>
     (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []).map(st => tasksMap.value[st]).filter(st => st),
@@ -142,7 +142,13 @@ const createChild = async () => {
             </div>
             <div v-if="dueDate" class="task-view-meta-row">
                 <span>Fällig am</span>
-                <UBadge color="neutral" icon="i-lucide-calendar" :label="toDayMonth(dueDate)" variant="subtle" />
+                <UBadge
+                    :class="{ 'task-view-overdue': !task?.fullfilled && uiColor(dueColor) === 'error' }"
+                    color="neutral"
+                    icon="i-lucide-calendar"
+                    :label="toDayMonth(dueDate)"
+                    variant="subtle"
+                />
             </div>
             <div v-if="startDate" class="task-view-meta-row">
                 <span>Startet am</span>
