@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht
 
+- Sammelaktionen für Listen, Tags, Verantwortliche, Fälligkeits- und Startdaten sowie Papierkorb
 - Zusätzliche Aufgaben-Properties bleiben beim Einlesen und Bearbeiten erhalten
 
 ## 0.6.0 · 09.10.2026

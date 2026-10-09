@@ -14,7 +14,10 @@ import { failWithCompensation } from '../application/compensation';
 import { reportOperationalError } from '../application/operationalErrors';
 import { TASK_PRIORITIES, taskDiff } from '../domain/tasks';
 import type { TransformedTask } from '../domain/types';
+import { requireCurrentUser } from '../platform';
 import { useProjectTaskContext } from './useProjectTaskContext';
+
+export type BulkEditField = 'list' | 'assignedTo' | 'tags' | 'dueDate' | 'startDate';
 
 type TaskSelectionContext = {
     enabled: ComputedRef<boolean>;
@@ -27,6 +30,8 @@ type TaskSelectionContext = {
     toggleTask: (taskId: number, selected: boolean | 'indeterminate') => void;
     selectAll: () => void;
     bulkMenu: ComputedRef<DropdownMenuItem[][]>;
+    editField: ReturnType<typeof ref<BulkEditField | undefined>>;
+    batchUpdate: (transform: (task: TransformedTask) => TransformedTask) => Promise<void>;
 };
 
 const taskSelectionKey: InjectionKey<TaskSelectionContext> = Symbol('task-selection');
@@ -37,6 +42,7 @@ export function provideTaskSelection(visibleTasks: MaybeRefOrGetter<TransformedT
     const ids = ref<number[]>([]);
     const saving = ref(false);
     const error = ref('');
+    const editField = ref<BulkEditField>();
     const tasks = computed(() => toValue(visibleTasks));
     const selectedIds = computed(() => new Set(ids.value));
     const selectedTasks = computed(() => tasks.value.filter(task => selectedIds.value.has(task.id)));
@@ -125,11 +131,65 @@ export function provideTaskSelection(visibleTasks: MaybeRefOrGetter<TransformedT
                 onSelect: () => batchCompletion(false),
             },
         ],
+        [
+            {
+                label: 'Liste ändern …',
+                icon: 'i-lucide-list',
+                onSelect: () => {
+                    editField.value = 'list';
+                },
+            },
+            {
+                label: 'Verantwortliche ändern …',
+                icon: 'i-lucide-users',
+                onSelect: () => {
+                    editField.value = 'assignedTo';
+                },
+            },
+            {
+                label: 'Tags ändern …',
+                icon: 'i-lucide-tags',
+                onSelect: () => {
+                    editField.value = 'tags';
+                },
+            },
+            {
+                label: 'Fälligkeit ändern …',
+                icon: 'i-lucide-calendar',
+                onSelect: () => {
+                    editField.value = 'dueDate';
+                },
+            },
+            {
+                label: 'Startdatum ändern …',
+                icon: 'i-lucide-calendar-days',
+                onSelect: () => {
+                    editField.value = 'startDate';
+                },
+            },
+        ],
         TASK_PRIORITIES.map(priority => ({
             label: `Priorität: ${priority.label}`,
             icon: priority.icon,
             onSelect: () => batchUpdate(task => ({ ...task, priority: priority.id })),
         })),
+        [
+            {
+                label: 'In Papierkorb verschieben',
+                icon: 'i-lucide-trash-2',
+                color: 'error',
+                onSelect: () => {
+                    if (
+                        !window.confirm(
+                            `${selectedTasks.value.length} ausgewählte Aufgaben in den Papierkorb verschieben?`,
+                        )
+                    )
+                        return;
+                    const user = requireCurrentUser();
+                    return batchUpdate(task => ({ ...task, deletedAt: new Date().toISOString(), deletedBy: user.id }));
+                },
+            },
+        ],
     ]);
 
     const context: TaskSelectionContext = {
@@ -143,6 +203,8 @@ export function provideTaskSelection(visibleTasks: MaybeRefOrGetter<TransformedT
         toggleTask,
         selectAll,
         bulkMenu,
+        editField,
+        batchUpdate,
     };
     provide(taskSelectionKey, context);
     return context;
