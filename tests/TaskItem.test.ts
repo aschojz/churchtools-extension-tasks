@@ -3,7 +3,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, ref } from 'vue';
 import TaskItem from '../src/components/TaskItem.vue';
 
-const mocks = vi.hoisted(() => ({ push: vi.fn(), toggleTask: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+    push: vi.fn(),
+    toggleTask: vi.fn(),
+    selectTask: vi.fn(),
+    bulk: false,
+    selectedIds: new Set<number>(),
+}));
+vi.mock('../src/composables/useTaskSelection', () => ({
+    useTaskSelection: () => ({
+        enabled: ref(mocks.bulk),
+        selectedIds: ref(mocks.selectedIds),
+        saving: ref(false),
+        toggleTask: mocks.selectTask,
+    }),
+}));
 
 vi.mock('vue-router', () => ({
     useRouter: () => ({ currentRoute: ref({ name: 'project-board', params: { projectId: '3' } }), push: mocks.push }),
@@ -65,9 +79,24 @@ const render = () =>
 beforeEach(() => {
     mocks.push.mockReset();
     mocks.toggleTask.mockReset();
+    mocks.selectTask.mockReset();
+    mocks.bulk = false;
+    mocks.selectedIds.clear();
 });
 
 describe('task card semantics', () => {
+    it('selects via the card surface and deselects via the title in bulk mode without opening a dialog', async () => {
+        mocks.bulk = true;
+        const wrapper = render();
+        await wrapper.get('.task-item').trigger('click');
+        expect(mocks.selectTask).toHaveBeenLastCalledWith(42, true);
+        mocks.selectedIds.add(42);
+        await wrapper.get('button.task-title-button').trigger('click');
+        expect(mocks.selectTask).toHaveBeenLastCalledWith(42, false);
+        expect(mocks.selectTask).toHaveBeenCalledTimes(2);
+        expect(mocks.push).not.toHaveBeenCalled();
+        wrapper.unmount();
+    });
     it('opens through the card surface and the semantic title button', async () => {
         const wrapper = render();
         const card = wrapper.get('.task-item');

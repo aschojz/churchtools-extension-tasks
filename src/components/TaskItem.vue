@@ -66,10 +66,18 @@ const openTask = () => {
     const name = currentRoute.params.projectId ? currentRoute.name! : 'my-tasks';
     router.push({ name, params: { projectId: props.projectId, taskId: props.item.id } });
 };
+const activateTask = () => {
+    if (selection?.enabled.value) {
+        if (!selection.saving.value)
+            selection.toggleTask(task.value.id, !selection.selectedIds.value.has(task.value.id));
+        return;
+    }
+    openTask();
+};
 const onCardClick = (event: MouseEvent) => {
     const target = event.target;
     if (target instanceof Element && target.closest('button, a, input, [role="menu"], [role="checkbox"]')) return;
-    openTask();
+    activateTask();
 };
 
 const showMetadata = computed(
@@ -214,9 +222,10 @@ const breadcrumbs = computed(() => {
         <div class="task-item-heading flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1">
                 <button
+                    :aria-pressed="selection?.enabled.value ? selection.selectedIds.value.has(task.id) : undefined"
                     class="task-title-button appearance-none border-0 bg-transparent p-0 text-left font-bold"
                     type="button"
-                    @click.stop="openTask"
+                    @click.stop="activateTask"
                 >
                     {{ task.name }}
                 </button>
