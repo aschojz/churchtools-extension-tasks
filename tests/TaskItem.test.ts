@@ -88,6 +88,7 @@ describe('task card semantics', () => {
     it('selects via the card surface and deselects via the title in bulk mode without opening a dialog', async () => {
         mocks.bulk = true;
         const wrapper = render();
+        expect(wrapper.find('[aria-label="Aufgabenaktionen"]').exists()).toBe(false);
         await wrapper.get('.task-item').trigger('click');
         expect(mocks.selectTask).toHaveBeenLastCalledWith(42, true);
         mocks.selectedIds.add(42);

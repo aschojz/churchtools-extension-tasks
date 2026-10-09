@@ -4,10 +4,10 @@ import { computed } from 'vue';
 const props = defineProps<{
     percent: number;
 }>();
-const radius = 9;
+const radius = 11;
 const strokeWidth = 2;
 const circumference = radius * 2 * Math.PI;
-const size = 22;
+const size = 24;
 
 const safePercent = computed(() => Math.min(100, Math.max(0, Math.round(props.percent || 0))));
 const complete = computed(() => safePercent.value === 100);
@@ -47,9 +47,9 @@ const strokeDashoffset = computed(() => {
 .progress-indicator {
     position: relative;
     display: inline-grid;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
     place-items: center;
 }
 .progress-ring {

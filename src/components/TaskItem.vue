@@ -236,11 +236,11 @@ const breadcrumbs = computed(() => {
                     :aria-label="`${task.name} auswählen`"
                     class="task-selection-checkbox mt-1 shrink-0"
                     :model-value="selection.selectedIds.value.has(task.id)"
-                    :ui="{ base: 'rounded-[4px]' }"
+                    :ui="{ base: 'rounded-full' }"
                     @click.stop
                     @update:model-value="(value: boolean | 'indeterminate') => selection?.toggleTask(task.id, value)"
                 />
-                <UDropdownMenu :items="contextMenu"
+                <UDropdownMenu v-if="!selection?.enabled.value" :items="contextMenu"
                     ><UButton
                         aria-label="Aufgabenaktionen"
                         class="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100"
