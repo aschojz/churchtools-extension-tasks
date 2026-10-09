@@ -105,6 +105,7 @@ const onSave = async () => {
             isEdit.value = false;
         } else if (!showEditor.value) {
             await toggleTask();
+            resetRoute();
         }
     } catch (error) {
         saveError.value = reportOperationalError(

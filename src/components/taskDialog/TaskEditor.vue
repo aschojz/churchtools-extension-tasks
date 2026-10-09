@@ -289,10 +289,32 @@ watch(personSearch, (query, _previous, onCleanup) => {
                 />
             </UFormField>
             <UFormField label="Fällig am">
-                <UInput v-model="internTask.dueDate" class="w-full" type="date" />
+                <UInput v-model="internTask.dueDate" class="w-full" type="date">
+                    <template v-if="internTask.dueDate" #trailing>
+                        <UButton
+                            aria-label="Fälligkeitsdatum löschen"
+                            color="neutral"
+                            icon="i-lucide-x"
+                            size="xs"
+                            variant="ghost"
+                            @click="internTask.dueDate = undefined"
+                        />
+                    </template>
+                </UInput>
             </UFormField>
             <UFormField label="Startet am">
-                <UInput v-model="internTask.startDate" class="w-full" type="date" />
+                <UInput v-model="internTask.startDate" class="w-full" type="date">
+                    <template v-if="internTask.startDate" #trailing>
+                        <UButton
+                            aria-label="Startdatum löschen"
+                            color="neutral"
+                            icon="i-lucide-x"
+                            size="xs"
+                            variant="ghost"
+                            @click="internTask.startDate = undefined"
+                        />
+                    </template>
+                </UInput>
             </UFormField>
             <UFormField label="Wiederholung">
                 <USelect
