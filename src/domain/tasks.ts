@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual, pick } from 'lodash-es';
+import { cloneDeep, isEqual, omit } from 'lodash-es';
 import type { TaskSort } from '../composables/storeTasks';
 import type {
     ActivityEntry,
@@ -89,29 +89,7 @@ export function taskDraft(task: Partial<Task> = {}): Task {
         fullfilled: false,
         priority: 'none',
         sortKey: Date.now(),
-        ...pick(task, [
-            'name',
-            'description',
-            'fullfilled',
-            'priority',
-            'sortKey',
-            'url',
-            'dueDate',
-            'startDate',
-            'dueDateRelative',
-            'allDay',
-            'activity',
-            'list',
-            'tags',
-            'assignedTo',
-            'subTasks',
-            'blockedBy',
-            'recurrence',
-            'deletedAt',
-            'deletedBy',
-            'archivedAt',
-            'archivedBy',
-        ]),
+        ...omit(task, ['id', 'dataCategoryId', 'schemaVersion', 'revision', 'updatedAt', 'parent', 'score']),
     });
     if (!Array.isArray(draft.activity)) draft.activity = undefined;
     if (!Array.isArray(draft.assignedTo)) draft.assignedTo = undefined;

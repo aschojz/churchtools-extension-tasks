@@ -26,6 +26,21 @@ const task = (id: number, overrides: Partial<TransformedTask> = {}): Transformed
 });
 
 describe('task integrity', () => {
+    it('preserves and clones additional properties without copying runtime metadata', () => {
+        const source = {
+            ...task(1),
+            external: { references: ['abc'], enabled: false, count: 0, empty: null },
+            customLabel: 'Integration',
+            parent: 7,
+            score: 0.2,
+        };
+        const draft = taskDraft(source);
+        expect(draft).toMatchObject({ external: source.external, customLabel: 'Integration' });
+        for (const key of ['id', 'dataCategoryId', 'parent', 'score']) expect(draft).not.toHaveProperty(key);
+        expect((draft as typeof source).external).not.toBe(source.external);
+        (draft as typeof source).external.references.push('edited');
+        expect(source.external.references).toEqual(['abc']);
+    });
     it('appends trimmed comments without mutating the activity history', () => {
         const source: ActivityEntry[] = [{ personId: 1, date: '2026-01-01T00:00:00.000Z', type: 'create' }];
         const next = appendComment(source, '  Hallo Welt  ', 7, new Date('2026-10-03T10:00:00.000Z'));

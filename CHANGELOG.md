@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht
+
+- Zusätzliche Aufgaben-Properties bleiben beim Einlesen und Bearbeiten erhalten
+
 ## 0.6.0 · 09.10.2026
 
 - Aktualisierte Node-Typdefinitionen und Sicherheitskorrektur für source-map-js

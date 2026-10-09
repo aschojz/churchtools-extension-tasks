@@ -14,6 +14,7 @@ import {
 } from '../src/data/ccm';
 import { queryClient } from '../src/data/queryClient';
 import { CURRENT_SCHEMA_VERSION, dataIssues } from '../src/domain/storedData';
+import { taskDraft } from '../src/domain/tasks';
 const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), deleteApi: vi.fn() }));
 vi.mock('@churchtools/churchtools-client', () => ({ churchtoolsClient: api }));
 
@@ -23,6 +24,53 @@ beforeEach(() => {
     dataIssues.value = [];
 });
 describe('CCM repository', () => {
+    it('keeps additional task properties through reading, editing and serializing', async () => {
+        const stored = {
+            type: 'task',
+            name: 'Original',
+            fullfilled: false,
+            priority: 'none',
+            sortKey: 1,
+            revision: 2,
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            external: { refs: ['abc'], enabled: false, count: 0, empty: null },
+            customLabel: 'Integration',
+            description: 'Remove me',
+            tags: 'invalid',
+        };
+        api.get.mockResolvedValue([{ id: 11, dataCategoryId: 1, value: JSON.stringify(stored) }]);
+        api.put.mockResolvedValue({ id: 11, dataCategoryId: 1 });
+        const [task] = await fetchCustomModuleDataValues<Task>(7, 1);
+        const draft = taskDraft(task);
+        draft.name = 'Edited';
+        draft.description = undefined;
+        let commands!: ReturnType<typeof useCustomModuleDataValuesMutations<Task>>;
+        const wrapper = mount(
+            defineComponent({
+                setup() {
+                    commands = useCustomModuleDataValuesMutations<Task>(7, 1);
+                    return () => null;
+                },
+            }),
+        );
+        await commands.updateCustomDataValue({
+            ...draft,
+            id: task.id,
+            dataCategoryId: task.dataCategoryId,
+            revision: task.revision,
+        });
+        const saved = JSON.parse(api.put.mock.calls[0][1].value);
+        expect(saved).toMatchObject({
+            name: 'Edited',
+            revision: 3,
+            external: stored.external,
+            customLabel: stored.customLabel,
+        });
+        expect(saved).not.toHaveProperty('description');
+        expect(saved).not.toHaveProperty('tags');
+        expect(saved).not.toHaveProperty('id');
+        wrapper.unmount();
+    });
     it('rejects malformed JSON and gives API metadata precedence', () => {
         expect(decodeData('{"id":999,"name":"Task"}', { id: 1 })).toEqual({ id: 1, name: 'Task' });
         expect(() => decodeData('broken', {})).toThrow();

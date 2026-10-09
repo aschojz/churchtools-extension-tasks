@@ -1,3 +1,4 @@
+import { omit } from 'lodash-es';
 import { ref } from 'vue';
 import { colorKey, CtColor } from '../platform';
 import { projectIcon } from '../utils/utils';
@@ -191,6 +192,36 @@ export function parseStoredValue(value: unknown): TransformedTask | TransformedL
         const archivedAt = storedUpdatedAt(data.archivedAt);
         const archivedBy = positiveInteger(data.archivedBy);
         return {
+            // Keep extension fields while validating every field interpreted by this UI.
+            ...omit(data, [
+                'type',
+                'id',
+                'dataCategoryId',
+                'schemaVersion',
+                'revision',
+                'updatedAt',
+                'name',
+                'fullfilled',
+                'priority',
+                'sortKey',
+                'description',
+                'url',
+                'dueDate',
+                'startDate',
+                'dueDateRelative',
+                'allDay',
+                'activity',
+                'list',
+                'tags',
+                'assignedTo',
+                'subTasks',
+                'blockedBy',
+                'recurrence',
+                'deletedAt',
+                'deletedBy',
+                'archivedAt',
+                'archivedBy',
+            ]),
             schemaVersion: CURRENT_SCHEMA_VERSION,
             ...persistenceMetadata(data),
             type: 'task',
