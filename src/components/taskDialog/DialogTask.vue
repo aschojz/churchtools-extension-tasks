@@ -117,9 +117,16 @@ const onSave = async () => {
         isSaving.value = false;
     }
 };
+const onEditorShortcut = (event: KeyboardEvent) => {
+    if (!showEditor.value || event.key !== 'Enter' || !(event.metaKey || event.ctrlKey) || event.isComposing) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) void onSave();
+};
 </script>
 <template>
     <UModal
+        :content="{ onKeydownCapture: onEditorShortcut }"
         :description="project?.name"
         :open="true"
         scrollable
