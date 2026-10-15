@@ -18,7 +18,7 @@ import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
 import { useTags } from '../../composables/useTags';
 import { authState, firstOrSelf } from '../../platform';
 
-const props = defineProps<{ projectId: number }>();
+const props = defineProps<{ projectId: number; columns?: boolean }>();
 const DialogTask = defineAsyncComponent(() => import('../../components/taskDialog/DialogTask.vue'));
 
 const fullscreen = ref(false);
@@ -401,8 +401,13 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
                 </UDropdownMenu>
             </div>
         </div>
-        <div class="task-board-scroll min-h-0 max-w-full flex-1 overflow-auto p-4 lg:p-6">
-            <div class="flex min-h-full gap-4">
+        <div
+            :aria-label="columns ? 'Aufgabenspalten' : 'Aufgabenansicht'"
+            class="task-board-scroll min-h-0 max-w-full flex-1 overflow-auto p-4 lg:p-6"
+            :class="{ 'task-board-columns': columns }"
+            tabindex="0"
+        >
+            <div class="task-view-content flex min-h-full gap-4">
                 <slot></slot>
             </div>
         </div>

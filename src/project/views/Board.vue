@@ -40,7 +40,7 @@ const visibleTasks = computed(() => transformedTasks.value.filter(showTask));
 provideTaskSelection(visibleTasks);
 </script>
 <template>
-    <ViewWrapper :project-id="projectId">
+    <ViewWrapper columns :project-id="projectId">
         <template #extra-actions><TaskSelectionActions /></template>
         <List
             v-for="list in boardlists"

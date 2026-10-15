@@ -107,7 +107,7 @@ const boardlists = computed(() => {
 });
 </script>
 <template>
-    <ViewWrapper :project-id="projectId">
+    <ViewWrapper columns :project-id="projectId">
         <template #extra-actions>
             <TaskSelectionActions />
             <UButton

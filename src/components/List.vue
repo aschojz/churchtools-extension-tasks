@@ -129,7 +129,7 @@ const listIsOpen = ref<TransformedList>();
         :class="preferences.isCollapsed ? 'min-h-[300px] w-12' : 'w-96'"
     >
         <div
-            class="px-2 pt-2"
+            class="shrink-0 px-2 pt-2"
             :class="{
                 'mb-3 flex items-center justify-between gap-2': !preferences.isCollapsed,
                 'flex min-h-96 flex-col items-center gap-2': preferences.isCollapsed,
@@ -194,7 +194,12 @@ const listIsOpen = ref<TransformedList>();
             </div>
         </div>
         <p v-if="saveError" class="px-2 text-red-600" role="alert">{{ saveError }}</p>
-        <div v-if="!preferences.isCollapsed" class="flex flex-grow flex-col gap-2 overflow-y-auto px-2 pb-2">
+        <div
+            v-if="!preferences.isCollapsed"
+            :aria-label="`Aufgaben in ${list.name}`"
+            class="board-column-body flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2"
+            tabindex="0"
+        >
             <draggable
                 v-if="isDraggable && list.type === 'list'"
                 v-model="internItems"

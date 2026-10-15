@@ -58,7 +58,7 @@ const tasksBySection = computed(
         icon="i-lucide-list-checks"
         title="Noch keine Projekte"
     />
-    <div v-else class="dashboard-overview">
+    <div v-else aria-label="Aufgabenübersicht" class="dashboard-overview" tabindex="0">
         <section>
             <div class="dashboard-section-heading">
                 <div>
@@ -221,7 +221,7 @@ const tasksBySection = computed(
 <style>
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     grid-template-rows: auto;
 }
 .task-sections {

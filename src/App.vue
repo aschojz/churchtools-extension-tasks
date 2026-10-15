@@ -27,7 +27,7 @@ const availableHeight = ref('100dvh');
 const updateAvailableHeight = () => {
     if (!appRoot.value) return;
     const top = Math.max(0, appRoot.value.getBoundingClientRect().top);
-    availableHeight.value = `${Math.max(320, window.innerHeight - top)}px`;
+    availableHeight.value = `${Math.max(0, window.innerHeight - top)}px`;
 };
 const handleGlobalShortcut = (event: KeyboardEvent) => {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.key.toLowerCase() !== 'n')

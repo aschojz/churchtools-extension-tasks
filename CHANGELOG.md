@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht
 
+- Erreichbare lange Inhalte: eigene Scrollbereiche für Übersicht und Board-Spalten sowie Dialoge mit sichtbaren Aktionen und scrollbarem Inhalt
 - Hell- und Dunkelmodus über Nuxt UIs semantische Themefarben; der aktive Modus folgt der ChurchTools-Umgebung
 - Themefähige Karten, Kalender, Auswertung, Dialoge, Kommentare und Markdown-Editor
 
