@@ -127,18 +127,10 @@ const metrics = computed(() => [
 </script>
 
 <template>
-    <ViewWrapper :project-id="projectId">
-        <template #actions>
-            <UDropdownMenu :items="csvMenu">
-                <UButton
-                    aria-label="CSV-Aktionen"
-                    color="neutral"
-                    icon="i-lucide-arrow-left-right"
-                    label="CSV"
-                    variant="outline"
-                />
-            </UDropdownMenu>
-        </template>
+    <ViewWrapper
+        :project-id="projectId"
+        :view-actions="[{ label: 'CSV', icon: 'i-lucide-arrow-left-right', children: csvMenu }]"
+    >
         <div class="insights-layout flex w-full flex-col gap-6 pb-6">
             <div class="insight-metrics grid gap-3">
                 <button

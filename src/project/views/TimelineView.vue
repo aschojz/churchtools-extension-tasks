@@ -5,7 +5,6 @@ import { useLists } from '../../composables/useLists';
 import { useTasks } from '../../composables/useTasks';
 import { sortTasks, taskStartDate } from '../../domain/tasks';
 import TaskItem from '../../components/TaskItem.vue';
-import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { provideTaskSelection } from '../../composables/useTaskSelection';
 import ViewWrapper from './ViewWrapper.vue';
 
@@ -47,8 +46,6 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
 
 <template>
     <ViewWrapper :project-id="projectId">
-        <template #actions><span /></template>
-        <template #extra-actions><TaskSelectionActions /></template>
         <UAlert
             v-if="selection.error.value"
             class="mb-3"

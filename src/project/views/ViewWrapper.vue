@@ -3,6 +3,8 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DialogList from '../../components/DialogList.vue';
+import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
+import { useTaskSelection } from '../../composables/useTaskSelection';
 import {
     taskStore,
     type TaskAssigneeFilter,
@@ -20,10 +22,11 @@ import { useProject } from '../../project/useProject';
 import { projectIcon } from '../../utils/utils';
 import { authState, firstOrSelf } from '../../platform';
 
-const props = defineProps<{ projectId: number; columns?: boolean }>();
+const props = defineProps<{ projectId: number; columns?: boolean; viewActions?: DropdownMenuItem[] }>();
 const { project } = useProject(() => props.projectId);
 const DialogTask = defineAsyncComponent(() => import('../../components/taskDialog/DialogTask.vue'));
 
+const selection = useTaskSelection();
 const fullscreen = ref(false);
 const onFullscreen = () => {
     fullscreen.value = !fullscreen.value;
@@ -45,6 +48,32 @@ const { tagsArray } = useTags(projectId);
 const { people } = useProjectTaskContext();
 const viewId = computed(() => String(route.name ?? 'project'));
 const taskControlsVisible = computed(() => !['project-archive', 'project-trash'].includes(viewId.value));
+const workspaceMenu = computed<DropdownMenuItem[][]>(() => [
+    [
+        ...(selection && !selection.enabled.value
+            ? [{ label: 'Aufgaben auswählen', icon: 'i-lucide-list-checks', onSelect: selection.toggleMode }]
+            : []),
+        ...(!['project-timeline', 'project-insights', 'project-archive', 'project-trash'].includes(viewId.value)
+            ? [
+                  {
+                      label: 'Liste erstellen',
+                      icon: 'i-lucide-list-plus',
+                      onSelect: () => {
+                          listIsOpen.value = true;
+                      },
+                  },
+              ]
+            : []),
+        ...(props.viewActions ?? []),
+    ],
+    [
+        {
+            label: fullscreen.value ? 'Vollbild verlassen' : 'Vollbild öffnen',
+            icon: fullscreen.value ? 'i-lucide-minimize' : 'i-lucide-maximize',
+            onSelect: onFullscreen,
+        },
+    ],
+]);
 const filters = computed(() => store.filtersForProject(props.projectId));
 const statusFilter = computed({
     get: () => filters.value.status,
@@ -221,182 +250,175 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
         <div class="project-view-header shrink-0 border-b">
             <div v-if="project" class="project-heading">
                 <span class="project-heading-icon"><UIcon :name="projectIcon(project.icon)" /></span>
-                <div class="min-w-0">
-                    <h1>{{ project.name }}</h1>
-                    <p v-if="project.description">{{ project.description }}</p>
+                <div class="project-heading-copy">
+                    <h1 :title="project.name">{{ project.name }}</h1>
+                    <p v-if="project.description" :title="project.description">{{ project.description }}</p>
                 </div>
-            </div>
-            <UDashboardToolbar v-if="taskControlsVisible" :ui="{ left: 'min-w-0 flex-1' }">
-                <template #left>
-                    <div class="flex w-full flex-wrap items-center gap-2">
-                        <UInput
-                            v-model="projectSearch"
-                            class="w-64 max-w-full"
-                            icon="i-lucide-search"
-                            placeholder="Aufgaben filtern …"
-                        />
-                        <UPopover class="ml-auto">
-                            <UButton
-                                color="neutral"
-                                icon="i-lucide-list-filter"
-                                :label="activeFilterCount ? `Filter (${activeFilterCount})` : 'Filter'"
-                                variant="outline"
-                            />
-                            <template #content>
-                                <div class="grid w-80 gap-3 p-4 sm:w-[34rem] sm:grid-cols-2">
-                                    <UFormField label="Status">
-                                        <USelect
-                                            v-model="statusFilter"
-                                            class="w-full"
-                                            :items="statusOptions"
-                                            label-key="label"
-                                            value-key="id"
-                                        />
-                                    </UFormField>
-                                    <UFormField label="Priorität">
-                                        <USelect
-                                            v-model="priorityFilter"
-                                            class="w-full"
-                                            :items="priorityOptions"
-                                            label-key="label"
-                                            value-key="id"
-                                        />
-                                    </UFormField>
-                                    <UFormField label="Fälligkeit">
-                                        <USelect
-                                            v-model="dueFilter"
-                                            class="w-full"
-                                            :items="dueOptions"
-                                            label-key="label"
-                                            value-key="id"
-                                        />
-                                    </UFormField>
-                                    <UFormField label="Verantwortlichkeit">
-                                        <USelect
-                                            v-model="assigneeFilter"
-                                            class="w-full"
-                                            :items="assigneeOptions"
-                                            label-key="label"
-                                            value-key="id"
-                                        />
-                                    </UFormField>
-                                    <UFormField label="Liste">
-                                        <USelect
-                                            v-model="listFilter"
-                                            class="w-full"
-                                            :items="listOptions"
-                                            label-key="label"
-                                            value-key="id"
-                                        />
-                                    </UFormField>
-                                    <UFormField label="Tag">
-                                        <USelect
-                                            v-model="tagFilter"
-                                            class="w-full"
-                                            :items="tagOptions"
-                                            label-key="label"
-                                            value-key="id"
-                                        />
-                                    </UFormField>
-                                    <div class="sm:col-span-2 sm:text-right">
-                                        <UButton
-                                            :disabled="!activeFilterCount"
-                                            icon="i-lucide-rotate-ccw"
-                                            label="Filter zurücksetzen"
-                                            variant="ghost"
-                                            @click="resetFilters"
-                                        />
-                                    </div>
-                                    <USeparator class="sm:col-span-2" label="Gespeicherte Ansichten" />
-                                    <div class="flex gap-2 sm:col-span-2">
-                                        <USelect
-                                            v-model="selectedSavedViewId"
-                                            class="min-w-0 flex-1"
-                                            :items="savedViewOptions"
-                                            label-key="label"
-                                            placeholder="Ansicht auswählen …"
-                                            value-key="id"
-                                        />
-                                        <UButton
-                                            :disabled="!selectedSavedViewId"
-                                            icon="i-lucide-play"
-                                            label="Anwenden"
-                                            variant="outline"
-                                            @click="applySelectedView"
-                                        />
-                                        <UButton
-                                            aria-label="Gespeicherte Ansicht löschen"
-                                            color="error"
-                                            :disabled="!selectedSavedViewId"
-                                            icon="i-lucide-trash-2"
-                                            variant="ghost"
-                                            @click="removeSelectedView"
-                                        />
-                                    </div>
-                                    <div class="flex gap-2 sm:col-span-2">
-                                        <UInput
-                                            v-model="savedViewName"
-                                            class="min-w-0 flex-1"
-                                            placeholder="Name der neuen Ansicht"
-                                            @keydown.enter="saveCurrentView"
-                                        />
-                                        <UButton
-                                            :disabled="!savedViewName.trim()"
-                                            icon="i-lucide-bookmark-plus"
-                                            label="Speichern"
-                                            @click="saveCurrentView"
-                                        />
-                                    </div>
-                                </div>
-                            </template>
-                        </UPopover>
-                        <UDropdownMenu :items="sortMenu">
-                            <template #item-trailing="{ item }">
-                                <UIcon
-                                    v-if="item.checked"
-                                    class="task-menu-option-active size-4"
-                                    name="i-lucide-check"
-                                />
-                            </template>
-                            <UButton
-                                :aria-label="sortLabel"
-                                color="neutral"
-                                icon="i-lucide-arrow-down-wide-narrow"
-                                square
-                                :title="sortLabel"
-                                variant="outline"
-                            />
-                        </UDropdownMenu>
-                    </div>
-                </template>
-                <template #right>
-                    <slot name="extra-actions"></slot>
-                    <slot name="actions">
-                        <UButton
-                            aria-label="Liste erstellen"
-                            color="neutral"
-                            icon="i-lucide-plus"
-                            label="Liste"
-                            variant="outline"
-                            @click="listIsOpen = true"
-                        />
-                        <UButton
-                            :aria-label="fullscreen ? 'Vollbild verlassen' : 'Vollbild öffnen'"
-                            color="neutral"
-                            :icon="fullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-                            variant="outline"
-                            @click="onFullscreen"
-                        />
-                    </slot>
+                <div class="project-primary-actions">
                     <UButton
+                        v-if="taskControlsVisible"
                         aria-keyshortcuts="N"
-                        :disabled="authState.status !== 'authenticated'"
+                        :disabled="authState.status !== 'authenticated' || selection?.saving.value"
                         icon="i-lucide-plus"
                         label="Neu"
                         :to="newTaskRoute"
                     />
-                </template>
-            </UDashboardToolbar>
+                    <UDropdownMenu :items="workspaceMenu"
+                        ><UButton
+                            aria-label="Weitere Projektaktionen"
+                            color="neutral"
+                            :disabled="selection?.saving.value"
+                            icon="i-lucide-ellipsis"
+                            square
+                            variant="ghost"
+                    /></UDropdownMenu>
+                </div>
+            </div>
+            <div
+                v-if="taskControlsVisible"
+                aria-label="Aufgaben suchen und filtern"
+                class="project-toolbar"
+                role="search"
+            >
+                <div class="project-search-tools">
+                    <UInput
+                        v-model="projectSearch"
+                        class="project-search-input"
+                        icon="i-lucide-search"
+                        placeholder="Aufgaben filtern …"
+                    />
+                    <UPopover>
+                        <UButton
+                            :aria-label="activeFilterCount ? `Filter (${activeFilterCount})` : 'Filter'"
+                            :color="activeFilterCount ? 'primary' : 'neutral'"
+                            icon="i-lucide-list-filter"
+                            :label="activeFilterCount ? `Filter (${activeFilterCount})` : 'Filter'"
+                            :ui="{ label: 'hidden sm:inline' }"
+                            :variant="activeFilterCount ? 'soft' : 'ghost'"
+                        />
+                        <template #content>
+                            <div class="grid w-80 gap-3 p-4 sm:w-[34rem] sm:grid-cols-2">
+                                <UFormField label="Status">
+                                    <USelect
+                                        v-model="statusFilter"
+                                        class="w-full"
+                                        :items="statusOptions"
+                                        label-key="label"
+                                        value-key="id"
+                                    />
+                                </UFormField>
+                                <UFormField label="Priorität">
+                                    <USelect
+                                        v-model="priorityFilter"
+                                        class="w-full"
+                                        :items="priorityOptions"
+                                        label-key="label"
+                                        value-key="id"
+                                    />
+                                </UFormField>
+                                <UFormField label="Fälligkeit">
+                                    <USelect
+                                        v-model="dueFilter"
+                                        class="w-full"
+                                        :items="dueOptions"
+                                        label-key="label"
+                                        value-key="id"
+                                    />
+                                </UFormField>
+                                <UFormField label="Verantwortlichkeit">
+                                    <USelect
+                                        v-model="assigneeFilter"
+                                        class="w-full"
+                                        :items="assigneeOptions"
+                                        label-key="label"
+                                        value-key="id"
+                                    />
+                                </UFormField>
+                                <UFormField label="Liste">
+                                    <USelect
+                                        v-model="listFilter"
+                                        class="w-full"
+                                        :items="listOptions"
+                                        label-key="label"
+                                        value-key="id"
+                                    />
+                                </UFormField>
+                                <UFormField label="Tag">
+                                    <USelect
+                                        v-model="tagFilter"
+                                        class="w-full"
+                                        :items="tagOptions"
+                                        label-key="label"
+                                        value-key="id"
+                                    />
+                                </UFormField>
+                                <div class="sm:col-span-2 sm:text-right">
+                                    <UButton
+                                        :disabled="!activeFilterCount"
+                                        icon="i-lucide-rotate-ccw"
+                                        label="Filter zurücksetzen"
+                                        variant="ghost"
+                                        @click="resetFilters"
+                                    />
+                                </div>
+                                <USeparator class="sm:col-span-2" label="Gespeicherte Ansichten" />
+                                <div class="flex gap-2 sm:col-span-2">
+                                    <USelect
+                                        v-model="selectedSavedViewId"
+                                        class="min-w-0 flex-1"
+                                        :items="savedViewOptions"
+                                        label-key="label"
+                                        placeholder="Ansicht auswählen …"
+                                        value-key="id"
+                                    />
+                                    <UButton
+                                        :disabled="!selectedSavedViewId"
+                                        icon="i-lucide-play"
+                                        label="Anwenden"
+                                        variant="outline"
+                                        @click="applySelectedView"
+                                    />
+                                    <UButton
+                                        aria-label="Gespeicherte Ansicht löschen"
+                                        color="error"
+                                        :disabled="!selectedSavedViewId"
+                                        icon="i-lucide-trash-2"
+                                        variant="ghost"
+                                        @click="removeSelectedView"
+                                    />
+                                </div>
+                                <div class="flex gap-2 sm:col-span-2">
+                                    <UInput
+                                        v-model="savedViewName"
+                                        class="min-w-0 flex-1"
+                                        placeholder="Name der neuen Ansicht"
+                                        @keydown.enter="saveCurrentView"
+                                    />
+                                    <UButton
+                                        :disabled="!savedViewName.trim()"
+                                        icon="i-lucide-bookmark-plus"
+                                        label="Speichern"
+                                        @click="saveCurrentView"
+                                    />
+                                </div>
+                            </div>
+                        </template>
+                    </UPopover>
+                    <UDropdownMenu :items="sortMenu">
+                        <template #item-trailing="{ item }">
+                            <UIcon v-if="item.checked" class="task-menu-option-active size-4" name="i-lucide-check" />
+                        </template>
+                        <UButton
+                            :aria-label="sortLabel"
+                            color="neutral"
+                            icon="i-lucide-arrow-down-wide-narrow"
+                            square
+                            :title="sortLabel"
+                            variant="outline"
+                        />
+                    </UDropdownMenu>
+                </div>
+            </div>
             <div ref="tabBar" class="project-tabs flex min-w-0 items-center px-4 sm:px-6">
                 <UNavigationMenu
                     class="flex-none"
@@ -410,6 +432,10 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
                     <UButton color="neutral" icon="i-lucide-ellipsis" label="Mehr" size="sm" variant="ghost" />
                 </UDropdownMenu>
             </div>
+        </div>
+        <div v-if="selection?.enabled.value" aria-label="Sammelauswahl" class="project-selection-bar">
+            <span class="selection-count">{{ selection.selectedTasks.value.length }} ausgewählt</span>
+            <div class="selection-actions"><TaskSelectionActions /></div>
         </div>
         <div
             :aria-label="columns ? 'Aufgabenspalten' : 'Aufgabenansicht'"

@@ -1352,19 +1352,6 @@ body.dark:has(#tasks) {
         display: none;
     }
 }
-@media (max-height: 540px) {
-    .project-heading {
-        padding-top: 10px;
-        padding-bottom: 4px;
-    }
-    .project-heading-icon {
-        width: 32px;
-        height: 32px;
-    }
-    .project-heading p {
-        display: none;
-    }
-}
 
 .dashboard-overview .task-sections {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1415,23 +1402,151 @@ body.dark:has(#tasks) {
         grid-row: 3;
     }
 }
+
+/* Stable control hierarchy: creation in the heading, search below, selection in its own bar. */
+.project-heading {
+    padding: 14px 24px 12px;
+    gap: 12px;
+}
+.project-heading-icon {
+    width: 40px;
+    height: 40px;
+}
+.project-heading-copy {
+    flex: 1;
+    min-width: 0;
+}
+.project-heading h1 {
+    font-size: 18px;
+    line-height: 22px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.project-heading p {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+}
+.project-primary-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+.project-toolbar {
+    padding: 10px 24px;
+    border-block: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 65%, var(--page));
+}
+.project-search-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.project-search-input {
+    flex: 0 1 340px;
+    min-width: 0;
+}
+.project-selection-bar {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--accent-soft);
+}
+.selection-count {
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.selection-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.calendar-heading {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+}
+.calendar-navigation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
 @media (max-width: 720px) {
-    .project-view-header > [data-slot='root'] {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-        padding-block: 8px;
+    .project-heading {
+        padding: 12px 16px;
+        gap: 10px;
     }
-    .project-view-header > [data-slot='root'] > [data-slot='left'] > div {
-        flex-wrap: nowrap;
+    .project-heading-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
     }
-    .project-view-header > [data-slot='root'] > [data-slot='left'] > div > :first-child {
+    .project-heading h1 {
+        font-size: 16px;
+        line-height: 20px;
+    }
+    .project-heading p {
+        display: block;
+        font-size: 11px;
+        line-height: 14px;
+    }
+    .project-primary-actions {
+        gap: 4px;
+    }
+    .project-toolbar {
+        padding: 8px 16px;
+    }
+    .project-search-input {
         flex: 1;
-        min-width: 0;
-        width: auto;
     }
-    .project-view-header > [data-slot='root'] > [data-slot='right'] {
-        flex-wrap: wrap;
-        justify-content: flex-end;
+    .project-search-tools {
+        gap: 4px;
+    }
+    .project-selection-bar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        padding: 8px 16px;
+        gap: 6px 8px;
+    }
+    .selection-count {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .selection-actions {
+        display: contents;
+    }
+    .selection-actions > :first-child {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+    }
+    .selection-actions > :nth-child(2) {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: start;
+    }
+    .selection-actions > :nth-child(3) {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: end;
+    }
+}
+@media (max-height: 540px) {
+    .project-heading {
+        padding-block: 8px;
     }
 }

@@ -6,7 +6,6 @@ import { failWithCompensation } from '../../application/compensation';
 import { reportOperationalError } from '../../application/operationalErrors';
 import DialogTag from '../../components/DialogTag.vue';
 import List from '../../components/List.vue';
-import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useTags } from '../../composables/useTags';
@@ -107,17 +106,19 @@ const boardlists = computed(() => {
 });
 </script>
 <template>
-    <ViewWrapper columns :project-id="projectId">
-        <template #extra-actions>
-            <TaskSelectionActions />
-            <UButton
-                color="neutral"
-                icon="i-lucide-tag"
-                label="Tag erstellen"
-                variant="outline"
-                @click="tagDialog = true"
-            />
-        </template>
+    <ViewWrapper
+        columns
+        :project-id="projectId"
+        :view-actions="[
+            {
+                label: 'Tag erstellen',
+                icon: 'i-lucide-tag',
+                onSelect: () => {
+                    tagDialog = true;
+                },
+            },
+        ]"
+    >
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <template v-for="list in boardlists" :key="list.id">
             <List

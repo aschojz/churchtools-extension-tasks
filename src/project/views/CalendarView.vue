@@ -50,31 +50,31 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 <template>
     <ViewWrapper :project-id="projectId">
-        <template #extra-actions>
-            <UButton
-                aria-label="Vorheriger Monat"
-                color="neutral"
-                icon="i-lucide-chevron-left"
-                square
-                variant="outline"
-                @click="changeMonth(-1)"
-            />
-            <UButton color="neutral" label="Heute" variant="outline" @click="goToday" />
-            <UButton
-                aria-label="Nächster Monat"
-                color="neutral"
-                icon="i-lucide-chevron-right"
-                square
-                variant="outline"
-                @click="changeMonth(1)"
-            />
-        </template>
-        <section :aria-label="`Kalender ${monthLabel}`" class="flex min-w-[760px] flex-1 flex-col gap-3">
+        <section :aria-label="`Kalender ${monthLabel}`" class="flex min-w-0 flex-1 flex-col gap-3">
             <div class="calendar-heading">
                 <h2 class="text-xl font-semibold capitalize">{{ monthLabel }}</h2>
                 <span>Fälligkeiten & Starttermine</span>
+                <div aria-label="Monat auswählen" class="calendar-navigation">
+                    <UButton
+                        aria-label="Vorheriger Monat"
+                        color="neutral"
+                        icon="i-lucide-chevron-left"
+                        square
+                        variant="outline"
+                        @click="changeMonth(-1)"
+                    />
+                    <UButton color="neutral" label="Heute" variant="outline" @click="goToday" />
+                    <UButton
+                        aria-label="Nächster Monat"
+                        color="neutral"
+                        icon="i-lucide-chevron-right"
+                        square
+                        variant="outline"
+                        @click="changeMonth(1)"
+                    />
+                </div>
             </div>
-            <div class="calendar-grid grid grid-cols-7 gap-px overflow-hidden rounded-xl border">
+            <div class="calendar-grid grid min-w-[760px] grid-cols-7 gap-px overflow-hidden rounded-xl border">
                 <div
                     v-for="weekday in weekdays"
                     :key="weekday"

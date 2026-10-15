@@ -3,7 +3,6 @@ import type { TransformedTask } from '../../domain/types';
 import { computed } from 'vue';
 import List from '../../components/List.vue';
 import ProgressRing from '../../components/ProgressRing.vue';
-import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useTasks } from '../../composables/useTasks';
@@ -51,7 +50,6 @@ provideTaskSelection(visibleTasks);
 </script>
 <template>
     <ViewWrapper columns :project-id="projectId">
-        <template #extra-actions><TaskSelectionActions /></template>
         <template v-for="list in boardlists" :key="list.id">
             <List
                 :is-draggable="false"

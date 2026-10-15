@@ -2,6 +2,8 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Kompakter, am Icon ausgerichteter Projektkopf; getrennte Bereiche für Hauptaktion, Suche und Sammelauswahl
+- Projektmenü für Listen, Vollbild und ansichtsspezifische Aktionen; Monatssteuerung direkt am Kalender
 - Klarer Projektkopf und besser auffindbare Kalender- und Timeline-Ansichten
 - Neu gestaltete Übersicht mit Kennzahlen, leichteren Aufgabenbereichen und überarbeiteten Projektkarten
 - Ruhigere Board-Karten und konsistente visuelle Hierarchie in Hell und Dunkel
