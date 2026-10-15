@@ -48,6 +48,12 @@ body:has(#tasks) {
     --ui-radius: 0.55rem;
     --ui-container: 90rem;
 }
+/* The dashboard uses muted/elevated surfaces. Nuxt UI's default dark border
+   shares their shade, so raise the border contrast without changing surfaces. */
+body.dark:has(#tasks) {
+    --ui-border: var(--ui-color-neutral-700);
+    --ui-border-accented: var(--ui-color-neutral-600);
+}
 body:has(#tasks) [class~='tasks:text-inverted'] {
     color: var(--ui-text-inverted) !important;
 }
