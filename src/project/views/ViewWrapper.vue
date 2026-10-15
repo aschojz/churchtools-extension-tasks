@@ -16,9 +16,12 @@ import {
 import { useLists } from '../../composables/useLists';
 import { useProjectTaskContext } from '../../composables/useProjectTaskContext';
 import { useTags } from '../../composables/useTags';
+import { useProject } from '../../project/useProject';
+import { projectIcon } from '../../utils/utils';
 import { authState, firstOrSelf } from '../../platform';
 
 const props = defineProps<{ projectId: number; columns?: boolean }>();
+const { project } = useProject(() => props.projectId);
 const DialogTask = defineAsyncComponent(() => import('../../components/taskDialog/DialogTask.vue'));
 
 const fullscreen = ref(false);
@@ -166,10 +169,10 @@ const viewNavigation: NavigationMenuItem[] = [
     { label: 'Meine Aufgaben', icon: 'i-lucide-user-check', to: { name: 'my-tasks' } },
     { label: 'Board', icon: 'i-lucide-columns-3', to: { name: 'project-board' } },
     { label: 'Liste', icon: 'i-lucide-list', to: { name: 'project-list' } },
-    { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags' } },
-    { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
     { label: 'Kalender', icon: 'i-lucide-calendar-days', to: { name: 'project-calendar' } },
     { label: 'Timeline', icon: 'i-lucide-gantt-chart', to: { name: 'project-timeline' } },
+    { label: 'Tags', icon: 'i-lucide-tags', to: { name: 'project-tags' } },
+    { label: 'Unteraufgaben', icon: 'i-lucide-git-branch', to: { name: 'project-tasks' } },
     { label: 'Auswertung', icon: 'i-lucide-chart-no-axes-column', to: { name: 'project-insights' } },
     { label: 'Archiv', icon: 'i-lucide-archive', to: { name: 'project-archive' } },
     { label: 'Papierkorb', icon: 'i-lucide-trash-2', to: { name: 'project-trash' } },
@@ -216,6 +219,13 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
         :class="{ 'bg-muted fixed top-0 left-0 z-[2000] h-screen w-screen': fullscreen }"
     >
         <div class="project-view-header shrink-0 border-b">
+            <div v-if="project" class="project-heading">
+                <span class="project-heading-icon"><UIcon :name="projectIcon(project.icon)" /></span>
+                <div class="min-w-0">
+                    <h1>{{ project.name }}</h1>
+                    <p v-if="project.description">{{ project.description }}</p>
+                </div>
+            </div>
             <UDashboardToolbar v-if="taskControlsVisible" :ui="{ left: 'min-w-0 flex-1' }">
                 <template #left>
                     <div class="flex w-full flex-wrap items-center gap-2">
@@ -387,7 +397,7 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
                     />
                 </template>
             </UDashboardToolbar>
-            <div ref="tabBar" class="flex min-w-0 items-center px-4 sm:px-6">
+            <div ref="tabBar" class="project-tabs flex min-w-0 items-center px-4 sm:px-6">
                 <UNavigationMenu
                     class="flex-none"
                     highlight

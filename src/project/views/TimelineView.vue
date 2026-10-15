@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TransformedTask } from '../../domain/types';
 import { computed } from 'vue';
+import { useLists } from '../../composables/useLists';
 import { useTasks } from '../../composables/useTasks';
 import { sortTasks, taskStartDate } from '../../domain/tasks';
 import TaskItem from '../../components/TaskItem.vue';
@@ -11,6 +12,8 @@ import ViewWrapper from './ViewWrapper.vue';
 const props = defineProps<{ projectId: string }>();
 const projectId = computed(() => Number(props.projectId));
 const { tasks, showTask, calculateDueDate } = useTasks(projectId);
+const { lists } = useLists(projectId);
+const listName = (id: number | undefined) => lists.value.find(list => list.id === id)?.name;
 const planningDate = (task: TransformedTask) => calculateDueDate(task) ?? taskStartDate(task);
 
 const groups = computed(() => {
@@ -55,11 +58,20 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
         />
         <div v-if="groups.length" class="mx-auto flex w-full max-w-4xl flex-col gap-8 pb-6">
             <section v-for="group in groups" :key="group.key" :aria-labelledby="`timeline-${group.key}`">
-                <h2 :id="`timeline-${group.key}`" class="mb-3 text-lg font-semibold capitalize">
-                    {{ group.label }}
+                <h2 :id="`timeline-${group.key}`" class="timeline-month-heading mb-3 text-lg font-semibold capitalize">
+                    {{ group.label
+                    }}<span>{{ group.tasks.length }} {{ group.tasks.length === 1 ? 'Aufgabe' : 'Aufgaben' }}</span>
                 </h2>
-                <div class="timeline-track relative ml-7 flex flex-col gap-3">
-                    <div v-for="task in group.tasks" :key="task.id" class="timeline-item relative pl-7">
+                <div class="timeline-track relative flex flex-col gap-3">
+                    <div v-for="task in group.tasks" :key="task.id" class="timeline-item relative">
+                        <div class="timeline-date">
+                            <template v-if="planningDate(task)">
+                                <strong>{{ planningDate(task)!.getDate().toString().padStart(2, '0') }}</strong>
+                                <span>{{ planningDate(task)!.toLocaleDateString('de-DE', { weekday: 'short' }) }}</span>
+                            </template>
+                            <UIcon v-else name="i-lucide-calendar-minus" />
+                            <span v-if="listName(task.list)" class="timeline-list">{{ listName(task.list) }}</span>
+                        </div>
                         <span aria-hidden="true" class="timeline-dot"></span>
                         <TaskItem density="timeline" :item="task" :project-id="projectId" />
                     </div>
@@ -76,11 +88,17 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
     </ViewWrapper>
 </template>
 <style scoped>
+.timeline-item {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 32px;
+    align-items: center;
+}
 .timeline-track::before {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 0;
+    left: 80px;
     width: 1px;
     background: var(--line, #e1ddd7);
     content: '';
@@ -88,7 +106,7 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
 .timeline-dot {
     position: absolute;
     top: 50%;
-    left: 0.5px;
+    left: 80.5px;
     width: 12px;
     height: 12px;
     transform: translate(-50%, -50%);
@@ -96,5 +114,20 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
     border-radius: 50%;
     background: var(--dimmed);
     box-shadow: 0 0 0 1px var(--line);
+}
+</style>
+
+<style scoped>
+@media (max-width: 720px) {
+    .timeline-item {
+        grid-template-columns: 40px minmax(0, 1fr);
+        gap: 22px;
+    }
+    .timeline-track::before {
+        left: 50px;
+    }
+    .timeline-dot {
+        left: 50.5px;
+    }
 }
 </style>

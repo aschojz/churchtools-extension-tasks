@@ -1,5 +1,13 @@
 # Changelog
 
+## Unveröffentlicht · Gestaltungsvorschlag
+
+- Klarer Projektkopf und besser auffindbare Kalender- und Timeline-Ansichten
+- Neu gestaltete Übersicht mit Kennzahlen, leichteren Aufgabenbereichen und überarbeiteten Projektkarten
+- Ruhigere Board-Karten und konsistente visuelle Hierarchie in Hell und Dunkel
+- Kalenderkarten mit Priorität, Status und verantwortlicher Person; Timeline mit Datum, Wochentag und Liste
+- Kompakte mobile Werkzeugleiste und responsive Planungsansichten
+
 ## 0.8.0 · 15.10.2026
 
 - Aktualisierte Produktions- und Entwicklungsabhängigkeiten, einschließlich Markdown-Parser; TypeScript bleibt wegen der ESLint-Kompatibilität auf 5.9.3
