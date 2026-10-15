@@ -7,6 +7,7 @@ import { useTasks } from '../../composables/useTasks';
 import { appendComment, incompleteTaskBlockers, recurrenceLabel, taskStartDate } from '../../domain/tasks';
 import { requireCurrentUser, uiColor } from '../../platform';
 import TaskItem from '../TaskItem.vue';
+import TaskParentPath from '../TaskParentPath.vue';
 import Activities from './Activities.vue';
 
 const props = defineProps<{ taskId: number; projectId: number }>();
@@ -19,7 +20,7 @@ const subTasks = computed(() =>
     (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []).map(st => tasksMap.value[st]).filter(st => st),
 );
 
-const { updateTask, createTask, deleteTask, tasksMap } = useTasks(pId);
+const { updateTask, createTask, deleteTask, tasksMap, parentByChild } = useTasks(pId);
 const blockers = computed(() =>
     task.value
         ? (Array.isArray(task.value.blockedBy) ? task.value.blockedBy : [])
@@ -87,6 +88,12 @@ const createChild = async () => {
 <template>
     <div class="task-view-layout">
         <main class="task-view-main">
+            <TaskParentPath
+                class="task-view-parent"
+                :parent-by-child="parentByChild"
+                :project-id="projectId"
+                :task-id="taskId"
+            />
             <section v-if="task?.description" class="task-view-description">
                 <UEditor
                     class="task-markdown-display"

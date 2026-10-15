@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Klar erkennbare Oberaufgaben mit direkt öffnbarem Aufgabenpfad auf Karten und im Aufgabendialog
 - Kompakter, am Icon ausgerichteter Projektkopf; getrennte Bereiche für Hauptaktion, Suche und Sammelauswahl
 - Projektmenü für Listen, Vollbild und ansichtsspezifische Aktionen; Monatssteuerung direkt am Kalender
 - Klarer Projektkopf und besser auffindbare Kalender- und Timeline-Ansichten
