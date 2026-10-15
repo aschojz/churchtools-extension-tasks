@@ -2,14 +2,18 @@
 import type { Project } from '../domain/types';
 import { ref } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
-import { colorOptions } from '../platform';
+import { colorOptions, CtColor } from '../platform';
 import { projectIcon } from '../utils/utils';
 import useProjects from './useProjects';
 
 const props = defineProps<{ project?: Project }>();
 const emit = defineEmits<{ (event: 'close'): void }>();
 
-const proj = ref({ ...(props.project ?? ({} as Project)), icon: projectIcon(props.project?.icon) });
+const proj = ref({
+    ...(props.project ?? ({} as Project)),
+    color: props.project?.color ?? CtColor.BASIC,
+    icon: projectIcon(props.project?.icon),
+});
 
 const icons = [
     ['i-lucide-folder', 'Ordner'],

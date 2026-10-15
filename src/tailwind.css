@@ -19,6 +19,7 @@
 /* Custom layouts consume Nuxt UI's semantic colors, including its dark palette.
    ChurchTools supplies the active .light/.dark class on the body. */
 body:has(#tasks) {
+    --ui-text-dimmed: var(--ui-text-muted);
     --ink: var(--ui-text-highlighted);
     --muted: var(--ui-text-muted);
     --line: var(--ui-border);

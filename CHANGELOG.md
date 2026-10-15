@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht
 
+- Projektformular mit sichtbarer Standardfarbe „Neutral“; Platzhalter verwenden kontrastreichere Nuxt-UI-Textfarben
 - Sichtbare Rahmen und Trennlinien im Dark Mode, insbesondere an Sidebar und Headern
 - Erreichbare lange Inhalte: eigene Scrollbereiche für Übersicht und Board-Spalten sowie Dialoge mit sichtbaren Aktionen und scrollbarem Inhalt
 - Hell- und Dunkelmodus über Nuxt UIs semantische Themefarben; der aktive Modus folgt der ChurchTools-Umgebung
