@@ -1,6 +1,8 @@
 # Changelog
 
-## Unveröffentlicht
+## 0.8.0 · 15.10.2026
+
+- Aktualisierte Produktions- und Entwicklungsabhängigkeiten, einschließlich Markdown-Parser; TypeScript bleibt wegen der ESLint-Kompatibilität auf 5.9.3
 
 - Projektformular mit sichtbarer Standardfarbe „Neutral“; Platzhalter verwenden kontrastreichere Nuxt-UI-Textfarben
 - Sichtbare Rahmen und Trennlinien im Dark Mode, insbesondere an Sidebar und Headern

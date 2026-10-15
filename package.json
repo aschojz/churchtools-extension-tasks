@@ -1,7 +1,7 @@
 {
     "name": "churchtools-extension-tasks",
     "private": true,
-    "version": "0.7.0",
+    "version": "0.8.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -32,7 +32,7 @@
         "prettier-plugin-organize-imports": "4.3.0",
         "prettier-plugin-tailwindcss": "0.8.1",
         "tailwindcss": "4.3.3",
-        "typescript": "7.0.2",
+        "typescript": "5.9.3",
         "typescript-eslint": "8.71.1",
         "vite": "8.3.4",
         "vitest": "5.0.3",
