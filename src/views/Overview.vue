@@ -113,7 +113,7 @@ const tasksBySection = computed(
                                     <strong class="overview-task-title line-clamp-2 min-w-0 flex-1">{{
                                         item.task.name
                                     }}</strong>
-                                    <UIcon class="mt-1 size-4 shrink-0 text-gray-400" name="i-lucide-chevron-right" />
+                                    <UIcon class="text-dimmed mt-1 size-4 shrink-0" name="i-lucide-chevron-right" />
                                 </div>
                                 <div v-if="item.tags.length" class="task-item-tags flex flex-wrap gap-1.5">
                                     <UBadge

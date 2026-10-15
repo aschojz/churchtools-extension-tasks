@@ -34,6 +34,9 @@ export default defineConfig(({ mode }) => {
             vue(),
             tailwindcss(),
             ui({
+                // ChurchTools supplies .light/.dark; avoid a second OS/localStorage preference.
+                colorMode: false,
+                ui: { colors: { primary: 'orange', neutral: 'stone' } },
                 experimental: { componentDetection: true },
                 icon: { clientBundle: { scan: true } },
                 theme: { prefix: 'tasks' },

@@ -12,33 +12,39 @@
         BlinkMacSystemFont,
         'Segoe UI',
         sans-serif;
-    color: #242322;
-    background: #f7f6f4;
+    color: var(--ink);
+    background: var(--page);
     font-size: 14px;
-    --ink: #242322;
-    --muted: #73706c;
-    --line: #e7e4df;
-    --surface: #fff;
-    --accent: #ea7a35;
-    --accent-soft: #fff1e7;
-    --shadow: 0 18px 60px rgb(34 31 27 / 12%);
-    --color-accent-bright: #ea7a35;
-    --color-basic-bright: #73706c;
 }
+/* Custom layouts consume Nuxt UI's semantic colors, including its dark palette.
+   ChurchTools supplies the active .light/.dark class on the body. */
 body:has(#tasks) {
-    --ui-primary: #292826;
-    --ui-text: #242322;
-    --ui-text-highlighted: #242322;
-    --ui-text-toned: #68635d;
-    --ui-text-muted: #73706c;
-    --ui-text-dimmed: #8a847d;
-    --ui-text-inverted: #fff;
-    --ui-bg-muted: #f7f5f2;
-    --ui-bg-elevated: #f1eee9;
-    --ui-bg-accented: #e9e4dd;
-    --ui-border-muted: #e7e2db;
-    --ui-border: #ddd7cf;
-    --ui-border-accented: #cbc3b9;
+    --ink: var(--ui-text-highlighted);
+    --muted: var(--ui-text-muted);
+    --line: var(--ui-border);
+    --surface: var(--ui-bg);
+    --page: var(--ui-bg-muted);
+    --panel: var(--ui-bg-muted);
+    --subtle: var(--ui-bg-muted);
+    --column: var(--ui-bg-elevated);
+    --toned: var(--ui-text-toned);
+    --dimmed: var(--ui-text-dimmed);
+    --metadata: var(--ui-text-muted);
+    --hover-border: var(--ui-border-accented);
+    --editor-border: var(--ui-border-accented);
+    --focus-border: var(--ui-primary);
+    --overdue: var(--ui-error);
+    --link: var(--ui-primary);
+    --accent: var(--ui-primary);
+    --accent-soft: color-mix(in srgb, var(--ui-primary) 10%, var(--ui-bg));
+    --accent-text: var(--ui-primary);
+    --attention-bg: color-mix(in srgb, var(--ui-warning) 10%, var(--ui-bg));
+    --attention-border: color-mix(in srgb, var(--ui-warning) 30%, var(--ui-border));
+    --attention-ink: var(--ui-text-highlighted);
+    --progress-track: var(--ui-bg-accented);
+    --progress-fill: var(--ui-success);
+    --progress-check: var(--ui-success);
+    --shadow: 0 18px 60px rgb(0 0 0 / 12%);
     --ui-radius: 0.55rem;
     --ui-container: 90rem;
 }
@@ -87,7 +93,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     position: relative;
     min-height: 320px;
     color: var(--ink);
-    background: #f7f6f4;
+    background: var(--page);
 }
 .tasks-dashboard-group {
     position: absolute !important;
@@ -119,7 +125,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     width: 30px;
     height: 30px;
     border-radius: 9px;
-    color: #c85d1e;
+    color: var(--accent-text);
     background: var(--accent-soft);
 }
 .dashboard-brand strong {
@@ -145,11 +151,11 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     min-width: 0;
     align-items: center;
     border-radius: var(--ui-radius);
-    color: #615d58;
+    color: var(--toned);
 }
 .dashboard-project-nav:hover,
 .dashboard-project-nav.active {
-    color: #292826;
+    color: var(--ink);
     background: var(--ui-bg-elevated);
 }
 .dashboard-project-link {
@@ -201,29 +207,29 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     overflow: hidden;
 }
 [data-color='red'] {
-    --chip: #ffd8d5;
+    --chip: var(--tasks-color-red-500);
 }
 [data-color='yellow'] {
-    --chip: #ffefad;
+    --chip: var(--tasks-color-yellow-500);
 }
 [data-color='green'] {
-    --chip: #ccebd9;
+    --chip: var(--tasks-color-green-500);
 }
 [data-color='blue'] {
-    --chip: #d8e6ff;
+    --chip: var(--tasks-color-blue-500);
 }
 [data-color='violet'],
 [data-color='purple'] {
-    --chip: #ead9ff;
+    --chip: var(--tasks-color-violet-500);
 }
 [data-color='pink'] {
-    --chip: #ffd9ed;
+    --chip: var(--tasks-color-pink-500);
 }
 [data-color='orange'] {
-    --chip: #ffe0c7;
+    --chip: var(--tasks-color-orange-500);
 }
 [data-color='teal'] {
-    --chip: #cff0ed;
+    --chip: var(--tasks-color-teal-500);
 }
 .project-page {
     display: flex;
@@ -234,9 +240,9 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .project-icon,
 .project-card-icon {
-    --chip: #eeece8;
-    background: color-mix(in srgb, var(--chip), white 45%);
-    color: color-mix(in srgb, var(--chip), #222 55%);
+    --chip: var(--ui-text-muted);
+    background: color-mix(in srgb, var(--chip) 12%, var(--surface));
+    color: color-mix(in srgb, var(--chip), var(--ink) 40%);
 }
 .dashboard-overview {
     width: 100%;
@@ -274,20 +280,20 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     padding: 14px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: rgb(255 255 255 / 64%);
+    background: color-mix(in srgb, var(--surface) 64%, transparent);
 }
 .board-column {
-    border: 1px solid #e5e2dd;
+    border: 1px solid var(--line);
     border-radius: 12px;
-    background: #f3f2f0;
+    background: var(--column);
     box-shadow: none;
 }
 .board-column-collapse {
-    color: #77726c !important;
+    color: var(--muted) !important;
 }
 .project-view-header {
-    border-color: #e5e2dd !important;
-    background: rgb(255 255 255 / 58%);
+    border-color: var(--line) !important;
+    background: color-mix(in srgb, var(--surface) 58%, transparent);
 }
 .overview-empty {
     border: 1px solid var(--line);
@@ -295,9 +301,9 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     background: var(--surface);
 }
 .task-item {
-    border: 1px solid #e5e2dd;
+    border: 1px solid var(--line);
     border-radius: 10px !important;
-    background: #fff;
+    background: var(--surface);
     box-shadow: 0 1px 2px rgb(30 25 20 / 4%) !important;
     transition:
         border-color 140ms ease,
@@ -305,7 +311,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
         transform 140ms ease;
 }
 .task-item:hover {
-    border-color: #cbc5bd;
+    border-color: var(--hover-border);
     box-shadow: 0 4px 14px rgb(40 34 28 / 7%) !important;
     transform: translateY(-1px);
 }
@@ -356,7 +362,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #68635d;
+    color: var(--toned);
     font-size: 13px;
     line-height: 1.5;
 }
@@ -373,7 +379,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     text-decoration: underline;
 }
 .task-title-button {
-    color: var(--ink, #242322) !important;
+    color: var(--ink) !important;
     font-weight: 600 !important;
     line-height: 1.35;
 }
@@ -385,12 +391,12 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     border: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: #7a746d !important;
+    color: var(--metadata) !important;
     font-size: 11px;
     font-weight: 400;
 }
 .task-item-metadata > span.task-item-overdue {
-    color: #c44242 !important;
+    color: var(--overdue) !important;
 }
 .task-item-metadata > span svg {
     color: inherit !important;
@@ -432,22 +438,22 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     }
 }
 .insight-workload-track {
-    background: #e9e4dd;
+    background: var(--ui-bg-accented);
 }
 .insight-workload-fill {
-    background: #70675e;
+    background: var(--metadata);
 }
 .insights-attention {
-    background: #fff9ed !important;
-    border: 1px solid #e6d4b5;
+    background: var(--attention-bg) !important;
+    border: 1px solid var(--attention-border);
     box-shadow: none !important;
 }
 .insights-attention [data-slot='title'],
 .insights-attention [data-slot='icon'] {
-    color: #6b4922 !important;
+    color: var(--attention-ink) !important;
 }
 .insights-attention [data-slot='description'] {
-    color: #68635d !important;
+    color: var(--toned) !important;
 }
 .insight-metric > * {
     height: 100%;
@@ -459,7 +465,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .insight-metric:hover > *,
 .insight-metric:focus-visible > * {
-    border-color: #cfc6bb !important;
+    border-color: var(--hover-border) !important;
     box-shadow: 0 5px 18px rgb(48 40 32 / 8%);
     transform: translateY(-1px);
 }
@@ -491,8 +497,8 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     text-decoration: none;
 }
 .overview-task-title {
-    color: #242322 !important;
-    -webkit-text-fill-color: #242322;
+    color: var(--ink) !important;
+    -webkit-text-fill-color: var(--ink);
     font-size: 13px;
     font-weight: 600;
     line-height: 1.4;
@@ -501,7 +507,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     padding-top: 0;
 }
 .project-card {
-    border: 1px solid #e5e2dd;
+    border: 1px solid var(--line);
     box-shadow: 0 1px 2px rgb(30 25 20 / 3%) !important;
     transition:
         border-color 150ms ease,
@@ -509,7 +515,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
         transform 150ms ease;
 }
 .project-card:hover {
-    border-color: #cbc5bd;
+    border-color: var(--hover-border);
     box-shadow: 0 8px 24px rgb(40 34 28 / 7%) !important;
     transform: translateY(-1px);
 }
@@ -518,14 +524,14 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     max-width: 960px !important;
     max-height: min(820px, calc(100vh - 64px));
     overflow: hidden;
-    border: 1px solid #dfdcd6;
+    border: 1px solid var(--line);
     border-radius: 16px !important;
     box-shadow: 0 28px 90px rgb(0 0 0 / 28%) !important;
 }
 .tasks-modal-header {
     padding: 20px 24px 16px !important;
-    color: #242322;
-    background: #fff;
+    color: var(--ink);
+    background: var(--surface);
 }
 .task-dialog-header {
     display: flex;
@@ -536,7 +542,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .task-dialog-header h2 {
     margin: 0;
-    color: #242322;
+    color: var(--ink);
     font-size: 16px;
     font-weight: 700;
     line-height: 1.35;
@@ -555,15 +561,15 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .tasks-modal-body {
     padding: 0 !important;
-    background: #f8f7f5;
+    background: var(--panel);
 }
 .diagnostics-modal-body {
     padding: 24px !important;
-    background: #f8f7f5;
+    background: var(--panel);
 }
 .tasks-modal-footer {
     padding: 14px 20px !important;
-    background: #fff;
+    background: var(--surface);
 }
 .tasks-modal-editor {
     height: min(820px, calc(100dvh - 128px));
@@ -608,7 +614,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     flex-direction: column;
     gap: 18px;
     padding: 24px;
-    background: #fff;
+    background: var(--surface);
 }
 .task-editor-meta {
     display: flex;
@@ -616,7 +622,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     gap: 16px;
     padding: 24px 20px;
     border-left: 1px solid var(--line);
-    background: #f8f7f5;
+    background: var(--panel);
 }
 .task-editor-meta-heading {
     display: flex;
@@ -632,8 +638,8 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     display: grid;
     grid-template-columns: minmax(0, 1.65fr) minmax(250px, 0.8fr);
     min-height: 440px;
-    color: #242322;
-    background: #fff;
+    color: var(--ink);
+    background: var(--surface);
 }
 .task-view-main {
     display: flex;
@@ -646,14 +652,14 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     padding: 14px 16px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #faf9f7;
+    background: var(--subtle);
     line-height: 1.55;
 }
 .task-markdown-editor {
-    border: 1px solid #d8d4ce;
+    border: 1px solid var(--editor-border);
     border-radius: 10px;
     overflow: hidden;
-    background: #fff;
+    background: var(--surface);
 }
 .task-markdown-editor [contenteditable] {
     min-height: 200px;
@@ -661,17 +667,17 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     outline: none;
 }
 .task-editor-toolbar {
-    border-bottom: 1px solid #d8d4ce;
+    border-bottom: 1px solid var(--editor-border);
 }
 .task-markdown-editor:focus-within {
-    border-color: #9c8c7a;
+    border-color: var(--focus-border);
 }
 .task-markdown-editor [data-slot='root'] {
     flex-wrap: wrap;
 }
 .task-markdown-display .tiptap,
 .task-markdown-editor .tiptap {
-    color: #242322;
+    color: var(--ink);
     overflow-wrap: anywhere;
 }
 .task-markdown-display .tiptap {
@@ -687,7 +693,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-markdown-editor .tiptap h1,
 .task-markdown-editor .tiptap h2,
 .task-markdown-editor .tiptap h3 {
-    color: #242322 !important;
+    color: var(--ink) !important;
 }
 .task-markdown-display .tiptap p,
 .task-markdown-editor .tiptap p {
@@ -708,7 +714,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .task-markdown-display .tiptap a,
 .task-markdown-editor .tiptap a {
-    color: #8b5c35;
+    color: var(--link);
     text-decoration: underline;
 }
 .task-view-section {
@@ -728,7 +734,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .task-view-heading {
     margin: 0;
-    color: #242322 !important;
+    color: var(--ink) !important;
     font-size: 16px;
     font-weight: 700;
 }
@@ -738,8 +744,8 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     gap: 20px;
     padding: 24px 20px;
     border-left: 1px solid var(--line);
-    color: #242322;
-    background: #f8f7f5;
+    color: var(--ink);
+    background: var(--panel);
 }
 .task-view-meta-row {
     display: flex;
@@ -748,10 +754,10 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     gap: 8px;
 }
 .task-view-meta strong {
-    color: var(--ink, #242322) !important;
+    color: var(--ink) !important;
 }
 .task-view-assignees {
-    color: #68635d;
+    color: var(--toned);
     font-size: 12px;
     font-weight: 400;
 }
@@ -759,13 +765,13 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     width: 100%;
 }
 .task-view-blockers {
-    color: #7a746d;
+    color: var(--metadata);
     font-size: 12px;
     line-height: 1.5;
 }
 .task-view-blocker-hint {
     margin: 0;
-    color: #7a746d !important;
+    color: var(--metadata) !important;
     font-size: 11px !important;
     line-height: 1.5;
 }
@@ -775,31 +781,31 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 }
 .task-activity-event,
 .task-activity-event span {
-    color: var(--muted, #7a746d) !important;
+    color: var(--muted) !important;
     font-size: 11px !important;
     line-height: 1.5;
 }
 .task-comment {
-    border-color: #e8e4de !important;
-    background: #faf9f7;
+    border-color: var(--line) !important;
+    background: var(--subtle);
 }
 .task-comment-meta,
 .task-comment-meta > span,
 .task-comment-meta > div {
-    color: #8a847d !important;
+    color: var(--dimmed) !important;
     font-size: 11px;
     font-weight: 400;
     line-height: 1.4;
 }
 .task-view-meta-row > span,
 .task-view-meta-group > span {
-    color: var(--muted, #7a746d);
+    color: var(--muted);
     font-size: 12px;
     font-weight: 400;
 }
 .task-view-meta-row > span.task-view-overdue,
 .task-view-overdue svg {
-    color: #c44242 !important;
+    color: var(--overdue) !important;
 }
 .task-view-meta-group {
     display: flex;
@@ -809,7 +815,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
 .task-view-empty {
     margin: 0;
     padding: 18px;
-    border: 1px dashed #d8d4ce;
+    border: 1px dashed var(--editor-border);
     border-radius: 9px;
     color: var(--muted);
     font-size: 13px;
@@ -828,7 +834,7 @@ body:has(#tasks):has([data-slot='content'][role='dialog']) .task-board-scroll {
     border-color: var(--line);
 }
 .bg-foreground-secondary {
-    background: #faf9f7;
+    background: var(--subtle);
 }
 @media (max-width: 720px) {
     .task-sections {

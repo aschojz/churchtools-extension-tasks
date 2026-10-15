@@ -92,7 +92,7 @@ const metrics = computed(() => [
         label: 'Offen',
         value: openTasks.value.length,
         icon: 'i-lucide-circle',
-        colorClass: 'text-gray-500',
+        colorClass: 'text-muted',
         filters: { status: 'open' } as Partial<ProjectFilters>,
     },
     {
@@ -151,7 +151,7 @@ const metrics = computed(() => [
                     <UCard :ui="{ body: 'p-3 sm:p-3' }" variant="subtle">
                         <div class="flex items-center justify-between gap-3">
                             <div>
-                                <p class="text-sm text-gray-500">{{ metric.label }}</p>
+                                <p class="text-muted text-sm">{{ metric.label }}</p>
                                 <strong class="insight-value text-xl">{{ metric.value }}</strong>
                             </div>
                             <UIcon class="size-5" :class="metric.colorClass" :name="metric.icon" />
@@ -166,13 +166,13 @@ const metrics = computed(() => [
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <h2 class="font-semibold">Fortschritt</h2>
-                                <p class="text-sm text-gray-500">Anteil erledigter sichtbarer Aufgaben</p>
+                                <p class="text-muted text-sm">Anteil erledigter sichtbarer Aufgaben</p>
                             </div>
                             <strong class="insight-value text-2xl">{{ completionRate }} %</strong>
                         </div>
                     </template>
                     <UProgress :model-value="completionRate" />
-                    <p class="mt-3 text-sm text-gray-500">
+                    <p class="text-muted mt-3 text-sm">
                         {{ completedTasks.length }} von {{ visibleTasks.length }} Aufgaben erledigt
                     </p>
                 </UCard>
@@ -181,7 +181,7 @@ const metrics = computed(() => [
                     <template #header>
                         <div>
                             <h2 class="font-semibold">Auslastung</h2>
-                            <p class="text-sm text-gray-500">Offene Aufgaben je verantwortlicher Person</p>
+                            <p class="text-muted text-sm">Offene Aufgaben je verantwortlicher Person</p>
                         </div>
                     </template>
                     <div v-if="workload.length" class="space-y-4">
@@ -191,7 +191,7 @@ const metrics = computed(() => [
                                     <UAvatar :alt="person.name" size="xs" :src="person.imageUrl" />
                                     <span class="truncate font-medium">{{ person.name }}</span>
                                 </span>
-                                <span class="text-gray-500">{{ person.count }}</span>
+                                <span class="text-muted">{{ person.count }}</span>
                             </div>
                             <div class="insight-workload-track h-2 overflow-hidden rounded-full">
                                 <div
@@ -201,7 +201,7 @@ const metrics = computed(() => [
                             </div>
                         </div>
                     </div>
-                    <p v-else class="text-sm text-gray-500">Noch keine offenen Aufgaben zugewiesen.</p>
+                    <p v-else class="text-muted text-sm">Noch keine offenen Aufgaben zugewiesen.</p>
                 </UCard>
             </div>
 

@@ -94,7 +94,7 @@ const selection = provideTaskSelection(computed(() => groups.value.flatMap(group
     transform: translate(-50%, -50%);
     border: 2px solid var(--surface, #fff);
     border-radius: 50%;
-    background: #8b8781;
-    box-shadow: 0 0 0 1px #d9d4cd;
+    background: var(--dimmed);
+    box-shadow: 0 0 0 1px var(--line);
 }
 </style>

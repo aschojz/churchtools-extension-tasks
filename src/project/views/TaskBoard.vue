@@ -62,7 +62,7 @@ provideTaskSelection(visibleTasks);
                 :sort="sortMode"
             >
                 <template #header>
-                    <ProgressRing class="progress-icon relative text-[20px] text-gray-500" :percent="list.percentage" />
+                    <ProgressRing class="progress-icon text-muted relative text-[20px]" :percent="list.percentage" />
                     <span>{{ list.name }}</span>
                 </template>
             </List>

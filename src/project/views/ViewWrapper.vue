@@ -213,7 +213,7 @@ const overflowMenu = computed<DropdownMenuItem[][]>(() => [
 <template>
     <div
         class="project-view flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden"
-        :class="{ 'fixed top-0 left-0 z-[2000] h-screen w-screen bg-gray-100': fullscreen }"
+        :class="{ 'bg-muted fixed top-0 left-0 z-[2000] h-screen w-screen': fullscreen }"
     >
         <div class="project-view-header shrink-0 border-b">
             <UDashboardToolbar v-if="taskControlsVisible" :ui="{ left: 'min-w-0 flex-1' }">

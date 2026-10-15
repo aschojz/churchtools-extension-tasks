@@ -93,7 +93,7 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
                         <RouterLink
                             v-for="task in tasksByDay[day.key] ?? []"
                             :key="task.id"
-                            class="truncate rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-900 hover:bg-orange-100 focus-visible:outline-2"
+                            class="calendar-task truncate rounded-md px-2 py-1 text-xs font-medium focus-visible:outline-2"
                             :title="task.name"
                             :to="{ name: 'project-calendar', params: { projectId, taskId: task.id } }"
                         >
@@ -106,6 +106,13 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     </ViewWrapper>
 </template>
 <style scoped>
+.calendar-task {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+}
+.calendar-task:hover {
+    background: color-mix(in srgb, var(--accent-soft), var(--accent) 15%);
+}
 .calendar-grid {
     border-color: var(--line);
     background: var(--line);
@@ -119,11 +126,11 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     background: var(--surface);
 }
 .calendar-day.is-outside {
-    color: #9a9690;
-    background: #faf9f7;
+    color: var(--dimmed);
+    background: var(--subtle);
 }
 .calendar-day time.is-today {
-    color: #fff;
+    color: var(--surface);
     background: var(--ink);
 }
 </style>

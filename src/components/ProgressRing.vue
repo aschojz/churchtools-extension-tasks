@@ -57,17 +57,17 @@ const strokeDashoffset = computed(() => {
     inset: 0;
 }
 .progress-ring__track {
-    stroke: #dedbd5;
+    stroke: var(--progress-track);
 }
 .progress-ring__circle {
-    stroke: #3f8d63;
+    stroke: var(--progress-fill);
     stroke-linecap: round;
     transition: 0.35s stroke-dashoffset;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
 }
 .progress-indicator__value {
-    color: #55514d;
+    color: var(--toned);
     font-size: 8px;
     font-weight: 700;
     line-height: 1;
@@ -75,6 +75,6 @@ const strokeDashoffset = computed(() => {
 .progress-indicator__check {
     width: 12px;
     height: 12px;
-    color: #2f7b53;
+    color: var(--progress-check);
 }
 </style>

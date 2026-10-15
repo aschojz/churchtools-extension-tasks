@@ -108,11 +108,11 @@ const importTasks = async () => {
                     title="Import mit Vorschau"
                     variant="subtle"
                 />
-                <label class="block cursor-pointer rounded-lg border border-dashed p-5 text-center hover:bg-gray-50">
+                <label class="hover:bg-elevated block cursor-pointer rounded-lg border border-dashed p-5 text-center">
                     <input accept=".csv,text/csv" class="sr-only" type="file" @change="selectFile" />
-                    <UIcon class="mx-auto mb-2 size-6 text-gray-500" name="i-lucide-upload" />
+                    <UIcon class="text-muted mx-auto mb-2 size-6" name="i-lucide-upload" />
                     <span class="block text-sm font-medium">CSV-Datei auswählen</span>
-                    <span class="mt-1 block text-xs text-gray-500">{{
+                    <span class="text-muted mt-1 block text-xs">{{
                         filename || 'Maximal 2 MB und 1.000 Aufgaben'
                     }}</span>
                 </label>

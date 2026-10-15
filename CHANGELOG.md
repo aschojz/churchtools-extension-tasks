@@ -1,5 +1,10 @@
 # Changelog
 
+## Unveröffentlicht
+
+- Hell- und Dunkelmodus über Nuxt UIs semantische Themefarben; der aktive Modus folgt der ChurchTools-Umgebung
+- Themefähige Karten, Kalender, Auswertung, Dialoge, Kommentare und Markdown-Editor
+
 ## 0.7.0 · 09.10.2026
 
 - Sammelaktionen für Listen, Tags, Verantwortliche, Fälligkeits- und Startdaten sowie Papierkorb

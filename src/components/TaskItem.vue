@@ -207,7 +207,7 @@ const breadcrumbs = computed(() => {
     >
         <div
             v-if="superParent && !showTask"
-            class="task-item-breadcrumbs -mb-1 flex items-center gap-2 text-xs text-gray-400"
+            class="task-item-breadcrumbs text-dimmed -mb-1 flex items-center gap-2 text-xs"
         >
             <template v-for="(crumb, index) in breadcrumbs" :key="index">
                 <span>{{ crumb }}</span>
