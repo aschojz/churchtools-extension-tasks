@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Sichtbarer, themefähiger Rahmen zur klareren Abgrenzung der Board-Lanes
 - Erledigte Unteraufgaben sichtbar markiert und im Dialog ausblendbar; dezenter Elternpfad auf Karten, ohne Wiederholung im Eltern-Dialog
 - Klar erkennbare Oberaufgaben mit direkt öffnbarem Aufgabenpfad auf Karten und im Aufgabendialog
 - Kompakter, am Icon ausgerichteter Projektkopf; getrennte Bereiche für Hauptaktion, Suche und Sammelauswahl

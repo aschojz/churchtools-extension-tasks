@@ -1164,7 +1164,7 @@ body.dark:has(#tasks) {
     font-size: 12px;
 }
 .board-column {
-    border-color: transparent;
+    border-color: var(--ui-border-accented);
     background: var(--column);
     border-radius: 14px;
 }
