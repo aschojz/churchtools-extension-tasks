@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TagBadge from './TagBadge.vue';
 import type { TransformedTag, TransformedTask } from '../domain/types';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
@@ -245,11 +246,11 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
         <p v-if="actionError" class="text-red-600" role="alert">{{ actionError }}</p>
         <MarkdownPreview v-if="task.description && density !== 'timeline'" :source="task.description" />
         <div v-if="sortedTags.length" class="task-item-tags flex flex-wrap gap-1.5">
-            <UBadge
+            <TagBadge
                 v-for="tag in sortedTags"
                 :key="tag.id"
                 class="task-item-tag"
-                :color="uiColor(tag.color)"
+                :color="tag.color"
                 :label="tag.name"
                 size="sm"
                 variant="outline"

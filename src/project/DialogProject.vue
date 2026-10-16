@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import ColorSelect from '../components/ColorSelect.vue';
 import type { Project } from '../domain/types';
 import { ref } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
-import { colorOptions, CtColor } from '../platform';
+import { CtColor } from '../platform';
 import { projectIcon } from '../utils/utils';
 import useProjects from './useProjects';
 
@@ -68,14 +69,7 @@ const onSave = async () => {
                         :items="icons"
                         label-key="nameTranslated"
                         value-key="id" /></UFormField
-                ><UFormField label="Farbe"
-                    ><USelect
-                        v-model="proj.color"
-                        class="w-full"
-                        :items="colorOptions"
-                        label-key="nameTranslated"
-                        value-key="id"
-                /></UFormField></div
+                ><UFormField label="Farbe"><ColorSelect v-model="proj.color" class="w-full" /></UFormField></div
         ></template>
         <template #footer
             ><div class="flex w-full justify-end gap-2">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TagBadge from '../../components/TagBadge.vue';
 import type { TransformedTag, TransformedTask } from '../../domain/types';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
@@ -10,7 +11,7 @@ import { taskStore } from '../../composables/storeTasks';
 import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useTags } from '../../composables/useTags';
 import { useTasks } from '../../composables/useTasks';
-import { CtColor, uiColor } from '../../platform';
+import { CtColor } from '../../platform';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
@@ -129,7 +130,7 @@ const boardlists = computed(() => {
                 :sort="sortMode"
             >
                 <template #header>
-                    <UBadge :color="uiColor(list.color?.key ?? CtColor.BASIC)" :label="list.name" variant="soft" />
+                    <TagBadge :color="list.color?.key ?? CtColor.BASIC" :label="list.name" variant="soft" />
                     <UDropdownMenu v-if="list.id" :items="tagMenu(list.id)"
                         ><UButton
                             :aria-label="`Aktionen für Tag ${list.name}`"

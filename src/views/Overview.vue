@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TagBadge from '../components/TagBadge.vue';
 import type { Project } from '../domain/types';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
@@ -8,7 +9,7 @@ import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProje
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
 import { dueDateBucket, recurrenceLabel, taskPriority, type DueDateBucket } from '../domain/tasks';
-import { colorKey, CtColor, uiColor, useCurrentUser } from '../platform';
+import { colorKey, colorStyle, CtColor, uiColor, useCurrentUser } from '../platform';
 import { createOrEditProject } from '../project/projectHelper';
 import { projectIcon } from '../utils/utils';
 
@@ -142,11 +143,11 @@ const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day:
                                     item.task.name
                                 }}</RouterLink>
                                 <div v-if="item.tags.length" class="task-item-tags flex flex-wrap gap-1.5">
-                                    <UBadge
+                                    <TagBadge
                                         v-for="tag in item.tags"
                                         :key="tag.id"
                                         class="task-item-tag"
-                                        :color="uiColor(tag.color)"
+                                        :color="tag.color"
                                         :label="tag.name"
                                         size="sm"
                                         variant="outline"
@@ -235,6 +236,7 @@ const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day:
                             <div
                                 class="project-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
                                 :data-color="colorKey(project.color)"
+                                :style="colorStyle(project.color)"
                             >
                                 <UIcon class="size-5" :name="projectIcon(project.icon)" />
                             </div>

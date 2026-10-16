@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TagBadge from '../TagBadge.vue';
 import { computed, ref } from 'vue';
 import { failWithCompensation } from '../../application/compensation';
 import { reportOperationalError } from '../../application/operationalErrors';
@@ -206,11 +207,11 @@ const createChild = async () => {
             <div v-if="sortedTags.length" class="task-view-meta-group">
                 <span>Tags</span>
                 <div class="task-item-tags flex flex-wrap gap-1.5">
-                    <UBadge
+                    <TagBadge
                         v-for="tag in sortedTags"
                         :key="tag.id"
                         class="task-item-tag"
-                        :color="uiColor(tag.color)"
+                        :color="tag.color"
                         :label="tag.name"
                         size="sm"
                         variant="outline"

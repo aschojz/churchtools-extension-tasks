@@ -10,7 +10,7 @@ import { useTaskTemplates } from '../../composables/useTaskTemplates';
 import { useTasks } from '../../composables/useTasks';
 import { TASK_PRIORITIES, TASK_RECURRENCES, taskDraft } from '../../domain/tasks';
 import type { TaskRecurrenceFrequency } from '../../domain/types';
-import { personDisplay } from '../../platform';
+import { colorValue, personDisplay } from '../../platform';
 import DialogTag from '../DialogTag.vue';
 
 const props = defineProps<{ taskId?: number; projectId: number; toolsTarget?: string }>();
@@ -356,7 +356,15 @@ watch(personSearch, (query, _previous, onCleanup) => {
                         multiple
                         placeholder="Tags auswählen …"
                         value-key="id"
-                    />
+                    >
+                        <template #item-leading="{ item }">
+                            <span
+                                aria-hidden="true"
+                                class="color-swatch"
+                                :style="{ backgroundColor: colorValue(item.color) }"
+                            />
+                        </template>
+                    </USelectMenu>
                     <UButton
                         aria-label="Neuen Tag anlegen"
                         color="neutral"

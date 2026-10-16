@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht
 
+- Korrekte, von Status- und Primärfarben unabhängige Tagfarben; Palette mit 18 Farben und Vorschaukreisen in der Farb- und Tagauswahl
 - Kompaktere Übersichtskarten mit anklickbarem Elternpfad, Projekt in der Metadatenzeile und ohne zusätzlichen Navigationspfeil
 - Übersicht ohne maximale Seitenbreite; Aufgabenbereiche nutzen je nach verfügbarem Platz bis zu vier Spalten
 

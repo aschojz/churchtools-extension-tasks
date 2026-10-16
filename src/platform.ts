@@ -13,6 +13,14 @@ export const CtColor = {
     PURPLE: 'purple',
     PINK: 'pink',
     TEAL: 'teal',
+    AMBER: 'amber',
+    LIME: 'lime',
+    EMERALD: 'emerald',
+    CYAN: 'cyan',
+    SKY: 'sky',
+    INDIGO: 'indigo',
+    FUCHSIA: 'fuchsia',
+    ROSE: 'rose',
 } as const;
 export type CtColor = (typeof CtColor)[keyof typeof CtColor];
 
@@ -72,7 +80,38 @@ const COLOR_LABELS: Record<CtColor, string> = {
     purple: 'Lila',
     pink: 'Pink',
     teal: 'Türkis',
+    amber: 'Bernstein',
+    lime: 'Limette',
+    emerald: 'Smaragd',
+    cyan: 'Cyan',
+    sky: 'Himmelblau',
+    indigo: 'Indigo',
+    fuchsia: 'Fuchsia',
+    rose: 'Rosé',
 };
+// Fixed palette values keep custom colors independent of the app's primary/status colors.
+const COLOR_VALUES: Record<CtColor, string> = {
+    basic: '#78716c',
+    red: '#ef4444',
+    orange: '#f97316',
+    yellow: '#eab308',
+    green: '#22c55e',
+    blue: '#3b82f6',
+    violet: '#8b5cf6',
+    purple: '#a855f7',
+    pink: '#ec4899',
+    teal: '#14b8a6',
+    amber: '#f59e0b',
+    lime: '#84cc16',
+    emerald: '#10b981',
+    cyan: '#06b6d4',
+    sky: '#0ea5e9',
+    indigo: '#6366f1',
+    fuchsia: '#d946ef',
+    rose: '#f43f5e',
+};
+export const colorValue = (color: unknown): string => COLOR_VALUES[colorKey(color) as CtColor] ?? COLOR_VALUES.basic;
+export const colorStyle = (color: unknown) => ({ '--chip': colorValue(color) });
 export const colorOptions = Object.values(CtColor).map(key => ({ id: key, nameTranslated: COLOR_LABELS[key] }));
 export const colorKey = (color: unknown): string =>
     typeof color === 'string'

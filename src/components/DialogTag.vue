@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import ColorSelect from './ColorSelect.vue';
 import type { Tag, TransformedTag } from '../domain/types';
-import { computed, ref, toRef } from 'vue';
+import { ref, toRef } from 'vue';
 import { reportOperationalError } from '../application/operationalErrors';
 import { useTags } from '../composables/useTags';
-import { colorOptions, CtColor } from '../platform';
+import { CtColor } from '../platform';
 
 const props = defineProps<{
     projectId: number;
@@ -11,7 +12,6 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ (event: 'close'): void }>();
 
-const colors = computed(() => colorOptions);
 const { createTag, updateTag } = useTags(toRef(() => props.projectId));
 const draft = ref<Tag>({
     type: 'tag',
@@ -53,14 +53,7 @@ const onSave = async () => {
             ><UAlert v-if="error" color="error" :title="error" />
             <div class="flex flex-col gap-4">
                 <UFormField label="Name"><UInput v-model="draft.name" class="w-full" /></UFormField
-                ><UFormField label="Farbe"
-                    ><USelect
-                        v-model="draft.color"
-                        class="w-full"
-                        :items="colors"
-                        label-key="nameTranslated"
-                        value-key="id"
-                /></UFormField></div
+                ><UFormField label="Farbe"><ColorSelect v-model="draft.color" class="w-full" /></UFormField></div
         ></template>
         <template #footer
             ><div class="flex w-full justify-end gap-2">
