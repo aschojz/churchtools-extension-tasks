@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht
 
+- Kompaktere Übersichtskarten mit anklickbarem Elternpfad, Projekt in der Metadatenzeile und ohne zusätzlichen Navigationspfeil
 - Übersicht ohne maximale Seitenbreite; Aufgabenbereiche nutzen je nach verfügbarem Platz bis zu vier Spalten
 
 ## 0.9.0 · 16.10.2026

@@ -1126,17 +1126,47 @@ body.dark:has(#tasks) {
 .task-bucket[data-section='upcoming'] h3::before {
     background: var(--ui-info);
 }
-.overview-task-group + .overview-task-group {
-    margin-top: 8px;
+.overview-task-item .overview-project-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    max-width: 100%;
+    color: var(--ui-text-muted) !important;
+    -webkit-text-fill-color: var(--ui-text-muted);
+    font-size: 11px;
+    line-height: 16px;
 }
-.overview-project-label {
-    padding-left: 4px;
-    font-size: 10px;
-    line-height: 1.5;
+.overview-project-label > :first-child {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+.overview-project-label > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.overview-task-item .overview-project-label:hover {
+    color: var(--ui-text-highlighted) !important;
+    -webkit-text-fill-color: var(--ui-text-highlighted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 .overview-task-item {
-    padding: 15px;
+    padding: 10px 12px;
+    gap: 6px;
     box-shadow: var(--surface-shadow) !important;
+}
+.overview-task-item .task-parent-name {
+    font-size: 11px;
+    line-height: 16px;
+}
+.overview-task-item .task-parent-label {
+    padding-top: 2px;
+}
+.overview-task-metadata {
+    column-gap: 8px;
 }
 .overview-task-title {
     font-size: 13px;

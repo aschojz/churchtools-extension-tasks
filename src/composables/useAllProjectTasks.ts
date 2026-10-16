@@ -12,6 +12,7 @@ export type ProjectTask = {
     task: TransformedTask;
     dueDate?: Date;
     tags: TransformedTag[];
+    parentByChild: Record<number, TransformedTask>;
 };
 
 export function useAllProjectTasks(options: { enabled?: MaybeRefOrGetter<boolean> } = {}) {
@@ -36,14 +37,16 @@ export function useAllProjectTasks(options: { enabled?: MaybeRefOrGetter<boolean
                 values.filter((value): value is TransformedTag => value.type === 'tag').map(tag => [tag.id, tag]),
             );
             const projectTasks = values.filter((value): value is TransformedTask => value.type === 'task');
-            const taskMap = Object.fromEntries(projectTasks.map(task => [task.id, task]));
-            const findParent = (task: TransformedTask) =>
-                Object.values(taskMap).find(
-                    candidate => Array.isArray(candidate.subTasks) && candidate.subTasks.includes(task.id),
-                );
+            const parentByChild: Record<number, TransformedTask> = {};
+            for (const parent of projectTasks) {
+                for (const childId of Array.isArray(parent.subTasks) ? parent.subTasks : [])
+                    parentByChild[childId] ??= parent;
+            }
+            const findParent = (task: TransformedTask) => parentByChild[task.id];
             return projectTasks.map(task => ({
                 project,
                 task,
+                parentByChild,
                 dueDate: taskDueDate(task, findParent),
                 tags: (Array.isArray(task.tags) ? task.tags : [])
                     .map(id => tags[id])

@@ -2,6 +2,8 @@
 import type { Project } from '../domain/types';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import TaskParentPath from '../components/TaskParentPath.vue';
 import { useAllProjectTasks, type ProjectTask } from '../composables/useAllProjectTasks';
 import { usePlugin } from '../composables/usePlugin';
 import { useCustomModuleDataCategoriesQuery } from '../data/ccm';
@@ -15,6 +17,15 @@ const { moduleId } = usePlugin();
 const { data, isLoading, isError, refetch } = useCustomModuleDataCategoriesQuery<Project>(moduleId);
 const projects = computed(() => (data.value ?? []).filter(cat => cat.shorty.startsWith('project')) as Project[]);
 const currentUser = useCurrentUser();
+const router = useRouter();
+const taskRoute = (item: ProjectTask) => ({
+    name: 'project-board',
+    params: { projectId: item.project.id, taskId: item.task.id },
+});
+const openTask = (event: MouseEvent, item: ProjectTask) => {
+    if (event.target instanceof Element && event.target.closest('a, button')) return;
+    void router.push(taskRoute(item));
+};
 const { tasks: allTasks, isLoading: tasksLoading, isError: tasksError, refetch: refetchTasks } = useAllProjectTasks();
 const myTasks = computed(() =>
     sortBy(
@@ -116,27 +127,20 @@ const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day:
                             :key="`${item.project.id}-${item.task.id}`"
                             class="overview-task-group"
                         >
-                            <RouterLink
-                                class="overview-project-label text-muted mb-1 block truncate text-xs"
-                                :to="{ name: 'my-tasks', params: { projectId: item.project.id } }"
+                            <div
+                                class="task-item overview-task-item flex min-w-0 cursor-pointer flex-col gap-2 p-3"
+                                @click="openTask($event, item)"
                             >
-                                <UIcon class="mr-1 inline-block size-3" :name="projectIcon(item.project.icon)" />{{
-                                    item.project.name
-                                }}
-                            </RouterLink>
-                            <RouterLink
-                                class="task-item overview-task-item flex min-w-0 flex-col gap-2 p-3"
-                                :to="{
-                                    name: 'project-board',
-                                    params: { projectId: item.project.id, taskId: item.task.id },
-                                }"
-                            >
-                                <div class="flex min-w-0 items-start gap-2">
-                                    <strong class="overview-task-title line-clamp-2 min-w-0 flex-1">{{
-                                        item.task.name
-                                    }}</strong>
-                                    <UIcon class="text-dimmed mt-1 size-4 shrink-0" name="i-lucide-chevron-right" />
-                                </div>
+                                <TaskParentPath
+                                    v-if="item.parentByChild[item.task.id]"
+                                    compact
+                                    :parent-by-child="item.parentByChild"
+                                    :project-id="item.project.id"
+                                    :task-id="item.task.id"
+                                />
+                                <RouterLink class="overview-task-title line-clamp-2 min-w-0" :to="taskRoute(item)">{{
+                                    item.task.name
+                                }}</RouterLink>
                                 <div v-if="item.tags.length" class="task-item-tags flex flex-wrap gap-1.5">
                                     <UBadge
                                         v-for="tag in item.tags"
@@ -151,6 +155,14 @@ const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day:
                                 <div
                                     class="task-item-metadata overview-task-metadata flex flex-wrap items-center gap-x-2.5 gap-y-1"
                                 >
+                                    <RouterLink
+                                        class="overview-project-label"
+                                        :title="item.project.name"
+                                        :to="{ name: 'my-tasks', params: { projectId: item.project.id } }"
+                                    >
+                                        <UIcon :name="projectIcon(item.project.icon)" />
+                                        <span>{{ item.project.name }}</span>
+                                    </RouterLink>
                                     <UBadge
                                         v-if="taskPriority(item.task.priority).id !== 'none'"
                                         color="neutral"
@@ -179,7 +191,7 @@ const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day:
                                         variant="soft"
                                     />
                                 </div>
-                            </RouterLink>
+                            </div>
                         </div>
                         <p v-if="!tasksBySection[section.id].length" class="text-muted py-6 text-center text-sm">
                             Keine Aufgaben

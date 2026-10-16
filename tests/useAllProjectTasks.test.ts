@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     refetchFirst: vi.fn(),
     refetchSecond: vi.fn(),
     refetchProjects: vi.fn(),
+    hierarchy: false,
 }));
 
 vi.mock('../src/composables/usePlugin', () => ({ usePlugin: () => ({ moduleId: ref(7) }) }));
@@ -37,6 +38,12 @@ vi.mock('@tanstack/vue-query', async importOriginal => ({
                         priority: 'none',
                         sortKey: 1,
                     },
+                    ...(mocks.hierarchy
+                        ? [
+                              { id: 31, type: 'task', name: 'Parent', subTasks: [30], fullfilled: true },
+                              { id: 32, type: 'task', name: 'Root', subTasks: [31], fullfilled: false },
+                          ]
+                        : []),
                 ],
                 isPending: true,
                 isError: false,
@@ -47,9 +54,19 @@ vi.mock('@tanstack/vue-query', async importOriginal => ({
     },
 }));
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.hierarchy = false;
+});
 
 describe('global project task search', () => {
+    it('retains the full parent map even when ancestors are completed or not personally assigned', () => {
+        mocks.hierarchy = true;
+        const result = useAllProjectTasks();
+        const child = result.tasks.value.find(item => item.task.id === 30)!;
+        expect(child.parentByChild[30]).toMatchObject({ id: 31, fullfilled: true });
+        expect(child.parentByChild[31]).toMatchObject({ id: 32 });
+    });
     it('keeps all project queries disabled until search is opened', () => {
         const enabled = ref(false);
         const result = useAllProjectTasks({ enabled });
