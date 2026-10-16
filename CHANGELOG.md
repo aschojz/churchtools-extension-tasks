@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Gleichmäßig schmale Kartenabstände in Board-Spalten mit platzsparender Scrollbar
 - Projekte direkt über den Plusbutton neben der Sidebar-Überschrift erstellen
 - Leere Aufgabenbereiche unterbrechen das Spaltenraster der Übersicht nicht mehr
 - Gleichmäßiger Randabstand auch hinter der letzten horizontal gescrollten Board-Spalte
