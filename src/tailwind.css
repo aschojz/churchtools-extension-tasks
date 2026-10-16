@@ -1667,3 +1667,21 @@ button.task-parent-name:focus-visible {
     width: 13px;
     height: 13px;
 }
+
+.dashboard-project-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-inline: 10px;
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+.dashboard-project-heading .dashboard-sidebar-label {
+    margin: 0;
+    padding: 0;
+}
+.dashboard-project-heading.justify-center {
+    justify-content: center;
+    padding-inline: 0;
+}

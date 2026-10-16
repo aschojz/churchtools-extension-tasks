@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Projekte direkt über den Plusbutton neben der Sidebar-Überschrift erstellen
 - Leere Aufgabenbereiche unterbrechen das Spaltenraster der Übersicht nicht mehr
 - Gleichmäßiger Randabstand auch hinter der letzten horizontal gescrollten Board-Spalte
 - Sichtbarer, themefähiger Rahmen zur klareren Abgrenzung der Board-Lanes
