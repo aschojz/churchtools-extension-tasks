@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht
+## 0.9.1 · 16.10.2026
 
 - Einheitliche Überschriften und Trennlinien auch bei leeren Aufgabenbereichen der Übersicht
 - Korrekte, von Status- und Primärfarben unabhängige Tagfarben; Palette mit 18 Farben und Vorschaukreisen in der Farb- und Tagauswahl
