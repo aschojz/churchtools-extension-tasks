@@ -339,6 +339,18 @@ body:has(#tasks) [role='dialog'] [data-slot='title'],
     min-height: 0;
     align-items: flex-start;
 }
+.board-column {
+    --board-scrollbar-thumb: transparent;
+}
+.board-column:hover,
+.board-column:focus-within {
+    --board-scrollbar-thumb: var(--ui-border-accented);
+}
+@media (hover: none) {
+    .board-column {
+        --board-scrollbar-thumb: var(--ui-border-accented);
+    }
+}
 .board-column-body {
     overscroll-behavior-y: contain;
     scrollbar-gutter: stable;
@@ -353,12 +365,13 @@ body:has(#tasks) [role='dialog'] [data-slot='title'],
 .board-column-body::-webkit-scrollbar-thumb {
     border: 2px solid transparent;
     border-radius: 8px;
-    background: var(--ui-border-accented);
+    background: var(--board-scrollbar-thumb);
     background-clip: padding-box;
 }
 @supports not selector(::-webkit-scrollbar) {
     .board-column-body {
         scrollbar-width: thin;
+        scrollbar-color: var(--board-scrollbar-thumb) transparent;
     }
 }
 .board-column-body .task-item,

@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Spalten-Scrollbars nur bei Hover oder Tastaturfokus sichtbar; auf Touch-Geräten weiterhin dauerhaft sichtbar
 - Tooltips erscheinen vor der Sidebar und den übrigen Aufgaben-Overlays
 - Gleichmäßig schmale Kartenabstände in Board-Spalten mit platzsparender Scrollbar
 - Projekte direkt über den Plusbutton neben der Sidebar-Überschrift erstellen
