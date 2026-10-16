@@ -70,6 +70,10 @@ body:has(#tasks) [data-slot='content'][role='menu'],
 body:has(#tasks) [data-slot='content'][role='listbox'] {
     z-index: 120 !important;
 }
+/* Nuxt UI teleports tooltips outside the dashboard's stacking context. */
+body:has(#tasks) [data-slot='content']:has(> [role='tooltip']) {
+    z-index: 130 !important;
+}
 /* Keep fixed dialog actions reachable while long content scrolls independently. */
 body:has(#tasks) [data-slot='content'][role='dialog']:has(> [data-slot='body']) {
     display: flex;
