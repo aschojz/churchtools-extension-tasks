@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht · Gestaltungsvorschlag
+## 0.9.0 · 16.10.2026
 
 - Spalten-Scrollbars nur bei Hover oder Tastaturfokus sichtbar; auf Touch-Geräten weiterhin dauerhaft sichtbar
 - Tooltips erscheinen vor der Sidebar und den übrigen Aufgaben-Overlays
