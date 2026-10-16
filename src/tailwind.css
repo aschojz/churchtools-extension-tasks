@@ -290,7 +290,7 @@ body:has(#tasks) [role='dialog'] [data-slot='title'],
 }
 .dashboard-overview {
     width: 100%;
-    max-width: 96rem;
+    max-width: none;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior-y: contain;
@@ -937,9 +937,6 @@ body:has(#tasks) .tasks-modal-editor > .tasks-modal-body {
     background: var(--subtle);
 }
 @media (max-width: 720px) {
-    .task-sections {
-        grid-template-columns: 1fr !important;
-    }
     .dashboard-overview {
         padding: 16px;
     }
@@ -1043,7 +1040,6 @@ body.dark:has(#tasks) {
     letter-spacing: 0.12em;
 }
 .dashboard-overview {
-    max-width: 1400px;
     padding: 36px 32px;
     gap: 32px;
 }
@@ -1094,6 +1090,8 @@ body.dark:has(#tasks) {
     font-size: 11px;
 }
 .task-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
     align-items: start;
     gap: 18px;
 }
@@ -1390,9 +1388,6 @@ body.dark:has(#tasks) {
     }
 }
 
-.dashboard-overview .task-sections {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 .task-bucket.is-empty {
     display: flex;
     align-items: center;
@@ -1411,17 +1406,11 @@ body.dark:has(#tasks) {
     font-size: 12px;
 }
 @media (max-width: 1100px) and (min-width: 721px) {
-    .dashboard-overview .task-sections {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
     .overview-heading {
         flex-wrap: wrap;
     }
 }
 @media (max-width: 720px) {
-    .dashboard-overview .task-sections {
-        grid-template-columns: 1fr;
-    }
     .task-item-timeline {
         padding: 14px;
         grid-template-columns: minmax(0, 1fr);

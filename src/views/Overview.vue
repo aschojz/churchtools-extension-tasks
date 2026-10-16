@@ -246,8 +246,4 @@ const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day:
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     grid-template-rows: auto;
 }
-.task-sections {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
 </style>

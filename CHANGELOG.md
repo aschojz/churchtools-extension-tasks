@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht
+
+- Übersicht ohne maximale Seitenbreite; Aufgabenbereiche nutzen je nach verfügbarem Platz bis zu vier Spalten
+
 ## 0.9.0 · 16.10.2026
 
 - Spalten-Scrollbars nur bei Hover oder Tastaturfokus sichtbar; auf Touch-Geräten weiterhin dauerhaft sichtbar
