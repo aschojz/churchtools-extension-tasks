@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Leere Aufgabenbereiche unterbrechen das Spaltenraster der Übersicht nicht mehr
 - Gleichmäßiger Randabstand auch hinter der letzten horizontal gescrollten Board-Spalte
 - Sichtbarer, themefähiger Rahmen zur klareren Abgrenzung der Board-Lanes
 - Erledigte Unteraufgaben sichtbar markiert und im Dialog ausblendbar; dezenter Elternpfad auf Karten, ohne Wiederholung im Eltern-Dialog
