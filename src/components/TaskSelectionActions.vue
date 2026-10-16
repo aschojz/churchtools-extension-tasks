@@ -104,16 +104,18 @@ const apply = async () => {
     <template v-if="selection">
         <UButton
             color="neutral"
+            :disabled="selection.saving.value"
             :icon="selection.enabled.value ? 'i-lucide-x' : 'i-lucide-list-checks'"
-            :label="selection.enabled.value ? 'Fertig' : 'Auswählen'"
+            :label="selection.enabled.value ? 'Beenden' : 'Auswählen'"
             :variant="selection.enabled.value ? 'soft' : 'outline'"
             @click="selection.toggleMode"
         />
         <UButton
             v-if="selection.enabled.value"
             color="neutral"
+            :disabled="selection.saving.value"
             :icon="selection.allSelected.value ? 'i-lucide-square-minus' : 'i-lucide-square-check-big'"
-            :label="selection.allSelected.value ? 'Leeren' : 'Alle'"
+            :label="selection.allSelected.value ? 'Auswahl leeren' : 'Alle auswählen'"
             variant="outline"
             @click="selection.selectAll"
         />
@@ -121,11 +123,7 @@ const apply = async () => {
             v-if="selection.enabled.value && selection.selectedTasks.value.length"
             :items="selection.bulkMenu.value"
         >
-            <UButton
-                icon="i-lucide-layers-3"
-                :label="`Sammelaktion (${selection.selectedTasks.value.length})`"
-                :loading="selection.saving.value"
-            />
+            <UButton icon="i-lucide-layers-3" label="Aktionen" :loading="selection.saving.value" />
         </UDropdownMenu>
         <UModal
             :close="{ 'aria-label': 'Dialog schließen' }"

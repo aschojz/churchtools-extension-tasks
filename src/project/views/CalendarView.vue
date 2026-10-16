@@ -2,7 +2,8 @@
 import type { TransformedTask } from '../../domain/types';
 import { computed, ref } from 'vue';
 import { useTasks } from '../../composables/useTasks';
-import { taskStartDate } from '../../domain/tasks';
+import { taskAssignees, useProjectTaskContext } from '../../composables/useProjectTaskContext';
+import { taskPriority, taskStartDate } from '../../domain/tasks';
 import ViewWrapper from './ViewWrapper.vue';
 
 const props = defineProps<{ projectId: string }>();
@@ -42,33 +43,38 @@ const goToday = () => {
     const today = new Date();
     month.value = new Date(today.getFullYear(), today.getMonth(), 1);
 };
+const { people } = useProjectTaskContext();
+const assignee = (task: TransformedTask) => taskAssignees(task, people.value)[0];
 const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 </script>
 
 <template>
     <ViewWrapper :project-id="projectId">
-        <template #extra-actions>
-            <UButton
-                aria-label="Vorheriger Monat"
-                color="neutral"
-                icon="i-lucide-chevron-left"
-                square
-                variant="outline"
-                @click="changeMonth(-1)"
-            />
-            <UButton color="neutral" label="Heute" variant="outline" @click="goToday" />
-            <UButton
-                aria-label="Nächster Monat"
-                color="neutral"
-                icon="i-lucide-chevron-right"
-                square
-                variant="outline"
-                @click="changeMonth(1)"
-            />
-        </template>
-        <section :aria-label="`Kalender ${monthLabel}`" class="flex min-w-[760px] flex-1 flex-col gap-3">
-            <h2 class="text-xl font-semibold capitalize">{{ monthLabel }}</h2>
-            <div class="calendar-grid grid grid-cols-7 gap-px overflow-hidden rounded-xl border">
+        <section :aria-label="`Kalender ${monthLabel}`" class="flex min-w-0 flex-1 flex-col gap-3">
+            <div class="calendar-heading">
+                <h2 class="text-xl font-semibold capitalize">{{ monthLabel }}</h2>
+                <span>Fälligkeiten & Starttermine</span>
+                <div aria-label="Monat auswählen" class="calendar-navigation">
+                    <UButton
+                        aria-label="Vorheriger Monat"
+                        color="neutral"
+                        icon="i-lucide-chevron-left"
+                        square
+                        variant="outline"
+                        @click="changeMonth(-1)"
+                    />
+                    <UButton color="neutral" label="Heute" variant="outline" @click="goToday" />
+                    <UButton
+                        aria-label="Nächster Monat"
+                        color="neutral"
+                        icon="i-lucide-chevron-right"
+                        square
+                        variant="outline"
+                        @click="changeMonth(1)"
+                    />
+                </div>
+            </div>
+            <div class="calendar-grid grid min-w-[760px] grid-cols-7 gap-px overflow-hidden rounded-xl border">
                 <div
                     v-for="weekday in weekdays"
                     :key="weekday"
@@ -93,11 +99,25 @@ const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
                         <RouterLink
                             v-for="task in tasksByDay[day.key] ?? []"
                             :key="task.id"
-                            class="calendar-task truncate rounded-md px-2 py-1 text-xs font-medium focus-visible:outline-2"
+                            class="calendar-task rounded-md px-2 py-1 text-xs font-medium focus-visible:outline-2"
                             :title="task.name"
                             :to="{ name: 'project-calendar', params: { projectId, taskId: task.id } }"
                         >
-                            {{ task.name }}
+                            <strong class="line-clamp-2">{{ task.name }}</strong>
+                            <span class="calendar-task-details">
+                                <span v-if="task.fullfilled"><UIcon name="i-lucide-circle-check" /> Erledigt</span>
+                                <span v-else-if="taskPriority(task.priority).id !== 'none'"
+                                    ><UIcon :name="taskPriority(task.priority).icon" />{{
+                                        taskPriority(task.priority).label
+                                    }}</span
+                                >
+                                <UAvatar
+                                    v-if="assignee(task)"
+                                    :alt="assignee(task)!.title"
+                                    size="2xs"
+                                    :src="assignee(task)!.imageUrl"
+                                />
+                            </span>
                         </RouterLink>
                     </div>
                 </div>

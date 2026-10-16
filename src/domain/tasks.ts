@@ -9,6 +9,19 @@ import type {
     TransformedTask,
 } from './types';
 
+/** Ancestors from the root to the direct parent, tolerating malformed cycles. */
+export function taskAncestors(taskId: number, parentByChild: Record<number, TransformedTask>): TransformedTask[] {
+    const ancestors: TransformedTask[] = [];
+    const visited = new Set([taskId]);
+    let parent = parentByChild[taskId];
+    while (parent && !visited.has(parent.id)) {
+        visited.add(parent.id);
+        ancestors.unshift(parent);
+        parent = parentByChild[parent.id];
+    }
+    return ancestors;
+}
+
 export const TASK_PRIORITIES: Array<{
     id: TaskPriority;
     label: string;

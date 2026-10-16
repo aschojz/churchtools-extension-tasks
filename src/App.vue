@@ -188,7 +188,21 @@ const newTaskRoute = computed(() =>
                             tooltip
                         />
                         <div class="min-h-0 flex-1 overflow-y-auto">
-                            <p v-if="!collapsed" class="dashboard-sidebar-label">Projekte</p>
+                            <div class="dashboard-project-heading" :class="{ 'justify-center': collapsed }">
+                                <p v-if="!collapsed" class="dashboard-sidebar-label">Projekte</p>
+                                <UTooltip text="Projekt erstellen">
+                                    <UButton
+                                        aria-label="Projekt erstellen"
+                                        color="neutral"
+                                        :disabled="authState.status !== 'authenticated'"
+                                        icon="i-lucide-plus"
+                                        size="xs"
+                                        square
+                                        variant="ghost"
+                                        @click="createOrEditProject()"
+                                    />
+                                </UTooltip>
+                            </div>
                             <div class="flex flex-col gap-1">
                                 <div
                                     v-for="project in projects"

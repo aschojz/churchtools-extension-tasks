@@ -40,6 +40,7 @@ const tasksBySection = computed(
             ]),
         ) as Record<DueDateBucket, ProjectTask[]>,
 );
+const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
 </script>
 <template>
     <div v-if="isLoading" class="p-8"><UProgress animation="carousel" /></div>
@@ -55,17 +56,32 @@ const tasksBySection = computed(
                 onClick: () => createOrEditProject(),
             },
         ]"
+        class="overview-empty m-auto"
         icon="i-lucide-list-checks"
         title="Noch keine Projekte"
     />
     <div v-else aria-label="Aufgabenübersicht" class="dashboard-overview" tabindex="0">
         <section>
-            <div class="dashboard-section-heading">
+            <div class="dashboard-section-heading overview-heading">
                 <div>
+                    <span class="overview-eyebrow">{{ dateLabel }}</span>
                     <h2>Meine Aufgaben</h2>
                     <p>Alles, was als Nächstes deine Aufmerksamkeit braucht.</p>
                 </div>
-                <UBadge color="neutral" :label="String(myTasks.length)" variant="subtle" />
+                <div aria-label="Aufgabenübersicht in Zahlen" class="overview-summary">
+                    <div>
+                        <strong>{{ myTasks.length }}</strong
+                        ><span>Offene Aufgaben</span>
+                    </div>
+                    <div>
+                        <strong>{{ tasksBySection.overdue.length }}</strong
+                        ><span>Überfällig</span>
+                    </div>
+                    <div>
+                        <strong>{{ tasksBySection.today.length }}</strong
+                        ><span>Heute fällig</span>
+                    </div>
+                </div>
             </div>
             <div v-if="tasksLoading" class="p-8"><UProgress animation="carousel" /></div>
             <UAlert
@@ -82,8 +98,10 @@ const tasksBySection = computed(
                     :key="section.id"
                     :aria-labelledby="section.id"
                     class="task-bucket"
+                    :class="{ 'is-empty': !tasksBySection[section.id].length }"
+                    :data-section="section.id"
                 >
-                    <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="task-bucket-heading mb-3 flex items-center justify-between gap-2">
                         <h3 :id="section.id" class="font-semibold">{{ section.title }}</h3>
                         <UBadge
                             :color="uiColor(section.color)"
@@ -93,9 +111,13 @@ const tasksBySection = computed(
                         />
                     </div>
                     <div class="flex flex-col gap-2">
-                        <div v-for="item in tasksBySection[section.id]" :key="`${item.project.id}-${item.task.id}`">
+                        <div
+                            v-for="item in tasksBySection[section.id]"
+                            :key="`${item.project.id}-${item.task.id}`"
+                            class="overview-task-group"
+                        >
                             <RouterLink
-                                class="text-muted mb-1 block truncate text-xs"
+                                class="overview-project-label text-muted mb-1 block truncate text-xs"
                                 :to="{ name: 'my-tasks', params: { projectId: item.project.id } }"
                             >
                                 <UIcon class="mr-1 inline-block size-3" :name="projectIcon(item.project.icon)" />{{

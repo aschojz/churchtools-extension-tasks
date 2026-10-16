@@ -3,7 +3,6 @@ import type { TransformedTask } from '../../domain/types';
 import { sortBy } from 'lodash-es';
 import { computed } from 'vue';
 import List from '../../components/List.vue';
-import TaskSelectionActions from '../../components/TaskSelectionActions.vue';
 import { taskStore } from '../../composables/storeTasks';
 import { provideTaskSelection } from '../../composables/useTaskSelection';
 import { useLists } from '../../composables/useLists';
@@ -41,7 +40,6 @@ provideTaskSelection(visibleTasks);
 </script>
 <template>
     <ViewWrapper columns :project-id="projectId">
-        <template #extra-actions><TaskSelectionActions /></template>
         <List
             v-for="list in boardlists"
             :key="list.id"

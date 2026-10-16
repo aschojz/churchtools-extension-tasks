@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.9.0 · 16.10.2026
+
+- Spalten-Scrollbars nur bei Hover oder Tastaturfokus sichtbar; auf Touch-Geräten weiterhin dauerhaft sichtbar
+- Tooltips erscheinen vor der Sidebar und den übrigen Aufgaben-Overlays
+- Gleichmäßig schmale Kartenabstände in Board-Spalten mit platzsparender Scrollbar
+- Projekte direkt über den Plusbutton neben der Sidebar-Überschrift erstellen
+- Leere Aufgabenbereiche unterbrechen das Spaltenraster der Übersicht nicht mehr
+- Gleichmäßiger Randabstand auch hinter der letzten horizontal gescrollten Board-Spalte
+- Sichtbarer, themefähiger Rahmen zur klareren Abgrenzung der Board-Lanes
+- Erledigte Unteraufgaben sichtbar markiert und im Dialog ausblendbar; dezenter Elternpfad auf Karten, ohne Wiederholung im Eltern-Dialog
+- Klar erkennbare Oberaufgaben mit direkt öffnbarem Aufgabenpfad auf Karten und im Aufgabendialog
+- Kompakter, am Icon ausgerichteter Projektkopf; getrennte Bereiche für Hauptaktion, Suche und Sammelauswahl
+- Projektmenü für Listen, Vollbild und ansichtsspezifische Aktionen; Monatssteuerung direkt am Kalender
+- Klarer Projektkopf und besser auffindbare Kalender- und Timeline-Ansichten
+- Neu gestaltete Übersicht mit Kennzahlen, leichteren Aufgabenbereichen und überarbeiteten Projektkarten
+- Ruhigere Board-Karten und konsistente visuelle Hierarchie in Hell und Dunkel
+- Kalenderkarten mit Priorität, Status und verantwortlicher Person; Timeline mit Datum, Wochentag und Liste
+- Kompakte mobile Werkzeugleiste und responsive Planungsansichten
+
 ## 0.8.0 · 15.10.2026
 
 - Aktualisierte Produktions- und Entwicklungsabhängigkeiten, einschließlich Markdown-Parser; TypeScript bleibt wegen der ESLint-Kompatibilität auf 5.9.3

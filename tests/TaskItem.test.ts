@@ -85,6 +85,14 @@ beforeEach(() => {
 });
 
 describe('task card semantics', () => {
+    it('marks completed tasks with an explicit status as well as a completed style', async () => {
+        const wrapper = render();
+        await wrapper.setProps({ item: { ...wrapper.props('item'), fullfilled: true } });
+        expect(wrapper.classes()).toContain('task-item-completed');
+        expect(wrapper.get('.task-completed-label').text()).toBe('Erledigt');
+        await wrapper.setProps({ item: { ...wrapper.props('item'), fullfilled: false } });
+        expect(wrapper.find('.task-completed-label').exists()).toBe(false);
+    });
     it('selects via the card surface and deselects via the title in bulk mode without opening a dialog', async () => {
         mocks.bulk = true;
         const wrapper = render();

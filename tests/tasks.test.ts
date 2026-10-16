@@ -11,6 +11,7 @@ import {
     recurrenceLabel,
     reorderTasks,
     sortTasks,
+    taskAncestors,
     taskDiff,
     taskDraft,
     taskDueDate,
@@ -26,6 +27,13 @@ const task = (id: number, overrides: Partial<TransformedTask> = {}): Transformed
 });
 
 describe('task integrity', () => {
+    it('returns all ancestors in order without including the task or looping on cycles', () => {
+        const parents = { 4: task(3), 3: task(2), 2: task(1) };
+        expect(taskAncestors(4, parents).map(parent => parent.id)).toEqual([1, 2, 3]);
+        expect(taskAncestors(1, parents)).toEqual([]);
+        expect(taskAncestors(4, { ...parents, 1: task(4) }).map(parent => parent.id)).toEqual([1, 2, 3]);
+        expect(taskAncestors(4, { 4: task(4) })).toEqual([]);
+    });
     it('preserves and clones additional properties without copying runtime metadata', () => {
         const source = {
             ...task(1),

@@ -11,6 +11,7 @@ import { incompleteTaskBlockers, recurrenceLabel, taskPriority, taskStartDate } 
 import { uiColor } from '../platform';
 import ProgressRing from './ProgressRing.vue';
 import MarkdownPreview from './MarkdownPreview';
+import TaskParentPath from './TaskParentPath.vue';
 
 const props = defineProps<{
     item: TransformedTask;
@@ -31,13 +32,10 @@ const {
     archiveTaskTree,
     archiveCompletedTaskTree,
     toggleTask,
-    getSuperParent,
     getProgress,
     dueColor,
 } = useProjectTaskContext();
 const task = computed(() => tasksMap.value[id.value] ?? props.item);
-const parent = computed(() => parentByChild.value[id.value]);
-const superParent = computed(() => (parent.value ? getSuperParent(task.value) : undefined));
 const hasSubTasks = computed(() =>
     (Array.isArray(task.value.subTasks) ? task.value.subTasks : []).some(childId => !!tasksMap.value[childId]),
 );
@@ -187,38 +185,25 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
         },
     ],
 ]);
-
-const breadcrumbs = computed(() => {
-    const bc = [];
-    if (superParent.value) {
-        bc.push(superParent.value.name);
-    }
-    if (parent.value && parent.value.id !== superParent.value?.id) {
-        bc.push(parent.value.name);
-    }
-    return bc;
-});
 </script>
 <template>
     <div
         class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3"
-        :class="{ 'task-item-row': density === 'row', 'task-item-timeline': density === 'timeline' }"
+        :class="{
+            'task-item-row': density === 'row',
+            'task-item-timeline': density === 'timeline',
+            'task-item-completed': task.fullfilled,
+        }"
         @click="onCardClick"
     >
-        <div
-            v-if="superParent && !showTask"
-            class="task-item-breadcrumbs text-dimmed -mb-1 flex items-center gap-2 text-xs"
-        >
-            <template v-for="(crumb, index) in breadcrumbs" :key="index">
-                <span>{{ crumb }}</span>
-                <UIcon
-                    v-if="index === breadcrumbs.length - 1"
-                    class="size-3 rotate-90"
-                    name="i-lucide-corner-up-left"
-                />
-                <UIcon v-else class="size-3" name="i-lucide-arrow-left" />
-            </template>
-        </div>
+        <TaskParentPath
+            v-if="parentByChild[id] && !showTask"
+            class="task-item-breadcrumbs"
+            compact
+            :parent-by-child="parentByChild"
+            :project-id="projectId"
+            :task-id="id"
+        />
         <div class="task-item-heading flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1">
                 <button
@@ -229,6 +214,9 @@ const breadcrumbs = computed(() => {
                 >
                     {{ task.name }}
                 </button>
+                <span v-if="task.fullfilled" class="task-completed-label">
+                    <UIcon name="i-lucide-circle-check" />Erledigt
+                </span>
             </div>
             <div class="task-item-controls flex shrink-0 items-center gap-1">
                 <UCheckbox

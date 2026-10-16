@@ -40,7 +40,6 @@ const restore = async (task: TransformedTask) => {
 
 <template>
     <ViewWrapper :project-id="projectId">
-        <template #actions><span /></template>
         <div class="flex w-full flex-col gap-4">
             <UAlert v-if="error" color="error" :title="error" variant="subtle" />
             <UAlert
