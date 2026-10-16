@@ -9,6 +9,7 @@ const props = defineProps<{
     taskId: number;
     projectId: number;
     parentByChild: Record<number, TransformedTask>;
+    compact?: boolean;
 }>();
 const ancestors = computed(() => taskAncestors(props.taskId, props.parentByChild));
 const selection = useTaskSelection();
@@ -23,8 +24,10 @@ const openParent = (taskId: number) => {
 </script>
 
 <template>
-    <div v-if="ancestors.length" class="task-parent-path">
-        <span class="task-parent-label"><UIcon name="i-lucide-corner-left-up" />Oberaufgabe</span>
+    <div v-if="ancestors.length" class="task-parent-path" :class="{ 'task-parent-compact': compact }">
+        <span class="task-parent-label">
+            <UIcon name="i-lucide-corner-left-up" /><span v-if="!compact">Oberaufgabe</span>
+        </span>
         <div class="task-parent-links">
             <template v-for="(ancestor, index) in ancestors" :key="ancestor.id">
                 <UIcon v-if="index" class="task-parent-separator" name="i-lucide-chevron-right" />

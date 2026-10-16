@@ -19,6 +19,11 @@ const startDate = computed(() => taskStartDate(task.value));
 const subTasks = computed(() =>
     (Array.isArray(task.value?.subTasks) ? task.value.subTasks : []).map(st => tasksMap.value[st]).filter(st => st),
 );
+const showCompleted = ref(true);
+const completedCount = computed(() => subTasks.value.filter(subtask => subtask.fullfilled).length);
+const visibleSubTasks = computed(() =>
+    showCompleted.value ? subTasks.value : subTasks.value.filter(subtask => !subtask.fullfilled),
+);
 
 const { updateTask, createTask, deleteTask, tasksMap, parentByChild } = useTasks(pId);
 const blockers = computed(() =>
@@ -111,11 +116,34 @@ const createChild = async () => {
             <section class="task-view-section">
                 <div class="task-view-section-header">
                     <h3 class="task-view-heading">Unteraufgaben</h3>
-                    <UBadge color="neutral" :label="String(subTasks.length)" variant="subtle" />
+                    <UBadge
+                        color="neutral"
+                        :label="
+                            completedCount ? `${completedCount} / ${subTasks.length} erledigt` : String(subTasks.length)
+                        "
+                        variant="subtle"
+                    />
                 </div>
-                <div v-if="subTasks.length" class="flex flex-col gap-2">
-                    <TaskItem v-for="subtask in subTasks" :key="subtask.id" :item="subtask" :project-id="projectId" />
+                <div v-if="visibleSubTasks.length" class="flex flex-col gap-2">
+                    <TaskItem
+                        v-for="subtask in visibleSubTasks"
+                        :key="subtask.id"
+                        :item="subtask"
+                        :project-id="projectId"
+                        show-task
+                    />
                 </div>
+                <UButton
+                    v-if="completedCount"
+                    :aria-expanded="showCompleted"
+                    class="self-start"
+                    color="neutral"
+                    :icon="showCompleted ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                    :label="`${showCompleted ? 'Erledigte ausblenden' : 'Erledigte anzeigen'} (${completedCount})`"
+                    size="xs"
+                    variant="link"
+                    @click="showCompleted = !showCompleted"
+                />
                 <div class="flex items-end gap-2">
                     <UInput
                         v-model="childName"

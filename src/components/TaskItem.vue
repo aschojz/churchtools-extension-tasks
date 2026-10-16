@@ -189,12 +189,17 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
 <template>
     <div
         class="task-item group relative flex cursor-pointer flex-col justify-between gap-2 p-3"
-        :class="{ 'task-item-row': density === 'row', 'task-item-timeline': density === 'timeline' }"
+        :class="{
+            'task-item-row': density === 'row',
+            'task-item-timeline': density === 'timeline',
+            'task-item-completed': task.fullfilled,
+        }"
         @click="onCardClick"
     >
         <TaskParentPath
             v-if="parentByChild[id] && !showTask"
             class="task-item-breadcrumbs"
+            compact
             :parent-by-child="parentByChild"
             :project-id="projectId"
             :task-id="id"
@@ -209,6 +214,9 @@ const contextMenu = computed<DropdownMenuItem[][]>(() => [
                 >
                     {{ task.name }}
                 </button>
+                <span v-if="task.fullfilled" class="task-completed-label">
+                    <UIcon name="i-lucide-circle-check" />Erledigt
+                </span>
             </div>
             <div class="task-item-controls flex shrink-0 items-center gap-1">
                 <UCheckbox

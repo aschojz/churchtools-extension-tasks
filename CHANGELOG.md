@@ -2,6 +2,7 @@
 
 ## Unveröffentlicht · Gestaltungsvorschlag
 
+- Erledigte Unteraufgaben sichtbar markiert und im Dialog ausblendbar; dezenter Elternpfad auf Karten, ohne Wiederholung im Eltern-Dialog
 - Klar erkennbare Oberaufgaben mit direkt öffnbarem Aufgabenpfad auf Karten und im Aufgabendialog
 - Kompakter, am Icon ausgerichteter Projektkopf; getrennte Bereiche für Hauptaktion, Suche und Sammelauswahl
 - Projektmenü für Listen, Vollbild und ansichtsspezifische Aktionen; Monatssteuerung direkt am Kalender

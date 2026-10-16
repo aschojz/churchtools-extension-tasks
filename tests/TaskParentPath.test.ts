@@ -27,6 +27,12 @@ beforeEach(() => {
 });
 
 describe('parent task navigation', () => {
+    it('keeps the card path compact while retaining accessible parent navigation', () => {
+        const wrapper = mount(TaskParentPath, { props: { ...props, compact: true } });
+        expect(wrapper.classes()).toContain('task-parent-compact');
+        expect(wrapper.get('.task-parent-label').text()).toBe('');
+        expect(wrapper.get('button').attributes('aria-label')).toBe('Oberaufgabe öffnen: Projektziel');
+    });
     it('opens each ancestor in the same project and view, without activating the child card', async () => {
         const cardClick = vi.fn();
         const wrapper = mount(TaskParentPath, { props, attrs: { onClick: cardClick } });
