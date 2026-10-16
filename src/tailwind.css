@@ -1418,21 +1418,7 @@ body.dark:has(#tasks) {
     }
 }
 
-.task-bucket.is-empty {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 8px 2px;
-}
-.task-bucket.is-empty .task-bucket-heading {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    gap: 12px;
-}
 .task-bucket.is-empty p {
-    margin: 0;
-    padding: 0;
     font-size: 12px;
 }
 @media (max-width: 1100px) and (min-width: 721px) {
