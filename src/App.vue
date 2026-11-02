@@ -17,6 +17,10 @@ const route = useRoute();
 const router = useRouter();
 const { isLoading, isError, refetch } = usePlugin();
 const { projects, deleteProject } = useProjects();
+const authStatus = computed(() => authState.status);
+const authMessage = computed(() => authState.message);
+const isProjectDialogOpen = computed(() => activeProjectDialog.open);
+const projectDialogProject = computed(() => activeProjectDialog.project);
 const sidebarCollapsed = ref(false);
 const searchOpen = ref(false);
 const diagnosticsOpen = ref(false);
@@ -290,10 +294,10 @@ const newTaskRoute = computed(() =>
                         </UAlert>
                         <div v-else class="flex h-full min-h-0 flex-col">
                             <UAlert
-                                v-if="authState.status === 'error'"
+                                v-if="authStatus === 'error'"
                                 class="m-4 mb-0 shrink-0"
                                 color="error"
-                                :description="`${authState.message ?? 'Anmeldung fehlgeschlagen.'} Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt.`"
+                                :description="`${authMessage ?? 'Anmeldung fehlgeschlagen.'} Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt.`"
                                 icon="i-lucide-user-x"
                                 title="Der aktuelle Benutzer konnte nicht geladen werden."
                                 variant="subtle"
@@ -330,11 +334,7 @@ const newTaskRoute = computed(() =>
             placeholder="Projekte und Aufgaben durchsuchen …"
             title="Suchen"
         />
-        <DialogProject
-            v-if="activeProjectDialog.open"
-            :project="activeProjectDialog.project"
-            @close="closeProjectDialog"
-        />
+        <DialogProject v-if="isProjectDialogOpen" :project="projectDialogProject" @close="closeProjectDialog" />
         <DiagnosticsDialog v-if="diagnosticsOpen" @close="diagnosticsOpen = false" />
     </UApp>
 </template>
