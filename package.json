@@ -41,15 +41,15 @@
     },
     "dependencies": {
         "@churchtools/churchtools-client": "1.7.3",
-        "@iconify-json/lucide": "1.2.154",
-        "@nuxt/ui": "4.12.0",
-        "@tanstack/vue-query": "5.107.1",
+        "@iconify-json/lucide": "1.2.157",
+        "@nuxt/ui": "4.13.0",
+        "@tanstack/vue-query": "5.108.1",
         "fuse.js": "7.5.0",
         "lodash-es": "4.18.1",
-        "marked": "18.2.0",
+        "marked": "18.2.1",
         "pinia": "4.1.0",
-        "vue": "3.5.45",
-        "vue-router": "5.5.0",
+        "vue": "3.5.46",
+        "vue-router": "5.5.1",
         "vuedraggable": "4.1.0"
     },
     "engines": {
