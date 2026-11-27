@@ -17,6 +17,8 @@ const route = useRoute();
 const router = useRouter();
 const { isLoading, isError, refetch } = usePlugin();
 const { projects, deleteProject } = useProjects();
+const templateAuthState = computed(() => authState);
+const projectDialog = computed(() => activeProjectDialog);
 const sidebarCollapsed = ref(false);
 const searchOpen = ref(false);
 const diagnosticsOpen = ref(false);
@@ -296,10 +298,10 @@ const newTaskRoute = computed(() =>
                         </UAlert>
                         <div v-else class="flex h-full min-h-0 flex-col">
                             <UAlert
-                                v-if="authState.status === 'error'"
+                                v-if="templateAuthState.status === 'error'"
                                 class="m-4 mb-0 shrink-0"
                                 color="error"
-                                :description="`${authState.message ?? 'Anmeldung fehlgeschlagen.'} Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt.`"
+                                :description="`${templateAuthState.message ?? 'Anmeldung fehlgeschlagen.'} Die Daten bleiben lesbar, Schreibaktionen sind bis zur erfolgreichen Anmeldung gesperrt.`"
                                 icon="i-lucide-user-x"
                                 title="Der aktuelle Benutzer konnte nicht geladen werden."
                                 variant="subtle"
@@ -336,11 +338,7 @@ const newTaskRoute = computed(() =>
             placeholder="Projekte und Aufgaben durchsuchen …"
             title="Suchen"
         />
-        <DialogProject
-            v-if="activeProjectDialog.open"
-            :project="activeProjectDialog.project"
-            @close="closeProjectDialog"
-        />
+        <DialogProject v-if="projectDialog.open" :project="projectDialog.project" @close="closeProjectDialog" />
         <DiagnosticsDialog v-if="diagnosticsOpen" @close="diagnosticsOpen = false" />
     </UApp>
 </template>
