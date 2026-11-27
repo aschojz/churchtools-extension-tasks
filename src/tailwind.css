@@ -63,6 +63,11 @@ body:has(#tasks) [data-slot='overlay'],
     z-index: 100 !important;
     background: rgb(22 21 20 / 62%) !important;
 }
+.tasks-modal-overlay:has(> .tasks-modal-content) {
+    top: var(--tasks-dialog-top, 0px);
+    padding-block: 16px;
+    --tasks-dialog-max-height: min(820px, max(0px, calc(100dvh - var(--tasks-dialog-top, 0px) - 32px)));
+}
 body:has(#tasks) [data-slot='content'][role='dialog'] {
     z-index: 101 !important;
 }
@@ -79,7 +84,7 @@ body:has(#tasks) [data-slot='content'][role='dialog']:has(> [data-slot='body']) 
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-height: calc(100dvh - 32px);
+    max-height: var(--tasks-dialog-max-height, calc(100dvh - 32px));
     overflow: hidden;
 }
 body:has(#tasks) [role='dialog'] > [data-slot='header'],
@@ -619,7 +624,6 @@ body:has(#tasks) [role='dialog'] [data-slot='title'],
 .tasks-modal-content {
     width: min(960px, calc(100vw - 32px)) !important;
     max-width: 960px !important;
-    max-height: min(820px, calc(100dvh - 32px));
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: 16px !important;
@@ -669,7 +673,7 @@ body:has(#tasks) [role='dialog'] [data-slot='title'],
     background: var(--surface);
 }
 .tasks-modal-editor {
-    height: min(820px, calc(100dvh - 32px));
+    height: var(--tasks-dialog-max-height);
     display: flex;
     flex-direction: column;
 }
@@ -946,14 +950,10 @@ body:has(#tasks) .tasks-modal-editor > .tasks-modal-body {
     }
     .tasks-modal-content {
         width: calc(100vw - 16px) !important;
-        max-height: calc(100vh - 16px);
         border-radius: 12px !important;
     }
     .task-editor-layout {
         grid-template-columns: 1fr;
-    }
-    .tasks-modal-editor {
-        height: calc(100dvh - 32px);
     }
     body:has(#tasks) .tasks-modal-editor > .tasks-modal-body {
         overflow-y: auto;

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht
+
+- Aufgabendialoge berücksichtigen die ChurchTools-Navigation, damit Bearbeiten und Schließen auch bei langen Inhalten erreichbar bleiben
+
 ## 0.9.1 · 16.10.2026
 
 - Einheitliche Überschriften und Trennlinien auch bei leeren Aufgabenbereichen der Übersicht

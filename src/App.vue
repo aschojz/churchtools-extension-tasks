@@ -28,6 +28,9 @@ const updateAvailableHeight = () => {
     if (!appRoot.value) return;
     const top = Math.max(0, appRoot.value.getBoundingClientRect().top);
     availableHeight.value = `${Math.max(0, window.innerHeight - top)}px`;
+    const navigationBottom = document.getElementById('navigation')?.getBoundingClientRect().bottom ?? 0;
+    // The dialog is teleported to the body, outside the measured app container.
+    document.body.style.setProperty('--tasks-dialog-top', `${Math.max(top, navigationBottom)}px`);
 };
 const handleGlobalShortcut = (event: KeyboardEvent) => {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.key.toLowerCase() !== 'n')
@@ -53,11 +56,14 @@ onMounted(() => {
     window.addEventListener('keydown', handleGlobalShortcut);
     layoutObserver = new ResizeObserver(updateAvailableHeight);
     layoutObserver.observe(document.documentElement);
+    const navigation = document.getElementById('navigation');
+    if (navigation) layoutObserver.observe(navigation);
 });
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateAvailableHeight);
     window.removeEventListener('keydown', handleGlobalShortcut);
     layoutObserver?.disconnect();
+    document.body.style.removeProperty('--tasks-dialog-top');
 });
 const { tasks: allTasks } = useAllProjectTasks({ enabled: searchOpen });
 const projectId = computed(() => {
