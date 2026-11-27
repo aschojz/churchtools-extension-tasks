@@ -1,8 +1,9 @@
 # Changelog
 
-## Unveröffentlicht
+## 0.9.2 · 27.11.2026
 
 - Aufgabendialoge berücksichtigen die ChurchTools-Navigation, damit Bearbeiten und Schließen auch bei langen Inhalten erreichbar bleiben
+- Aktualisierte Produktions- und Entwicklungsabhängigkeiten
 
 ## 0.9.1 · 16.10.2026
 
